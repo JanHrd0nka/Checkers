@@ -1,5 +1,6 @@
 package cz.vse.java.checkers.client;
 
+import cz.vse.java.checkers.common.Game;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -8,6 +9,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import cz.vse.java.checkers.common.Figure;
 
 public class GameController {
 
@@ -23,7 +25,7 @@ public class GameController {
     // 0 = Empty, 1 = Player 1 (Red), 2 = Player 2 (Black)
     // You could also use an Enum here, which is even better!
     private int[][] boardState = new int[8][8];
-
+    private final Game game = new Game(true);
 
     // Variables to remember which piece the user clicked
     private int selectedRow = -1;
@@ -64,11 +66,14 @@ public class GameController {
 
     // 2. Set up the underlying data (The Model)
     private void setupStartingPositions() {
+       /*
+        ----OLD---
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 // In standard checkers, pieces only go on the dark squares
                 if ((row + col) % 2 != 0) {
                     if (row < 3) {
+
                         boardState[row][col] = 1; // Player 1 (Top 3 rows)
                     } else if (row > 4) {
                         boardState[row][col] = 2; // Player 2 (Bottom 3 rows)
@@ -80,6 +85,9 @@ public class GameController {
                 }
             }
         }
+        -----------
+        */
+        game.setPieces();
     }
 
     // 3. Read the data array and draw the pieces (The View)
@@ -87,16 +95,27 @@ public class GameController {
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
 
-                int pieceValue = boardState[row][col];
+                Figure figure = game.getPiece(row, col);
+                //int pieceValue = boardState[row][col];
 
-                if (pieceValue != 0) {
+                if (figure != Figure.NONE) {
+
                     // Create a circle with a radius of 24 (fits nicely inside 60x60 square)
                     Circle piece = new Circle(24);
 
-                    if (pieceValue == 1) {
-                        piece.setFill(Color.DARKRED);
-                    } else if (pieceValue == 2) {
-                        piece.setFill(Color.BLACK);
+                    if (figure == Figure.WHITE_MAN) {
+                        if(row == selectedRow && col == selectedCol){
+                            piece.setFill(Color.RED);
+                        }else{
+                            piece.setFill(Color.DARKRED);
+                        }
+                    } else if (figure == Figure.BLACK_MAN) {
+                        if(row == selectedRow && col == selectedCol){
+                            piece.setFill(Color.GREEN);
+                        } else{
+                            piece.setFill(Color.BLACK);
+                        }
+
                     }
 
                     // Optional: Add a slight border to make the pieces pop
@@ -128,31 +147,24 @@ public class GameController {
         selectedRow = row;
         selectedCol = col;
 
-        System.out.println("Selected piece row: " + selectedRow + " col: " + selectedCol);
-
         // Redraw the pieces so the selected one gets the "darker" color
         drawPieces();
     }
 
     private void handleSquareClick(int row, int col) {
         // Check if a piece is actually selected AND if the target square is empty
-        if (selectedRow != -1 && selectedCol != -1 && boardState[row][col] == 0) {
+        if (selectedRow != -1 && selectedCol != -1 && game.getFigures().get(row).get(col) == Figure.NONE) {
 
             // 1. Move the piece in the underlying data array
-            boardState[row][col] = boardState[selectedRow][selectedCol];
+            //game.getFigures().get(row).get(col) = game.getFigures().get(selectedRow).get(selectedCol);
+            game.movePiece(selectedRow, selectedCol, row, col);
 
             // 2. Erase the piece from its old position in the data array
-            boardState[selectedRow][selectedCol] = 0;
+            //boardState[selectedRow][selectedCol] = 0;
 
             // 3. Deselect the piece
             selectedRow = -1;
             selectedCol = -1;
-
-            for (int i = 0; i < 8; i++) {
-                for (int j = 0; j < 8; j++) {
-                    System.out.println(boardState[i][j]);
-                }
-            }
 
             // 4. Redraw the board to reflect the new array state
             drawEmptyBoard();

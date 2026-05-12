@@ -14,7 +14,12 @@ public class Game implements IGame {
 
     @Override
     public Figure getPiece(Pos pos) {
+
         return null;
+    }
+
+    public Figure getPiece(int row, int col) {
+        return figures.get(row).get(col);
     }
 
     @Override
@@ -27,7 +32,17 @@ public class Game implements IGame {
 
     }
 
-    private void setPieces() {
+    public void setPiece(int row, int col, Figure figure) {
+        figures.get(row).set(col, figure);
+    }
+
+    public void movePiece(int row_from, int col_from, int row_to, int col_to){
+        Figure figure = getPiece(row_from, col_from);
+        setPiece(row_from, col_from, Figure.NONE);
+        setPiece(row_to, col_to, figure);
+    }
+
+    public void setPieces() {
         figures = new ArrayList<>();
 
         for (int i = 0; i < 8; i++) {
@@ -51,5 +66,9 @@ public class Game implements IGame {
 
             figures.add(row);
         }
+    }
+
+    public List<List<Figure>> getFigures() {
+        return figures;
     }
 }
