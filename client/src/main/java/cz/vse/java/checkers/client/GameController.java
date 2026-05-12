@@ -1,6 +1,7 @@
 package cz.vse.java.checkers.client;
 
 import cz.vse.java.checkers.common.Game;
+import cz.vse.java.checkers.common.Pos;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -10,6 +11,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import cz.vse.java.checkers.common.Figure;
+
+import java.util.List;
 
 public class GameController {
 
@@ -35,7 +38,6 @@ public class GameController {
     public void initialize() {
         checkersBoard = new GridPane();
 
-        drawEmptyBoard();
         setupStartingPositions();
         drawPieces();
 
@@ -92,6 +94,7 @@ public class GameController {
 
     // 3. Read the data array and draw the pieces (The View)
     private void drawPieces() {
+        drawEmptyBoard();
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
 
@@ -133,27 +136,39 @@ public class GameController {
                     final int c = col;
 
                     // Add click listener to the piece
-                    piece.setOnMouseClicked(event -> handlePieceClick(r, c));
+                    piece.setOnMouseClicked(event -> handlePieceClick(r, c, figure));
 
                 }
             }
         }
     }
 
+    public void drawPossibleMoves(int row, int col, Figure figure){
+        List<Pos> possibleMoves = game.getPossibleMoves(new Pos(row, col), figure);
+
+        for (Pos move : possibleMoves) {
+            Rectangle highlight = new Rectangle(60, 60);
+            highlight.setFill(Color.web("#FFFF00", 0.5)); // Semi-transparent yellow
+            checkersBoard.add(highlight, move.y(), move.x());
+            highlight.setOnMouseClicked(event -> handleSquareClick(move.x(), move.y()));
+        }
+    }
+
     // --- CLICK HANDLERS ---
 
-    private void handlePieceClick(int row, int col) {
+    private void handlePieceClick(int row, int col, Figure figure) {
         // Save the coordinates of the clicked piece
         selectedRow = row;
         selectedCol = col;
 
         // Redraw the pieces so the selected one gets the "darker" color
         drawPieces();
+        drawPossibleMoves(row, col, figure);
     }
 
     private void handleSquareClick(int row, int col) {
         // Check if a piece is actually selected AND if the target square is empty
-        if (selectedRow != -1 && selectedCol != -1 && game.getFigures().get(row).get(col) == Figure.NONE) {
+        if (selectedRow != -1 && selectedCol != -1 && game.getPiece(row, col) == Figure.NONE) {
 
             // 1. Move the piece in the underlying data array
             //game.getFigures().get(row).get(col) = game.getFigures().get(selectedRow).get(selectedCol);
@@ -167,7 +182,6 @@ public class GameController {
             selectedCol = -1;
 
             // 4. Redraw the board to reflect the new array state
-            drawEmptyBoard();
             drawPieces();
         }
     }
