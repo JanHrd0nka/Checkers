@@ -13,8 +13,11 @@ import javafx.scene.shape.Rectangle;
 import cz.vse.java.checkers.common.Figure;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 public class GameController {
+
+    private Logger logger = Logger.getLogger("GameController");
 
     @FXML
     private StackPane boardContainer;
@@ -36,9 +39,12 @@ public class GameController {
 
     @FXML
     public void initialize() {
+        logger.info("Initializing game.");
         checkersBoard = new GridPane();
 
+        logger.info("Setting up starting position.");
         setupStartingPositions();
+        logger.info("Drawing starting position.");
         drawPieces();
 
         boardContainer.getChildren().add(checkersBoard);
@@ -119,6 +125,19 @@ public class GameController {
                             piece.setFill(Color.BLACK);
                         }
 
+                    } else if (figure == Figure.WHITE_KING) {
+                        if(row == selectedRow && col == selectedCol){
+                            piece.setFill(Color.PINK);
+                        } else{
+                            piece.setFill(Color.RED);
+                        }
+                    } else if (figure == Figure.BLACK_KING) {
+                        if(row == selectedRow && col == selectedCol){
+                            piece.setFill(Color.LIGHTGRAY);
+                        } else{
+                            piece.setFill(Color.GRAY);
+                        }
+
                     }
 
                     // Optional: Add a slight border to make the pieces pop
@@ -172,7 +191,7 @@ public class GameController {
 
             // 1. Move the piece in the underlying data array
             //game.getFigures().get(row).get(col) = game.getFigures().get(selectedRow).get(selectedCol);
-            game.movePiece(selectedRow, selectedCol, row, col);
+            game.movePiece(new Pos(selectedRow, selectedCol), new Pos(row, col));
 
             // 2. Erase the piece from its old position in the data array
             //boardState[selectedRow][selectedCol] = 0;
