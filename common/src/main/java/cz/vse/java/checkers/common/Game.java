@@ -2,10 +2,16 @@ package cz.vse.java.checkers.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class Game implements IGame {
     protected List<List<Figure>> figures;
+    boolean whiteToMove = true;
     protected Boolean mustTake;
+    private static final int BOARD_SIZE = 8;
+
+    private Logger logger = Logger.getLogger("Game");
+
     public Game(Boolean mustTake)
     {
         this.mustTake = mustTake;
@@ -14,15 +20,21 @@ public class Game implements IGame {
     List<Pos> capturedFigures = new ArrayList<>();
 
     @Override
-    public Figure getPiece(Pos pos) { return figures.get(pos.x()).get(pos.y()); }
+    public Figure getPiece(Pos pos) {
+        try{
+            return figures.get(pos.x()).get(pos.y());
+        } catch (IndexOutOfBoundsException e){
+            logger.info("Invalid position: " + pos);
+            return Figure.NONE;
+        }
 
-    public Figure getPiece(int row, int col) {
-        return figures.get(row).get(col);
     }
 
-    @Override
-    public List<Pos> getPossibleMoves(Pos pos, Figure figure) {
 
+    @Override
+    public List<Pos> getPossibleMoves(Pos pos) {
+
+        Figure figure = getPiece(pos);
         List<Pos> possibleMoves = new ArrayList<>();
 
         findPossibleMoves(pos, figure, possibleMoves);
@@ -46,7 +58,7 @@ public class Game implements IGame {
             int newCol = pos.y() + dir[1];
 
             if (isValidPosition(newRow, newCol) &&
-                    getPiece(newRow, newCol) == Figure.NONE) {
+                    getPiece(new Pos(newRow, newCol)) == Figure.NONE) {
                 possibleMoves.add(new Pos(newRow, newCol));
             }
         }
@@ -71,8 +83,8 @@ public class Game implements IGame {
             // Kontrola, zda je mezi figurkou a cílem protivníková figurka
             if (isValidPosition(middleRow, middleCol) &&
                     isValidPosition(targetRow, targetCol) &&
-                    isOpponentFigure(figure, getPiece(middleRow, middleCol)) &&
-                    getPiece(targetRow, targetCol) == Figure.NONE) {
+                    isOpponentFigure(figure, getPiece(new Pos(middleRow, middleCol))) &&
+                    getPiece(new Pos(targetRow, targetCol)) == Figure.NONE) {
 
                 moves.add(new Pos(targetRow, targetCol));
             }
@@ -97,17 +109,22 @@ public class Game implements IGame {
         figures.get(pos.x()).set(pos.y(), figure);
     }
 
-    public void setPiece(int row, int col, Figure figure) {
-        figures.get(row).set(col, figure);
+    public void setWhiteToMove(boolean value) {
+        whiteToMove = value;
+    }
+
+
+    public boolean getWhiteToMove() {
+        return whiteToMove;
     }
 
     public void movePiece(Pos from, Pos to){
-        Figure figure = getPiece(from.x(), from.y());
-        List<Pos> possilbeMoves = getPossibleMoves(new Pos(from.x(), from.y()), figure);
+        Figure figure = getPiece(from);
+        List<Pos> possilbeMoves = getPossibleMoves(new Pos(from.x(), from.y()));
 
         if(!possilbeMoves.isEmpty()){
             if(possilbeMoves.contains(new Pos(to.x(), to.y()))){
-                setPiece(from.x(), from.y(), Figure.NONE);
+                setPiece(from, Figure.NONE);
 
 
                 // Zjistit, zda je to krocení
@@ -119,7 +136,7 @@ public class Game implements IGame {
                     int captureRow = from.x() + (to.x() - from.x()) / 2;
                     int captureCol = from.y() + (to.y() - from.y()) / 2;
 
-                    setPiece(captureRow, captureCol, Figure.NONE);
+                    setPiece(new Pos(captureRow, captureCol), Figure.NONE);
                     capturedFigures.add(new Pos(captureRow, captureCol));
                 }
 
@@ -135,7 +152,8 @@ public class Game implements IGame {
                 }
 
 
-                setPiece(to.x(), to.y(), figure);
+                setPiece(to, figure);
+                setWhiteToMove(!getWhiteToMove());
             }
 
 
@@ -146,10 +164,10 @@ public class Game implements IGame {
     public void setPieces() {
         figures = new ArrayList<>();
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < BOARD_SIZE; i++) {
             List<Figure> row = new ArrayList<>();
 
-            for (int j = 0; j < 8; j++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
 
                 if ((i + j) % 2 == 0) {
                     row.add(Figure.NONE);
@@ -207,5 +225,8 @@ public class Game implements IGame {
     private void changeToKing(Figure figure) {
         //pro budoucí potřeby
     }
+
+
+
 
 }

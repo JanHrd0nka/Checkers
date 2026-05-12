@@ -163,7 +163,7 @@ public class GameController {
     }
 
     public void drawPossibleMoves(int row, int col, Figure figure){
-        List<Pos> possibleMoves = game.getPossibleMoves(new Pos(row, col), figure);
+        List<Pos> possibleMoves = game.getPossibleMoves(new Pos(row, col));
 
         for (Pos move : possibleMoves) {
             Rectangle highlight = new Rectangle(60, 60);
@@ -177,22 +177,30 @@ public class GameController {
 
     private void handlePieceClick(int row, int col, Figure figure) {
         // Save the coordinates of the clicked piece
-        selectedRow = row;
-        selectedCol = col;
+        boolean valid = (game.getWhiteToMove() == (figure == Figure.WHITE_KING || figure == Figure.WHITE_MAN));
+        if(valid) {
+            selectedRow = row;
+            selectedCol = col;
 
-        // Redraw the pieces so the selected one gets the "darker" color
-        drawPieces();
-        drawPossibleMoves(row, col, figure);
+            // Redraw the pieces so the selected one gets the "darker" color
+            drawPieces();
+            drawPossibleMoves(row, col, figure);
+        }
+
     }
 
     private void handleSquareClick(int row, int col) {
         // Check if a piece is actually selected AND if the target square is empty
-        if (selectedRow != -1 && selectedCol != -1 && game.getPiece(row, col) == Figure.NONE) {
+        if (selectedRow != -1 && selectedCol != -1 && game.getPiece(new Pos(row, col)) == Figure.NONE) {
 
             // 1. Move the piece in the underlying data array
             //game.getFigures().get(row).get(col) = game.getFigures().get(selectedRow).get(selectedCol);
-            game.movePiece(new Pos(selectedRow, selectedCol), new Pos(row, col));
-
+            try {
+                game.movePiece(new Pos(selectedRow, selectedCol), new Pos(row, col));
+            } catch (IllegalArgumentException e) {
+                logger.warning("Invalid move attempted: " + e.getMessage());
+                return; // Don't proceed with the move if it's invalid
+            }
             // 2. Erase the piece from its old position in the data array
             //boardState[selectedRow][selectedCol] = 0;
 
