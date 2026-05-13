@@ -1,5 +1,8 @@
 package cz.vse.java.checkers.client;
 
+import cz.vse.java.checkers.client.Networking.Connection;
+import cz.vse.java.checkers.client.Networking.MessageHandler;
+import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

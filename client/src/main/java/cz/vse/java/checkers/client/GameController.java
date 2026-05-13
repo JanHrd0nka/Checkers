@@ -11,13 +11,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import cz.vse.java.checkers.common.Figure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 public class GameController {
 
-    private Logger logger = Logger.getLogger("GameController");
+    private final Logger logger = LoggerFactory.getLogger(GameController.class);
 
     @FXML
     private StackPane boardContainer;
@@ -198,7 +199,7 @@ public class GameController {
             try {
                 game.movePiece(new Pos(selectedRow, selectedCol), new Pos(row, col));
             } catch (IllegalArgumentException e) {
-                logger.warning("Invalid move attempted: " + e.getMessage());
+                logger.warn("Invalid move attempted: " + e.getMessage());
                 return; // Don't proceed with the move if it's invalid
             }
             // 2. Erase the piece from its old position in the data array

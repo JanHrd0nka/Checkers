@@ -1,6 +1,6 @@
 package cz.vse.java.checkers.common;
 
-public enum ClientMessages {
+public enum ClientMessage {
     LOGIN,
     MATCH,
     SETUP,

@@ -1,5 +1,6 @@
 package cz.vse.java.checkers.server;
 
+import cz.vse.java.checkers.common.ServerMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,16 +16,28 @@ public class Server {
     private final int port;
     private ServerSocket serverSocket;
     private final Set<ClientHandler> clients = new HashSet<>();
+    private WaitingRoom waitingRoom;
 
     public Server(int port) {
         this.port = port;
         log = LoggerFactory.getLogger(Server.class);
+        waitingRoom = new WaitingRoom();
     }
 
     public void start() {
         log.info("Starting server on port {}...", port);
         Thread serverThread = new Thread(this::run);
         serverThread.start();
+    }
+
+    public void broadCast(ServerMessage name, String message){
+        for (var client : clients){
+            client.send(name, message);
+        }
+    }
+
+    public WaitingRoom getWaitingRoom(){
+        return waitingRoom;
     }
 
     private void run() {

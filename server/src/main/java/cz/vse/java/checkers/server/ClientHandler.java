@@ -1,11 +1,14 @@
 package cz.vse.java.checkers.server;
 
-import cz.vse.java.checkers.common.ClientMessages;
+import cz.vse.java.checkers.common.ClientMessage;
+import cz.vse.java.checkers.common.ServerMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
+
+import static cz.vse.java.checkers.common.ServerMessage.OK;
 
 public class ClientHandler implements Runnable {
 
@@ -16,8 +19,6 @@ public class ClientHandler implements Runnable {
 
     private PrintWriter out;
     private BufferedReader in;
-
-    private volatile boolean running = true;
 
     // TODO: private GameSession session;
 
@@ -34,7 +35,7 @@ public class ClientHandler implements Runnable {
             setupStreams();
 
             String message;
-            while (running && (message = in.readLine()) != null) {
+            while ((message = in.readLine()) != null) {
                 handleMessage(message);
             }
 
@@ -55,40 +56,53 @@ public class ClientHandler implements Runnable {
 
         String[] tokens = message.split(" ");
 
-        if (tokens.length == 0)
+        if (tokens.length > 0)
         {
-            return;
-        }
+            ClientMessage type;
 
-        ClientMessages type;
+            try {
+                type = ClientMessage.valueOf(tokens[0]);
+            } catch (IllegalArgumentException e) {
+                log.warn("Unknown message: {}", tokens[0]);
+                return;
+            }
+            switch (type) {
+                case LOGIN -> handleLogin(tokens);
+                case MATCH -> handleMatch(tokens);
+                case SETUP -> handleSetup(tokens);
+                case MOVE -> handleMove(tokens);
+                case HISTORY -> handleHistory(tokens);
+                case DRAW -> handleDraw();
+                case SURRENDER -> handleSurrender();
+                case QUIT -> disconnect();
+                case JOIN_WAITING_ROOM -> handleJoinWaitingRoom();
+                case REPLAY -> handleReplay(tokens);
 
-        try {
-            type = ClientMessages.valueOf(tokens[0]);
-        } catch (IllegalArgumentException e) {
-            log.warn("Unknown message: {}", tokens[0]);
-            return;
-        }
-
-        switch (type) {
-            case LOGIN -> handleLogin(tokens);
-            case MATCH -> handleMatch(tokens);
-            case SETUP -> handleSetup(tokens);
-            case MOVE -> handleMove(tokens);
-            case HISTORY -> handleHistory(tokens);
-            case DRAW -> handleDraw();
-            case SURRENDER -> handleSurrender();
-            case QUIT -> disconnect();
-            case JOIN_WAITING_ROOM -> handleJoinWaitingRoom();
-            case REPLAY -> handleReplay(tokens);
-
-            default -> log.warn("Unhandled message: {}", type);
+                default -> log.warn("Unhandled message: {}", type);
+            }
         }
     }
-
     // --- handlers ---
 
     private void handleLogin(String[] tokens) {
         log.info("LOGIN request");
+        if (validateLenght(2, tokens))
+        {
+            var wr = server.getWaitingRoom();
+            if (wr.addPlayer(tokens[1])) {
+                send(ServerMessage.OK);
+                try
+                {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e){
+
+                }
+                send(ServerMessage.OK, "message");
+            }
+            else {
+                send(ServerMessage.ERROR, "Jmeno obsazeno");
+            }
+        }
     }
 
     private void handleMatch(String[] tokens) {
@@ -118,27 +132,39 @@ public class ClientHandler implements Runnable {
 
     private void handleJoinWaitingRoom() {
         log.info("JOIN WAITING ROOM");
-        server.addToWaitingRoom(this);
+        //server.addToWaitingRoom(this);
     }
 
     private void handleReplay(String[] tokens) {
         log.info("REPLAY request");
     }
 
-    public void send(String message) {
+    public void send(ServerMessage name, String content) {
+        String message = name.name() + " " + content;
         out.println(message);
     }
 
-    private void disconnect() {
-        running = false;
+    public void send(ServerMessage name){
+        out.println(name.name());
+    }
 
+    private void disconnect() {
         try {
             socket.close();
         } catch (IOException e) {
             log.error("Error closing socket", e);
         }
 
-        server.removeClient(this);
+       //server.removeClient(this);
         log.info("Client disconnected");
+    }
+
+    private boolean validateLenght(int expectedLenght, String[] tokens){
+        boolean result = tokens.length == expectedLenght;
+        if (!result){
+            log.warn("Invalid message length");
+            send(ServerMessage.ERROR, "Invalid message length.");
+        }
+        return result;
     }
 }
