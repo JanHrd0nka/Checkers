@@ -136,6 +136,8 @@ public class Game implements IGame {
                     int captureRow = from.x() + (to.x() - from.x()) / 2;
                     int captureCol = from.y() + (to.y() - from.y()) / 2;
 
+
+
                     setPiece(new Pos(captureRow, captureCol), Figure.NONE);
                     capturedFigures.add(new Pos(captureRow, captureCol));
                 }
@@ -146,7 +148,7 @@ public class Game implements IGame {
                         figure = Figure.WHITE_KING;
                     }
                 } else if (figure == Figure.BLACK_MAN) {
-                    if(to.x() == 7){
+                    if(to.x() == BOARD_SIZE - 1){
                         figure = Figure.BLACK_KING;
                     }
                 }
@@ -154,11 +156,40 @@ public class Game implements IGame {
 
                 setPiece(to, figure);
                 setWhiteToMove(!getWhiteToMove());
+                switch(checkWin()){
+                    case Figure.WHITE_KING:
+                        logger.info("White wins!");
+                        break;
+                    case Figure.BLACK_KING:
+                        logger.info("Black wins!");
+                        break;
+                    default:
+                        break;
+                }
             }
 
 
         }
 
+    }
+
+
+    private Figure checkWin() {
+        List<Figure> allFigures = new ArrayList<>();
+
+        for (List<Figure> row : figures) {
+            allFigures.addAll(row);
+        }
+
+        if(allFigures.contains(Figure.WHITE_KING) || allFigures.contains(Figure.WHITE_MAN)){
+            if(allFigures.contains(Figure.BLACK_KING) || allFigures.contains(Figure.BLACK_MAN)){
+                return Figure.NONE;
+            }else{
+                return Figure.WHITE_KING;
+            }
+        } else{
+            return Figure.WHITE_KING;
+        }
     }
 
     public void setPieces() {

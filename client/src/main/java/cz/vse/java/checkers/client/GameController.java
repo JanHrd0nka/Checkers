@@ -104,7 +104,7 @@ public class GameController {
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
 
-                Figure figure = game.getPiece(row, col);
+                Figure figure = game.getPiece(new Pos(row, col));
                 //int pieceValue = boardState[row][col];
 
                 if (figure != Figure.NONE) {
