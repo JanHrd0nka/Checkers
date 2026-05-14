@@ -17,5 +17,6 @@ public class SampleMessageHandler extends MessageHandler{
     @Override
     public void onMessage(String message){
         System.out.println(message);
+        connection.removeMessageHandler(this);
     }
 }

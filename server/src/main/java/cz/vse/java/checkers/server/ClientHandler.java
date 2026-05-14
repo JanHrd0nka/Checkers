@@ -19,6 +19,7 @@ public class ClientHandler implements Runnable {
 
     private PrintWriter out;
     private BufferedReader in;
+    private Player player;
 
     // TODO: private GameSession session;
 
@@ -69,6 +70,7 @@ public class ClientHandler implements Runnable {
             switch (type) {
                 case LOGIN -> handleLogin(tokens);
                 case MATCH -> handleMatch(tokens);
+                case UNMATCH -> handleUnmatch(tokens);
                 case SETUP -> handleSetup(tokens);
                 case MOVE -> handleMove(tokens);
                 case HISTORY -> handleHistory(tokens);
@@ -89,24 +91,82 @@ public class ClientHandler implements Runnable {
         if (validateLenght(2, tokens))
         {
             var wr = server.getWaitingRoom();
-            if (wr.addPlayer(tokens[1])) {
-                send(ServerMessage.OK);
-                try
-                {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e){
-
+            boolean success = true;
+            if (player == null){
+                player = wr.addPlayer(tokens[1], this);
+                if (player == null) {
+                    success = false;
                 }
-                send(ServerMessage.OK, "message");
             }
-            else {
+            else{
+                success = wr.renamePlayer(player, tokens[1]);
+            }
+            if (success){
+                send(ServerMessage.OK);
+                server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
+            }
+            else{
                 send(ServerMessage.ERROR, "Jmeno obsazeno");
             }
         }
     }
-
+    // TODO tady neprobehla kontrola zda je to thread safe.
     private void handleMatch(String[] tokens) {
         log.info("MATCH request");
+        if (validatePlayerAndLength(2, tokens)){
+            var wr = server.getWaitingRoom();
+            Player opponent = wr.getPlayer(tokens[1]);
+            if (opponent != null){
+                if (opponent.wantsMatch(player)){
+                    String playerName = wr.getName(player);
+                    String opponentName = wr.getName(opponent);
+                    setUpBeforeGame(player, playerName, opponentName, opponent);
+                    setUpBeforeGame(opponent, opponentName, playerName, player);
+                    new Match(player, opponent);
+                    server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
+                } else {
+                    player.offerMatch(opponent);
+                    var oppClient = opponent.getClientHandler();
+                    oppClient.send(ServerMessage.MATCH, wr.getName(player));
+                    send(ServerMessage.OK);
+                }
+            }
+            else {
+                send(ServerMessage.ERROR, "Hrac neni dostupny");
+            }
+        }
+    }
+    // TODO tady neprobehla kontrola zda je to thread safe.
+    private void setUpBeforeGame(Player player, String playerName, String opponentName, Player opponent){
+        var playersToUnmatch = player.getOfferedMatches();
+        for (var playerToUnmatch : playersToUnmatch){
+            if (playerToUnmatch != opponent)
+            {
+                var handler = playerToUnmatch.getClientHandler();
+                handler.send(ServerMessage.UNMATCH, playerName);
+            }
+        }
+        player.clearOfferedMatches();
+        server.getWaitingRoom().removePlayer(player);
+        send(ServerMessage.SETUP, opponentName);
+    }
+    // TODO tady neprobehla kontrola zda je to thread safe.
+    private void handleUnmatch(String[] tokens) {
+        log.info("UNMATCH request");
+        if (validatePlayerAndLength(2, tokens)){
+            var wr = server.getWaitingRoom();
+            var opponent = wr.getPlayer(tokens[1]);
+            if (opponent != null){
+                player.removeMatch(opponent);
+                opponent.removeMatch(player);
+                var client = opponent.getClientHandler();
+                client.send(ServerMessage.UNMATCH, wr.getName(player));
+                send(ServerMessage.OK);
+            }
+            else{
+                send(ServerMessage.ERROR, "Hrac neni dostupny");
+            }
+        }
     }
 
     private void handleSetup(String[] tokens) {
@@ -139,12 +199,12 @@ public class ClientHandler implements Runnable {
         log.info("REPLAY request");
     }
 
-    public void send(ServerMessage name, String content) {
+    public synchronized void send(ServerMessage name, String content) {
         String message = name.name() + " " + content;
         out.println(message);
     }
 
-    public void send(ServerMessage name){
+    public synchronized void send(ServerMessage name){
         out.println(name.name());
     }
 
@@ -164,6 +224,18 @@ public class ClientHandler implements Runnable {
         if (!result){
             log.warn("Invalid message length");
             send(ServerMessage.ERROR, "Invalid message length.");
+        }
+        return result;
+    }
+
+    private boolean validatePlayerAndLength(int expectedLenght, String[] tokens){
+        boolean result = player != null;
+        if (!result){
+            log.warn("Player not registered");
+            send(ServerMessage.ERROR, "Nejsi zaregistrovan");
+        }
+        else{
+            result = validateLenght(expectedLenght, tokens);
         }
         return result;
     }

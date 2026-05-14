@@ -3,6 +3,7 @@ package cz.vse.java.checkers.common;
 public enum ClientMessage {
     LOGIN,
     MATCH,
+    UNMATCH,
     SETUP,
     MOVE,
     HISTORY,

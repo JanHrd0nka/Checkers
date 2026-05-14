@@ -30,13 +30,13 @@ public class Server {
         serverThread.start();
     }
 
-    public void broadCast(ServerMessage name, String message){
+    public synchronized void broadcast(ServerMessage name, String message){
         for (var client : clients){
             client.send(name, message);
         }
     }
 
-    public WaitingRoom getWaitingRoom(){
+    public synchronized WaitingRoom getWaitingRoom(){
         return waitingRoom;
     }
 
