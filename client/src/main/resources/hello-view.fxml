@@ -5,7 +5,7 @@
 
 <!-- Note: Remember to update fx:controller with your actual package and controller class name -->
 
-<GridPane prefHeight="750.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.vse.java.checkers.client.GameController">
+<GridPane prefHeight="750.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.vse.java.checkers.client.Game.BoardController">
 
     <!-- Enforce that the columns take up the full 100% width of the window -->
     <columnConstraints>
