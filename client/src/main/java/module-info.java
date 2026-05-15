@@ -5,7 +5,9 @@ module cz.vse.java.checkers.client {
     requires org.slf4j;
 
     opens cz.vse.java.checkers.client to javafx.fxml;
+    opens cz.vse.java.checkers.client.Game to javafx.fxml;
     exports cz.vse.java.checkers.client to javafx.graphics;
     exports cz.vse.java.checkers.client.Networking to javafx.graphics;
+    exports cz.vse.java.checkers.client.Game to javafx.fxml, javafx.graphics;
     opens cz.vse.java.checkers.client.Networking to javafx.fxml;
 }

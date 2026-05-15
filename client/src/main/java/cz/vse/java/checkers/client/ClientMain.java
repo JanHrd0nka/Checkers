@@ -6,11 +6,8 @@ import cz.vse.java.checkers.client.Networking.MessageHandler;
 import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
 import javafx.application.Application;
 
-import java.util.logging.Logger;
-
 public class ClientMain {
 
-    private static Logger logger = Logger.getLogger("ClientMain");
 
     public static void main(String[] args) {
 

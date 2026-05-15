@@ -1,8 +1,5 @@
-package cz.vse.java.checkers.client;
+package cz.vse.java.checkers.client.Game;
 
-import cz.vse.java.checkers.client.Networking.Connection;
-import cz.vse.java.checkers.client.Networking.MessageHandler;
-import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -18,5 +15,9 @@ public class HelloApplication extends Application {
         stage.setTitle("Checkers game");
         stage.setScene(scene);
         stage.show();
+
+
+
+
     }
 }
