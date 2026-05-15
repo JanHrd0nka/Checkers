@@ -168,7 +168,7 @@ public class BoardController {
     }
 
     private void handleSquareClick(int row, int col) {
-
+        gameController.getHandler().sendMove();
         // Check if a piece is actually selected AND if the target square is empty
         if (gameController.getSelectedRow() != -1 &&
                 gameController.getSelectedCol() != -1 &&
