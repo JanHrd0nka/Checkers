@@ -13,28 +13,32 @@ public class Player {
         offeredMatches = new HashSet<>();
     }
 
-    public void offerMatch(Player player){
+    public synchronized void offerMatch(Player player){
         offeredMatches.add(player);
     }
-    public void removeMatch(Player player){
+    public synchronized void removeMatch(Player player){
         offeredMatches.remove(player);
     }
 
-    public ClientHandler getClientHandler(){
+    public synchronized ClientHandler getClientHandler(){
         return clientHandler;
     }
 
-    public boolean wantsMatch(Player player){
+    public synchronized boolean wantsMatch(Player player){
         return offeredMatches.contains(player);
     }
 
-    public void setMatch(Match match){
+    public synchronized void setMatch(Match match){
         this.match = match;
     }
-    void clearOfferedMatches(){
+    public synchronized void clearOfferedMatches(){
         offeredMatches.clear();
     }
-    Set<Player> getOfferedMatches(){
+    public synchronized Set<Player> getOfferedMatches(){
         return offeredMatches;
+    }
+
+    public synchronized Match getMatch(){
+        return match;
     }
 }

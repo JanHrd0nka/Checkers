@@ -31,9 +31,11 @@ public class Server {
     }
 
     public synchronized void broadcast(ServerMessage name, String message){
+        log.info("----Broadcast Started----");
         for (var client : clients){
             client.send(name, message);
         }
+        log.info("----Broadcast finished---");
     }
 
     public synchronized WaitingRoom getWaitingRoom(){
