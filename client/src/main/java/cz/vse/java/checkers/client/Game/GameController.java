@@ -1,7 +1,5 @@
 package cz.vse.java.checkers.client.Game;
 
-import cz.vse.java.checkers.client.Networking.Connection;
-import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
 import cz.vse.java.checkers.common.ClientMessage;
 import cz.vse.java.checkers.common.Game;
 import org.slf4j.Logger;
@@ -11,7 +9,7 @@ public class GameController {
 
     private final Logger logger = LoggerFactory.getLogger(GameController.class);
 
-    private ConnectionController connectionController;
+    private InitialConnControler initialConnControler;
 
     private Game game;
 
@@ -19,8 +17,8 @@ public class GameController {
     private int selectedRow = -1;
     private int selectedCol = -1;
 
-    public GameController(ConnectionController connectionController, boolean mustTake) {
-        this.connectionController = connectionController;
+    public GameController(InitialConnControler initialConnControler, boolean mustTake) {
+        this.initialConnControler = initialConnControler;
         this.game = new Game(mustTake);
     }
 
@@ -53,8 +51,5 @@ public class GameController {
         this.selectedCol = selectedCol;
     }
 
-    public boolean send(ClientMessage clientMessage, String text) {
-        return connectionController.send(clientMessage, text);
-    }
 
 }

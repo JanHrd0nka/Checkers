@@ -1,11 +1,8 @@
 package cz.vse.java.checkers.client.Game;
 
-import cz.vse.java.checkers.client.Networking.Connection;
-import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
 import cz.vse.java.checkers.common.ClientMessage;
 import cz.vse.java.checkers.common.Figure;
 import cz.vse.java.checkers.common.Pos;
-import cz.vse.java.checkers.common.ServerMessage;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -40,22 +37,20 @@ public class BoardController {
 
     private GridPane checkersBoard;
 
-    @FXML
-    public void initialize() {
-        logger.info("Initializing game.");
-        checkersBoard = new GridPane();
-        gameController = new GameController(new ConnectionController(), true);
-        gameController.setupStartingPositions();
-        logger.info("Setting up starting position.");
-        logger.info("Drawing starting position.");
-        drawPieces();
-
-        boardContainer.getChildren().add(checkersBoard);
-
-        offerMatch.setOnAction(event -> offerMatch());
-        loginButton.setOnAction(event -> login());
-
-    }
+//    @FXML
+//    public void initialize() {
+//        logger.info("Initializing game.");
+//        checkersBoard = new GridPane();
+//        gameController = new GameController(new InitialConnControler(), true);
+//        gameController.setupStartingPositions();
+//        logger.info("Setting up starting position.");
+//        logger.info("Drawing starting position.");
+//        drawPieces();
+//
+//        boardContainer.getChildren().add(checkersBoard);
+//
+//
+//    }
 
     private void drawEmptyBoard() {
         for (int row = 0; row < 8; row++) {
@@ -207,16 +202,7 @@ public class BoardController {
         }
     }
 
-    @FXML
-    public void offerMatch(){
-        gameController.send(ClientMessage.MATCH, "hrac2");
-    }
 
-
-    public void login(){
-        String name = loginName.getText();
-        gameController.send(ClientMessage.LOGIN, name);
-    }
 
 
 }

@@ -19,6 +19,7 @@ public class Connection {
     private final Logger log = LoggerFactory.getLogger(Connection.class);
     Set<MessageHandler> messageHandlers = new CopyOnWriteArraySet<>();
     private final BlockingQueue<String> sendQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<String> receiveQueue = new LinkedBlockingQueue<>();
     private final String stopMessage = "__QUIT__";
     private Thread writerThread;
     private Thread readerThread;
@@ -50,6 +51,25 @@ public class Connection {
     public void removeMessageHandler(MessageHandler handler){
         messageHandlers.remove(handler);
     }
+
+    //----- receive Queue methods
+
+    public void insertToReceiveQueue(String message){
+        receiveQueue.add(message);
+    }
+
+    public String getReceiveMessage(){
+        try{
+            return receiveQueue.take();
+        } catch (InterruptedException e){
+            log.error("Interrupted while waiting for receive message: {}", e.getMessage());
+        }
+        return "EMPTY";
+    }
+
+
+    //----- sendQueue methods
+
     public boolean send(ClientMessage name, String content) {
         String message = name.name() + " " + content;
 
@@ -127,6 +147,7 @@ public class Connection {
                 String message = line;
                 log.info("Received: {}", message);
                 runOnFxThread(h -> h.onMessage(message));
+                receiveQueue.add(message);
             }
         } catch (IOException e) {
             log.error("Reader error", e);
