@@ -14,20 +14,10 @@ public class SampleMessageHandler extends MessageHandler{
         this.connection = connection;
     }
 
-    public void sendMove(){
-        boolean result = connection.send(ClientMessage.MOVE, "2,3,3,4");
-        if (result) {
-            logger.info("Move message sent successfully");
-        } else {
-            logger.info("Move message failed");
-        }
-    }
-
 
     @Override
     public void onConnect() {
         System.out.println("Connected");
-        connection.send(ClientMessage.LOGIN, "hrac1");
     }
 
     @Override

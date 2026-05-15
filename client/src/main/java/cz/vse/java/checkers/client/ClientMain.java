@@ -11,13 +11,9 @@ public class ClientMain {
 
     public static void main(String[] args) {
 
-
-        Connection connection = new Connection();
-        MessageHandler messageHandler = new SampleMessageHandler(connection);
-        connection.addMessageHandler(messageHandler);
-        connection.connect("localhost", 5000);
-
         Application.launch(HelloApplication.class, args);
+
+        
 
 
 

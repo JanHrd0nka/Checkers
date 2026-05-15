@@ -24,11 +24,12 @@
     <!-- I added a light gray background color just so you can visually see the split when testing -->
     <StackPane fx:id="boardContainer" style="-fx-background-color: #ECEFF1;" GridPane.rowIndex="0">
     </StackPane>
-
-    <!-- SECTION 2: The Bottom Menu/Status Area -->
-    <!-- I added a dark gray background color to contrast with the top -->
-    <StackPane fx:id="bottomContainer" style="-fx-background-color: #263238;" GridPane.rowIndex="1">
-        <!-- UI elements like "Player 1's Turn", timers, or forfeit buttons will go here -->
-    </StackPane>
+   <ButtonBar prefHeight="40.0" prefWidth="200.0" GridPane.rowIndex="1">
+     <buttons>
+       <Button fx:id="offerMatch" mnemonicParsing="false" text="Offer match to player 2" />
+         <Button fx:id="loginButton" mnemonicParsing="false" text="Login" />
+         <TextField fx:id="loginName" promptText="Enter login" />
+     </buttons>
+   </ButtonBar>
 
 </GridPane>

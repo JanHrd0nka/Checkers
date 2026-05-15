@@ -2,12 +2,15 @@ package cz.vse.java.checkers.client.Game;
 
 import cz.vse.java.checkers.client.Networking.Connection;
 import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
+import cz.vse.java.checkers.common.ClientMessage;
 import cz.vse.java.checkers.common.Figure;
 import cz.vse.java.checkers.common.Pos;
 import cz.vse.java.checkers.common.ServerMessage;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -26,9 +29,14 @@ public class BoardController {
 
     @FXML
     private StackPane boardContainer;
-
     @FXML
-    private StackPane bottomContainer;
+    private Button offerMatch;
+    @FXML
+    private Button loginButton;
+    @FXML
+    private TextField loginName;
+
+
 
     private GridPane checkersBoard;
 
@@ -36,14 +44,17 @@ public class BoardController {
     public void initialize() {
         logger.info("Initializing game.");
         checkersBoard = new GridPane();
-        gameController = new GameController(new SampleMessageHandler(new Connection()), true);
+        gameController = new GameController(new ConnectionController(), true);
         gameController.setupStartingPositions();
         logger.info("Setting up starting position.");
-
         logger.info("Drawing starting position.");
         drawPieces();
 
         boardContainer.getChildren().add(checkersBoard);
+
+        offerMatch.setOnAction(event -> offerMatch());
+        loginButton.setOnAction(event -> login());
+
     }
 
     private void drawEmptyBoard() {
@@ -168,7 +179,6 @@ public class BoardController {
     }
 
     private void handleSquareClick(int row, int col) {
-        gameController.getHandler().sendMove();
         // Check if a piece is actually selected AND if the target square is empty
         if (gameController.getSelectedRow() != -1 &&
                 gameController.getSelectedCol() != -1 &&
@@ -197,8 +207,16 @@ public class BoardController {
         }
     }
 
+    @FXML
+    public void offerMatch(){
+        gameController.send(ClientMessage.MATCH, "hrac2");
+    }
 
 
+    public void login(){
+        String name = loginName.getText();
+        gameController.send(ClientMessage.LOGIN, name);
+    }
 
 
 }

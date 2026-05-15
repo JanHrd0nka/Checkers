@@ -13,6 +13,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 public class Connection {
+
+    private static Connection instance;
+
     private final Logger log = LoggerFactory.getLogger(Connection.class);
     Set<MessageHandler> messageHandlers = new CopyOnWriteArraySet<>();
     private final BlockingQueue<String> sendQueue = new LinkedBlockingQueue<>();
@@ -22,6 +25,24 @@ public class Connection {
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
+
+    private Connection(){
+        System.out.println("Connection created");
+    }
+
+    public static Connection getInstance(){
+        if (instance == null){
+            synchronized (Connection.class){
+                if (instance == null){
+                    instance = new Connection();
+                }
+            }
+        }
+        return instance;
+    }
+
+
+
 
     public void addMessageHandler(MessageHandler handler){
         messageHandlers.add(handler);
