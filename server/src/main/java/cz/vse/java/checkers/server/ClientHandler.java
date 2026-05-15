@@ -5,6 +5,7 @@ import cz.vse.java.checkers.common.ServerMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.plaf.OptionPaneUI;
 import java.io.*;
 import java.net.Socket;
 
@@ -110,7 +111,6 @@ public class ClientHandler implements Runnable {
             }
         }
     }
-    // TODO tady neprobehla kontrola zda je to thread safe.
     private void handleMatch(String[] tokens) {
         log.info("MATCH request");
         if (validatePlayerAndLength(2, tokens)){
@@ -136,7 +136,6 @@ public class ClientHandler implements Runnable {
             }
         }
     }
-    // TODO tady neprobehla kontrola zda je to thread safe.
     private void setUpBeforeGame(Player player, String playerName, String opponentName, Player opponent){
         var playersToUnmatch = player.getOfferedMatches();
         for (var playerToUnmatch : playersToUnmatch){
@@ -150,7 +149,6 @@ public class ClientHandler implements Runnable {
         server.getWaitingRoom().removePlayer(player);
         send(ServerMessage.SETUP, opponentName);
     }
-    // TODO tady neprobehla kontrola zda je to thread safe.
     private void handleUnmatch(String[] tokens) {
         log.info("UNMATCH request");
         if (validatePlayerAndLength(2, tokens)){
@@ -171,6 +169,37 @@ public class ClientHandler implements Runnable {
 
     private void handleSetup(String[] tokens) {
         log.info("SETUP request");
+        if (validateSetupAndLength(4, tokens)){
+            boolean isW = "w".equalsIgnoreCase(tokens[2]);
+            boolean isMust = "MUST".equalsIgnoreCase(tokens[3]);
+            int time = -1;
+            try {
+                time = Integer.parseInt(tokens[1]);
+                if (time > 0) {
+                    log.info("Parsed setup: value={}, isW={}, isMust={}", time, isW, isMust);
+                }
+                else {
+                    throw new NumberFormatException("Negative time");
+                }
+            }
+            catch (NumberFormatException e) {
+                log.warn("Invalid integer in SETUP: {}", tokens[1]);
+                send (ServerMessage.ERROR, "Invalid setup");
+            }
+            var match = player.getMatch();
+            Player opponent = player.getMatch().getOpponent(player);
+            Player white;
+            if (isW){
+                white = player;
+            }
+            else{
+                white = opponent;
+            }
+            match.setUp(time, white, isMust);
+            send(ServerMessage.OK);
+            send(ServerMessage.STATE);
+            opponent.getClientHandler().send(ServerMessage.STATE);
+        }
     }
 
     private void handleMove(String[] tokens) {
@@ -201,10 +230,12 @@ public class ClientHandler implements Runnable {
 
     public synchronized void send(ServerMessage name, String content) {
         String message = name.name() + " " + content;
+        log.info("Sending message: {}", message);
         out.println(message);
     }
 
     public synchronized void send(ServerMessage name){
+        log.info("Sending message: {}", name.name());
         out.println(name.name());
     }
 
@@ -236,6 +267,24 @@ public class ClientHandler implements Runnable {
         }
         else{
             result = validateLenght(expectedLenght, tokens);
+        }
+        return result;
+    }
+
+    private boolean validateSetupAndLength(int expectedLenght, String[] tokens){
+        boolean result = validatePlayerAndLength(expectedLenght, tokens);
+        if (result){
+            var match = player.getMatch();
+            if (match != null){
+                if (match.isSetup()){
+                    log.warn("Match already setup");
+                    send(ServerMessage.ERROR, "Zapas uz je nastaven");
+                }
+            }
+            else{
+                log.warn("Player not paired");
+                send(ServerMessage.ERROR, "Nemas soupere");
+            }
         }
         return result;
     }
