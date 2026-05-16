@@ -1,6 +1,7 @@
 package cz.vse.java.checkers.client.Game;
 
 import cz.vse.java.checkers.client.Networking.Connection;
+import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -21,12 +22,21 @@ public class HelloApplication extends Application {
         Scene gameScene = new Scene(gameLoader.load(), 600, 600);
         Scene waitingRoomScene = new Scene(waitingRoomLoader.load(), 400, 300);
 
+        Connection connection = Connection.getInstance();
+        connection.connect("localhost", 5000);
+
+        SampleMessageHandler handler = new SampleMessageHandler(connection);
+        connection.addMessageHandler(handler);
+
+
         InitialConnControler initialConnControler = initialConnLoader.getController();
         initialConnControler.setNextScene(waitingRoomScene);
 
 
         WaitingRoomController waitingRoomController = waitingRoomLoader.getController();
         waitingRoomController.setNextScene(gameScene);
+
+        handler.registerController(waitingRoomController);
 
 
         stage.setTitle("Welcome");

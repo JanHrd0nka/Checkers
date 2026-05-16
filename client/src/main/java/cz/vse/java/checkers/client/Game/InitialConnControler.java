@@ -37,12 +37,6 @@ public class InitialConnControler {
     }
 
 
-    public InitialConnControler() {
-        connection.connect("localhost", 5000);
-        connection.addMessageHandler(new SampleMessageHandler(connection));
-
-    }
-
     private void requestWaitingRoom() {
         String name = nameField.getText();
         if(name.isEmpty()){
