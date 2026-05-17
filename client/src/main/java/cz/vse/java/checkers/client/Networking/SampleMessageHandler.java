@@ -11,7 +11,11 @@ import cz.vse.java.checkers.common.ServerMessage;
 
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class SampleMessageHandler extends MessageHandler{
@@ -19,7 +23,15 @@ public class SampleMessageHandler extends MessageHandler{
 
    private final ArrayList<Controller> controllers  = new ArrayList<>();
 
-    private final Logger logger = LoggerFactory.getLogger(SampleMessageHandler.class);
+   private ResponseManager rm = ResponseManager.getInstance();
+
+    // Stores pending responses mapped by their unique Correlation ID
+    private final Map<String, CompletableFuture<Message>> pendingRequests = new ConcurrentHashMap<>();
+
+
+   private final Logger logger = LoggerFactory.getLogger(SampleMessageHandler.class);
+
+
 
 
     public SampleMessageHandler(Connection connection){
@@ -42,8 +54,9 @@ public class SampleMessageHandler extends MessageHandler{
         Message msg = new Message(message);
         logger.info("Server message: {}",msg);
 
+
         switch (ServerMessage.valueOf(msg.getToken())){
-            case OK -> handleOK();
+            case OK -> handleOK(msg);
             case PLAYERS_WAITING -> updateWaitingRoom(msg.getContent());
             case MATCH -> updateRequestingMatches(msg.getContent());
         }
@@ -54,12 +67,8 @@ public class SampleMessageHandler extends MessageHandler{
         controllers.add(controller);
     }
 
-    private void handleOK(){
-        for (Controller con : controllers){
-            if(con.requestingOK){
-                con.requestingOK = false;
-            }
-        }
+    private void handleOK(Message message){
+        rm.dispatchResponse(message.getID(), message);
     }
 
 
@@ -75,6 +84,8 @@ public class SampleMessageHandler extends MessageHandler{
         controllers.getFirst().updateRequestingMatches(playerName);
 
     }
+
+
 
 
 }

@@ -29,10 +29,6 @@ public class Connection {
     private BufferedReader in;
     private PrintWriter out;
 
-    // Stores pending responses mapped by their unique Correlation ID
-    private final Map<String, CompletableFuture<Message>> pendingRequests = new ConcurrentHashMap<>();
-
-
 
     private String name;
 
@@ -77,7 +73,6 @@ public class Connection {
         if (!result) {
             log.error("Send queue full!");
         }
-        registerRequest(generateID());
         return result;
     }
     public void connect(String host, int port) {
@@ -148,7 +143,6 @@ public class Connection {
                 String message = line;
                 log.info("Received: {}", message);
                 runOnFxThread(h -> h.onMessage(message));
-                dispatchResponse();
             }
         } catch (IOException e) {
             log.error("Reader error", e);
@@ -164,24 +158,5 @@ public class Connection {
         });
     }
 
-    // Called before sending a request
-    public CompletableFuture<Message> registerRequest(String correlationId) {
-        CompletableFuture<Message> future = new CompletableFuture<>();
-        pendingRequests.put(correlationId, future);
-        return future;
-    }
-
-    // Called when a server response arrives
-    public void dispatchResponse(String correlationId, Message response) {
-        CompletableFuture<Message> future = pendingRequests.remove(correlationId);
-        if (future != null) {
-            future.complete(response); // This wakes up/notifies the waiting Controller
-        }
-    }
-
-
-    public static String generateID() {
-        return UUID.randomUUID().toString();
-    }
 
 }

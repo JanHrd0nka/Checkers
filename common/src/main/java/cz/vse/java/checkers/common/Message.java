@@ -2,10 +2,7 @@ package cz.vse.java.checkers.common;
 
 import java.sql.Time;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class Message {
     private String ID;
@@ -13,10 +10,10 @@ public class Message {
     private String content;
 
     public Message(String message){
-        ArrayList<String> parts = (ArrayList<String>) Arrays.asList(message.split(" "));
-        ID = parts.getFirst();
-        parts.removeFirst();
+        ArrayList<String> parts = new ArrayList<>(List.of(message.split(" ")));
         token = parts.getFirst();
+        parts.removeFirst();
+        ID = parts.getFirst();
         parts.removeFirst();
         content = parts.toString();
 

@@ -89,33 +89,33 @@ public class ClientHandler implements Runnable {
 
     private void handleLogin(String[] tokens) {
         log.info("LOGIN request");
-        if (validateLenght(2, tokens))
+        if (validateLenght(3, tokens))
         {
             var wr = server.getWaitingRoom();
             boolean success = true;
             if (player == null){
-                player = wr.addPlayer(tokens[1], this);
+                player = wr.addPlayer(tokens[2], this);
                 if (player == null) {
                     success = false;
                 }
             }
             else{
-                success = wr.renamePlayer(player, tokens[1]);
+                success = wr.renamePlayer(player, tokens[2]);
             }
             if (success){
-                send(ServerMessage.OK);
+                send(ServerMessage.OK, tokens[1]);
                 server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
             }
             else{
-                send(ServerMessage.ERROR, "Jmeno obsazeno");
+                send(ServerMessage.ERROR, tokens[1] + " Jmeno_obsazeno");
             }
         }
     }
     private void handleMatch(String[] tokens) {
         log.info("MATCH request");
-        if (validatePlayerAndLength(2, tokens)){
+        if (validatePlayerAndLength(3, tokens)){
             var wr = server.getWaitingRoom();
-            Player opponent = wr.getPlayer(tokens[1]);
+            Player opponent = wr.getPlayer(tokens[2]);
             if (opponent != null){
                 if (opponent.wantsMatch(player)){
                     String playerName = wr.getName(player);
@@ -123,16 +123,16 @@ public class ClientHandler implements Runnable {
                     setUpBeforeGame(player, playerName, opponentName, opponent);
                     setUpBeforeGame(opponent, opponentName, playerName, player);
                     new Match(player, opponent);
-                    server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
+                    server.broadcast(ServerMessage.PLAYERS_WAITING,wr.getPlayerNames());
                 } else {
                     player.offerMatch(opponent);
                     var oppClient = opponent.getClientHandler();
-                    oppClient.send(ServerMessage.MATCH, wr.getName(player));
-                    send(ServerMessage.OK);
+                    oppClient.send(ServerMessage.MATCH, "server-id " + wr.getName(player));
+                    send(ServerMessage.OK, tokens[1]);
                 }
             }
             else {
-                send(ServerMessage.ERROR, "Hrac neni dostupny");
+                send(ServerMessage.ERROR, tokens[1] + " Hrac_neni_dostupny");
             }
         }
     }
@@ -142,39 +142,39 @@ public class ClientHandler implements Runnable {
             if (playerToUnmatch != opponent)
             {
                 var handler = playerToUnmatch.getClientHandler();
-                handler.send(ServerMessage.UNMATCH, playerName);
+                handler.send(ServerMessage.UNMATCH, "server-id " + playerName);
             }
         }
         player.clearOfferedMatches();
         server.getWaitingRoom().removePlayer(player);
-        send(ServerMessage.SETUP, opponentName);
+        send(ServerMessage.SETUP, "server-id " + opponentName);
     }
     private void handleUnmatch(String[] tokens) {
         log.info("UNMATCH request");
-        if (validatePlayerAndLength(2, tokens)){
+        if (validatePlayerAndLength(3, tokens)){
             var wr = server.getWaitingRoom();
-            var opponent = wr.getPlayer(tokens[1]);
+            var opponent = wr.getPlayer(tokens[2]);
             if (opponent != null){
                 player.removeMatch(opponent);
                 opponent.removeMatch(player);
                 var client = opponent.getClientHandler();
-                client.send(ServerMessage.UNMATCH, wr.getName(player));
-                send(ServerMessage.OK);
+                client.send(ServerMessage.UNMATCH, "server-id " + wr.getName(player));
+                send(ServerMessage.OK, tokens[1]);
             }
             else{
-                send(ServerMessage.ERROR, "Hrac neni dostupny");
+                send(ServerMessage.ERROR, tokens[1] + " Hrac_neni_dostupny");
             }
         }
     }
 
     private void handleSetup(String[] tokens) {
         log.info("SETUP request");
-        if (validateSetupAndLength(4, tokens)){
-            boolean isW = "w".equalsIgnoreCase(tokens[2]);
-            boolean isMust = "MUST".equalsIgnoreCase(tokens[3]);
+        if (validateSetupAndLength(5, tokens)){
+            boolean isW = "w".equalsIgnoreCase(tokens[3]);
+            boolean isMust = "MUST".equalsIgnoreCase(tokens[4]);
             int time = -1;
             try {
-                time = Integer.parseInt(tokens[1]);
+                time = Integer.parseInt(tokens[2]);
                 if (time > 0) {
                     log.info("Parsed setup: value={}, isW={}, isMust={}", time, isW, isMust);
                 }
@@ -183,8 +183,8 @@ public class ClientHandler implements Runnable {
                 }
             }
             catch (NumberFormatException e) {
-                log.warn("Invalid integer in SETUP: {}", tokens[1]);
-                send (ServerMessage.ERROR, "Invalid setup");
+                log.warn("Invalid integer in SETUP: {}", tokens[2]);
+                send (ServerMessage.ERROR, tokens[1] + " Invalid_setup");
             }
             var match = player.getMatch();
             Player opponent = player.getMatch().getOpponent(player);
@@ -196,9 +196,9 @@ public class ClientHandler implements Runnable {
                 white = opponent;
             }
             match.setUp(time, white, isMust);
-            send(ServerMessage.OK);
-            send(ServerMessage.STATE);
-            opponent.getClientHandler().send(ServerMessage.STATE);
+            send(ServerMessage.OK, tokens[1]);
+            send(ServerMessage.STATE, tokens[1]);
+            opponent.getClientHandler().send(ServerMessage.STATE, "server-id");
         }
     }
 
