@@ -1,16 +1,18 @@
 package cz.vse.java.checkers.client.Networking;
 
 import cz.vse.java.checkers.common.ClientMessage;
+import cz.vse.java.checkers.common.Message;
+import cz.vse.java.checkers.common.ServerMessage;
 import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.UUID;
+import java.util.concurrent.*;
 
 public class Connection {
 
@@ -27,6 +29,13 @@ public class Connection {
     private BufferedReader in;
     private PrintWriter out;
 
+    // Stores pending responses mapped by their unique Correlation ID
+    private final Map<String, CompletableFuture<Message>> pendingRequests = new ConcurrentHashMap<>();
+
+
+
+    private String name;
+
     private Connection(){
         System.out.println("Connection created");
     }
@@ -42,6 +51,13 @@ public class Connection {
         return instance;
     }
 
+    public void setName(String setName){
+        name = setName;
+    }
+    public String getName(){
+        return name;
+    }
+
 
 
 
@@ -52,22 +68,6 @@ public class Connection {
         messageHandlers.remove(handler);
     }
 
-    //----- receive Queue methods
-
-    public void insertToReceiveQueue(String message){
-        receiveQueue.add(message);
-    }
-
-    public String getReceiveMessage(){
-        try{
-            return receiveQueue.take();
-        } catch (InterruptedException e){
-            log.error("Interrupted while waiting for receive message: {}", e.getMessage());
-        }
-        return "EMPTY";
-    }
-
-
     //----- sendQueue methods
 
     public boolean send(ClientMessage name, String content) {
@@ -77,6 +77,7 @@ public class Connection {
         if (!result) {
             log.error("Send queue full!");
         }
+        registerRequest(generateID());
         return result;
     }
     public void connect(String host, int port) {
@@ -147,7 +148,7 @@ public class Connection {
                 String message = line;
                 log.info("Received: {}", message);
                 runOnFxThread(h -> h.onMessage(message));
-                receiveQueue.add(message);
+                dispatchResponse();
             }
         } catch (IOException e) {
             log.error("Reader error", e);
@@ -162,4 +163,25 @@ public class Connection {
             }
         });
     }
+
+    // Called before sending a request
+    public CompletableFuture<Message> registerRequest(String correlationId) {
+        CompletableFuture<Message> future = new CompletableFuture<>();
+        pendingRequests.put(correlationId, future);
+        return future;
+    }
+
+    // Called when a server response arrives
+    public void dispatchResponse(String correlationId, Message response) {
+        CompletableFuture<Message> future = pendingRequests.remove(correlationId);
+        if (future != null) {
+            future.complete(response); // This wakes up/notifies the waiting Controller
+        }
+    }
+
+
+    public static String generateID() {
+        return UUID.randomUUID().toString();
+    }
+
 }

@@ -37,6 +37,7 @@ public class HelloApplication extends Application {
         waitingRoomController.setNextScene(gameScene);
 
         handler.registerController(waitingRoomController);
+        handler.registerController(initialConnControler);
 
 
         stage.setTitle("Welcome");

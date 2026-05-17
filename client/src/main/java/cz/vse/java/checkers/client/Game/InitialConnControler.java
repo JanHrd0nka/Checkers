@@ -18,10 +18,12 @@ import org.slf4j.LoggerFactory;
 import java.util.Iterator;
 import java.util.Set;
 
-public class InitialConnControler {
+public class InitialConnControler extends Controller{
 
     private static final Logger log = LoggerFactory.getLogger(InitialConnControler.class);
     private Connection connection = Connection.getInstance();
+    public boolean requestingOK;
+
 
     Scene nextScene;
 
@@ -46,13 +48,15 @@ public class InitialConnControler {
                 log.info("Sending login message with name: {}", name);
                 boolean result = connection.send(ClientMessage.LOGIN, name);
                 if(result){
-                    String[] response = connection.getReceiveMessage().split(" ");
-                    if(ServerMessage.valueOf(response[0]).equals(ServerMessage.OK)){
-                        Stage stage = (Stage)  waitingRoomButton.getScene().getWindow();
-                        stage.setScene(nextScene);
-                    } else{
-                        log.info("Login failed: {}", response[1]);
+                    requestingOK = true;
+                    waitingRoomButton.setDisable(true);
+                    while (requestingOK){
+
                     }
+                    connection.setName(name);
+                    Stage stage = (Stage)  waitingRoomButton.getScene().getWindow();
+                    stage.setScene(nextScene);
+                    waitingRoomButton.setDisable(false);
                 }
             } catch (Exception e){
                 log.info("Failed to send login message", e);

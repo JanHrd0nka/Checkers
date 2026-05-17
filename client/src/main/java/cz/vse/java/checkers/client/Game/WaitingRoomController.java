@@ -9,12 +9,9 @@ import javafx.scene.effect.SepiaTone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-public class WaitingRoomController {
+public class WaitingRoomController extends Controller{
 
     private static final Logger log = LoggerFactory.getLogger(WaitingRoomController.class);
     private Scene nextScene;
@@ -33,21 +30,24 @@ public class WaitingRoomController {
     @FXML
     private void initialize() {
         availablePlayersList.setOnMouseClicked(event -> requestMatch(availablePlayersList.getSelectionModel().getSelectedItem()));
-        playersRequestingList.setOnMouseClicked(event -> acceptMatch());
+        playersRequestingList.setOnMouseClicked(event -> acceptMatch(playersRequestingList.getSelectionModel().getSelectedItem()));
 
     }
 
-
+    @Override
     public void updatePlayersWaiting(String[] playersList){
         players.addAll(Arrays.asList(playersList));
         if(availablePlayersList != null){
             availablePlayersList.getItems().clear();
             for (String name : players){
-                availablePlayersList.getItems().add(name);
+                if(!Objects.equals(name, connection.getName())){
+                    availablePlayersList.getItems().add(name);
+                }
             }
         }
     }
 
+    @Override
     public void updateRequestingMatches(String name){
         if(playersRequestingList != null){
             playersRequestingList.getItems().add(name);
@@ -60,7 +60,10 @@ public class WaitingRoomController {
         this.nextScene = nextScene;
     }
 
-    private void acceptMatch() {
+    private void acceptMatch(String playerName) {
+        if(connection.send(ClientMessage.MATCH, playerName)){
+            log.info("Accepted match from: {}", playerName);
+        }
 
     }
 
