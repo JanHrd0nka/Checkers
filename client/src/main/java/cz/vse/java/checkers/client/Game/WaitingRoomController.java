@@ -1,24 +1,32 @@
 package cz.vse.java.checkers.client.Game;
 
 import cz.vse.java.checkers.client.Networking.Connection;
+import cz.vse.java.checkers.client.Networking.ResponseManager;
 import cz.vse.java.checkers.common.ClientMessage;
+import cz.vse.java.checkers.common.Message;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.effect.SepiaTone;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class WaitingRoomController extends Controller{
 
     private static final Logger log = LoggerFactory.getLogger(WaitingRoomController.class);
     private Scene nextScene;
 
+    private ResponseManager rm = ResponseManager.getInstance();
+
     private Connection connection = Connection.getInstance();
 
-    private static Set<String> players = new HashSet<>();
+    private Set<String> playersAvailable = new HashSet<>();
+    private Set<String> requestedMatches = new HashSet<>();
+    private Set<String> requestingMatches = new HashSet<>();
 
 
     @FXML
@@ -36,12 +44,16 @@ public class WaitingRoomController extends Controller{
 
     @Override
     public void updatePlayersWaiting(String[] playersList){
-        players.addAll(Arrays.asList(playersList));
+        playersAvailable.addAll(Arrays.asList(playersList));
         if(availablePlayersList != null){
             availablePlayersList.getItems().clear();
-            for (String name : players){
+            for (String name : playersAvailable){
                 if(!Objects.equals(name, connection.getName())){
-                    availablePlayersList.getItems().add(name);
+                    if(!requestingMatches.contains(name)){
+                        if(!requestedMatches.contains(name)){
+                            availablePlayersList.getItems().add(name);
+                        }
+                    }
                 }
             }
         }
@@ -50,7 +62,11 @@ public class WaitingRoomController extends Controller{
     @Override
     public void updateRequestingMatches(String name){
         if(playersRequestingList != null){
-            playersRequestingList.getItems().add(name);
+            if(!Objects.equals(name, connection.getName())){
+                requestingMatches.add(name);
+                playersRequestingList.getItems().add(name);
+                availablePlayersList.getItems().remove(name);
+            }
         }
     }
 
@@ -61,17 +77,21 @@ public class WaitingRoomController extends Controller{
     }
 
     private void acceptMatch(String playerName) {
-        if(connection.send(ClientMessage.MATCH, playerName)){
+        String UID = generateID();
+        if(connection.send(ClientMessage.MATCH,UID + " " + playerName)){
             log.info("Accepted match from: {}", playerName);
         }
 
     }
 
     private void requestMatch(String playerName) {
-        if(connection.send(ClientMessage.MATCH, playerName)){
+        String UID = generateID();
+        if(connection.send(ClientMessage.MATCH,UID + " " + playerName)){
             log.info("Sent match request to: {}", playerName);
+            requestedMatches.add(playerName);
+            availablePlayersList.getItems().remove(playerName);
         } else{
-            if(players.contains(playerName)){
+            if(playersAvailable.contains(playerName)){
                 log.info("Player {} exists but request match failed to send", playerName);
             } else{
                 log.info("Player {} doesn't exist. Can't send a match request", playerName);
@@ -79,6 +99,12 @@ public class WaitingRoomController extends Controller{
 
 
         }
+    }
+
+    @Override
+    public void setUpMatch(String playerName){
+        Stage stage = (Stage)  availablePlayersList.getScene().getWindow();
+        stage.setScene(nextScene);
     }
 
 

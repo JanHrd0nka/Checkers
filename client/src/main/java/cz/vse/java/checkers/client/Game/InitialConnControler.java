@@ -61,17 +61,19 @@ public class InitialConnControler extends Controller{
                     waitingRoomButton.setDisable(true);
                     // 3. Handle the response whenever it arrives without blocking the UI
                     responseFuture.thenAccept(response -> {
+                                connection.setName(name);
                                 // CRITICAL: GUI updates must happen on the main UI thread
                                 Platform.runLater(() -> {
                                     if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
-                                        connection.setName(name);
                                         Stage stage = (Stage)  waitingRoomButton.getScene().getWindow();
                                         stage.setScene(nextScene);
                                         waitingRoomButton.setDisable(false);
                                     } else {
+                                        waitingRoomButton.setDisable(false);
                                         log.error("Invalid credentials");
                                     }
                                 });
+
                             }).orTimeout(5, TimeUnit.SECONDS) // Avoid waiting forever if server goes down
                             .exceptionally(ex -> {
                                 Platform.runLater(() -> log.error("Network timeout while waiting for response from server."));
@@ -87,9 +89,5 @@ public class InitialConnControler extends Controller{
 
     public void setNextScene(Scene nextScene) {
         this.nextScene = nextScene;
-    }
-
-    public static String generateID() {
-        return UUID.randomUUID().toString();
     }
 }

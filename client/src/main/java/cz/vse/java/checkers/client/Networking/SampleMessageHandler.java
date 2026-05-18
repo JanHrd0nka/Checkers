@@ -5,6 +5,7 @@ import cz.vse.java.checkers.client.Game.Controller;
 import cz.vse.java.checkers.client.Game.WaitingRoomController;
 import cz.vse.java.checkers.common.Message;
 import cz.vse.java.checkers.common.ServerMessage;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cz.vse.java.checkers.common.ServerMessage;
@@ -59,6 +60,7 @@ public class SampleMessageHandler extends MessageHandler{
             case OK -> handleOK(msg);
             case PLAYERS_WAITING -> updateWaitingRoom(msg.getContent());
             case MATCH -> updateRequestingMatches(msg.getContent());
+            case SETUP -> setUpMatch(msg.getContent());
         }
 
     }
@@ -74,16 +76,25 @@ public class SampleMessageHandler extends MessageHandler{
 
     private void updateWaitingRoom(String message){
         logger.info("updating players");
-        String[] players = message.split(", ");
+        String result = StringUtils.substringBetween(message, "[", "]");
+        String[] players = result.split(", ");
         controllers.getFirst().updatePlayersWaiting(players);
 
     }
 
     private void updateRequestingMatches(String playerName){
         logger.info("updating requesting matches");
-        controllers.getFirst().updateRequestingMatches(playerName);
+        String result = StringUtils.substringBetween(playerName, "[", "]");
+        controllers.getFirst().updateRequestingMatches(result);
 
     }
+
+    private void setUpMatch(String setupWith){
+        logger.info("Setting up match with: {}", setupWith);
+        String result = StringUtils.substringBetween(setupWith, "[", "]");
+        controllers.getFirst().setUpMatch(result);
+    }
+
 
 
 

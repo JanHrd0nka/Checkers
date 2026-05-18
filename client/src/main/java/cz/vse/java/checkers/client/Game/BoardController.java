@@ -37,20 +37,20 @@ public class BoardController {
 
     private GridPane checkersBoard;
 
-//    @FXML
-//    public void initialize() {
-//        logger.info("Initializing game.");
-//        checkersBoard = new GridPane();
-//        gameController = new GameController(new InitialConnControler(), true);
-//        gameController.setupStartingPositions();
-//        logger.info("Setting up starting position.");
-//        logger.info("Drawing starting position.");
-//        drawPieces();
-//
-//        boardContainer.getChildren().add(checkersBoard);
-//
-//
-//    }
+    @FXML
+    public void initialize() {
+        logger.info("Initializing game.");
+        checkersBoard = new GridPane();
+        gameController = new GameController(true);
+        gameController.setupStartingPositions();
+        logger.info("Setting up starting position.");
+        logger.info("Drawing starting position.");
+        drawPieces();
+
+        boardContainer.getChildren().add(checkersBoard);
+
+
+    }
 
     private void drawEmptyBoard() {
         for (int row = 0; row < 8; row++) {

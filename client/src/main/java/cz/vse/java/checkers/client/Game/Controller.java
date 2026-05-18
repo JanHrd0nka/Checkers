@@ -1,8 +1,13 @@
 package cz.vse.java.checkers.client.Game;
 
+import java.util.UUID;
+
 public class Controller {
     //TODO
-    public boolean requestingOK;
+
+    public static String generateID() {
+        return UUID.randomUUID().toString();
+    }
 
 
     public void updatePlayersWaiting(String[] playersList){
@@ -10,6 +15,10 @@ public class Controller {
     }
 
     public void updateRequestingMatches(String name){
+
+    }
+
+    public void setUpMatch(String playerName){
 
     }
 

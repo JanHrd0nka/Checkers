@@ -147,7 +147,8 @@ public class ClientHandler implements Runnable {
         }
         player.clearOfferedMatches();
         server.getWaitingRoom().removePlayer(player);
-        send(ServerMessage.SETUP, "server-id " + opponentName);
+        var handler = player.getClientHandler();
+        handler.send(ServerMessage.SETUP, "server-id " + opponentName);
     }
     private void handleUnmatch(String[] tokens) {
         log.info("UNMATCH request");
