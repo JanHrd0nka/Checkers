@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import javax.swing.plaf.OptionPaneUI;
 import java.io.*;
 import java.net.Socket;
+import java.util.Random;
+import java.util.random.RandomGenerator;
 
 import static cz.vse.java.checkers.common.ServerMessage.OK;
 
@@ -204,7 +206,13 @@ public class ClientHandler implements Runnable {
     }
 
     private void handleMove(String[] tokens) {
-        log.info("MOVE request");
+        log.info("MOVE request with ID: {}", tokens[1]);
+        if(RandomGenerator.getDefault().nextBoolean()){
+            send(ServerMessage.OK, tokens[1]);
+        }else{
+            send(ServerMessage.ERROR, tokens[1]);
+        }
+
         // později: server.getGameSession(...).move(...)
     }
 

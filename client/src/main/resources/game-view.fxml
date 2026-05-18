@@ -24,11 +24,11 @@
     <!-- I added a light gray background color just so you can visually see the split when testing -->
     <StackPane fx:id="boardContainer" style="-fx-background-color: #ECEFF1;" GridPane.rowIndex="0">
     </StackPane>
-   <ButtonBar prefHeight="40.0" prefWidth="200.0" GridPane.rowIndex="1">
+   <ButtonBar nodeOrientation="LEFT_TO_RIGHT" prefHeight="40.0" prefWidth="200.0" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
      <buttons>
-       <Button fx:id="offerMatch" mnemonicParsing="false" text="Offer match to player 2" />
-         <Button fx:id="loginButton" mnemonicParsing="false" text="Login" />
-         <TextField fx:id="loginName" promptText="Enter login" />
+       <Button fx:id="forfeightBtn" mnemonicParsing="false" text="Forfeight" />
+         <Button fx:id="drawBtn" mnemonicParsing="false" text="Offer draw" />
+         <Label text="Time remaining: XXXX" />
      </buttons>
    </ButtonBar>
 

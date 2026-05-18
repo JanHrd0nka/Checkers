@@ -62,6 +62,7 @@ public class SampleMessageHandler extends MessageHandler{
             case MATCH -> updateRequestingMatches(msg.getContent());
             case SETUP -> setUpMatch(msg.getContent());
         }
+        rm.dispatchResponse(msg.getID(), msg);
 
     }
 
@@ -70,8 +71,9 @@ public class SampleMessageHandler extends MessageHandler{
     }
 
     private void handleOK(Message message){
-        rm.dispatchResponse(message.getID(), message);
+
     }
+
 
 
     private void updateWaitingRoom(String message){

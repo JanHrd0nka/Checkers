@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class BoardController {
 
@@ -41,9 +42,9 @@ public class BoardController {
     public void initialize() {
         logger.info("Initializing game.");
         checkersBoard = new GridPane();
-        gameController = new GameController(true);
+        gameController = new GameController(true, this);
         gameController.setupStartingPositions();
-        logger.info("Setting up starting position.");
+
         logger.info("Drawing starting position.");
         drawPieces();
 
@@ -63,42 +64,39 @@ public class BoardController {
                 }
                 checkersBoard.add(square, col, row);
 
-                final int r = row;
-                final int c = col;
+                final Pos pos = new Pos(row, col);
 
                 square.setOnMouseClicked(event -> {
-                    handleSquareClick(r, c);
+                    handleSquareClick(pos);
                 });
             }
         }
     }
 
 
-    private void drawPieces() {
+    public void drawPieces() {
         drawEmptyBoard();
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 Pos current = new Pos(row, col);
 
-                Figure figure = gameController.getGame().getPiece(new Pos(row, col));
-                //int pieceValue = boardState[row][col];
+                Figure figure = gameController.getGame().getPiece(current);
 
                 if (figure != Figure.NONE) {
 
-                    // Create a circle with a radius of 24 (fits nicely inside 60x60 square)
                     Circle piece = new Circle(24);
 
                         if (figure == Figure.WHITE_MAN) {
                             if(row == gameController.getSelectedRow() &&
                                     col == gameController.getSelectedCol()){
-                                piece.setFill(Color.RED);
+                                piece.setFill(Color.WHITE.darker());
                             }else{
-                                piece.setFill(Color.DARKRED);
+                                piece.setFill(Color.WHITE);
                             }
                         } else if (figure == Figure.BLACK_MAN) {
                             if(row == gameController.getSelectedRow() &&
                                     col == gameController.getSelectedCol()){
-                                piece.setFill(Color.GREEN);
+                                piece.setFill(Color.BLACK.brighter());
                             } else{
                                 piece.setFill(Color.BLACK);
                             }
@@ -106,37 +104,31 @@ public class BoardController {
                         } else if (figure == Figure.WHITE_KING) {
                             if(row == gameController.getSelectedRow() &&
                                     col == gameController.getSelectedCol()){
-                                piece.setFill(Color.PINK);
+                                piece.setFill(Color.NAVAJOWHITE.darker());
                             } else{
-                                piece.setFill(Color.RED);
+                                piece.setFill(Color.NAVAJOWHITE);
                             }
                         } else if (figure == Figure.BLACK_KING) {
                             if(row == gameController.getSelectedRow() &&
                                     col == gameController.getSelectedCol()){
-                                piece.setFill(Color.LIGHTGRAY);
+                                piece.setFill(Color.DARKBLUE.brighter());
                             } else{
-                                piece.setFill(Color.GRAY);
+                                piece.setFill(Color.DARKBLUE);
                             }
 
                         }
 
-
-                    // Optional: Add a slight border to make the pieces pop
-                    piece.setStroke(Color.WHITE);
-                    piece.setStrokeWidth(2);
-
                     // Add the piece to the grid
-                    checkersBoard.add(piece, col, row);
+                    checkersBoard.add(piece, current.y(), current.x());
 
                     // Center the circle inside the grid cell
                     GridPane.setHalignment(piece, HPos.CENTER);
                     GridPane.setValignment(piece, VPos.CENTER);
 
-                    final int r = row;
-                    final int c = col;
+                    final Pos pos = current;
 
                     // Add click listener to the piece
-                    piece.setOnMouseClicked(event -> handlePieceClick(r, c, figure));
+                    piece.setOnMouseClicked(event -> handlePieceClick(pos, figure));
 
                 }
 
@@ -148,57 +140,46 @@ public class BoardController {
 
     // --- CLICK HANDLERS ---
 
-    private void handlePieceClick(int row, int col, Figure figure) {
-        // Save the coordinates of the clicked piece
+    private void handlePieceClick(Pos clickedPos, Figure figure) {
         boolean valid = (gameController.getGame().getWhiteToMove() == (figure == Figure.WHITE_KING || figure == Figure.WHITE_MAN));
         if(valid) {
-            gameController.setSelectedRow(row);
-            gameController.setSelectedCol(col);
+            gameController.setSelectedRow(clickedPos.x());
+            gameController.setSelectedCol(clickedPos.y());
 
-            // Redraw the pieces so the selected one gets the "darker" color
             drawPieces();
-            drawPossibleMoves(row, col, figure);
+            drawPossibleMoves(clickedPos, figure);
         }
 
     }
 
-    public void drawPossibleMoves(int row, int col, Figure figure){
-        List<Pos> possibleMoves = gameController.getGame().getPossibleMoves(new Pos(row, col));
+    public void drawPossibleMoves(Pos pos, Figure figure){
+        List<Pos> possibleMoves = gameController.getGame().getPossibleMoves(pos);
+
 
         for (Pos move : possibleMoves) {
             Rectangle highlight = new Rectangle(60, 60);
             highlight.setFill(Color.web("#FFFF00", 0.5)); // Semi-transparent yellow
             checkersBoard.add(highlight, move.y(), move.x());
-            highlight.setOnMouseClicked(event -> handleSquareClick(move.x(), move.y()));
+            highlight.setOnMouseClicked(event -> handleSquareClick(move));
         }
     }
 
-    private void handleSquareClick(int row, int col) {
+    private void handleSquareClick(Pos pos) {
         // Check if a piece is actually selected AND if the target square is empty
         if (gameController.getSelectedRow() != -1 &&
                 gameController.getSelectedCol() != -1 &&
-                gameController.getGame().getPiece(new Pos(row, col)) == Figure.NONE
+                gameController.getGame().getPiece(pos) == Figure.NONE
         ) {
 
-            // Move piece in game instance
             try {
-                gameController.getGame().movePiece(
+                gameController.movePiece(
                         new Pos(gameController.getSelectedRow(), gameController.getSelectedCol()),
-                        new Pos(row, col)
+                        pos
                 );
             } catch (IllegalArgumentException e) {
                 logger.warn("Invalid move attempted: " + e.getMessage());
-                return; // Don't proceed with the move if it's invalid
             }
-            // 2. Erase the piece from its old position in the data array
-            //boardState[selectedRow][selectedCol] = 0;
 
-            // 3. Deselect the piece
-            gameController.setSelectedRow(-1);
-            gameController.setSelectedCol(-1);
-
-            // 4. Redraw the board to reflect the new array state
-            drawPieces();
         }
     }
 
