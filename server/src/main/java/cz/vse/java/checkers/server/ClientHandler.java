@@ -209,6 +209,8 @@ public class ClientHandler implements Runnable {
         log.info("MOVE request with ID: {}", tokens[1]);
         if(RandomGenerator.getDefault().nextBoolean()){
             send(ServerMessage.OK, tokens[1]);
+            //docasny zasilani tahu protivnikovy, pouze pro test
+            player.getMatch().getOpponent(player).getClientHandler().send(ServerMessage.MOVED,"server-id " +  tokens[2] + " "  + tokens[3]);
         }else{
             send(ServerMessage.ERROR, tokens[1]);
         }

@@ -13,6 +13,13 @@ import java.util.Set;
 public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
+        Connection connection = Connection.getInstance();
+        connection.connect("localhost", 5000);
+
+        SampleMessageHandler handler = new SampleMessageHandler(connection);
+        connection.addMessageHandler(handler);
+
+
         FXMLLoader initialConnLoader = new FXMLLoader(HelloApplication.class.getClassLoader().getResource("initialConn-view.fxml"));
         FXMLLoader gameLoader = new FXMLLoader(HelloApplication.class.getClassLoader().getResource("game-view.fxml"));
         FXMLLoader waitingRoomLoader = new FXMLLoader(HelloApplication.class.getClassLoader().getResource("waitingRoom-view.fxml"));
@@ -22,11 +29,7 @@ public class HelloApplication extends Application {
         Scene gameScene = new Scene(gameLoader.load(), 600, 600);
         Scene waitingRoomScene = new Scene(waitingRoomLoader.load(), 400, 300);
 
-        Connection connection = Connection.getInstance();
-        connection.connect("localhost", 5000);
 
-        SampleMessageHandler handler = new SampleMessageHandler(connection);
-        connection.addMessageHandler(handler);
 
 
         InitialConnControler initialConnControler = initialConnLoader.getController();
@@ -36,8 +39,15 @@ public class HelloApplication extends Application {
         WaitingRoomController waitingRoomController = waitingRoomLoader.getController();
         waitingRoomController.setNextScene(gameScene);
 
+        BoardController boardController = gameLoader.getController();
+        GameController gameController = boardController.getGameController();
+
         handler.registerController(waitingRoomController);
         handler.registerController(initialConnControler);
+
+        handler.setInitialController(initialConnControler);
+        handler.setWaitingRoomController(waitingRoomController);
+        handler.setGameController(gameController);
 
 
         stage.setTitle("Welcome");

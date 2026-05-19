@@ -28,6 +28,7 @@ public class Connection {
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
+    private SampleMessageHandler messageHandler;
 
 
     private String name;
@@ -57,12 +58,18 @@ public class Connection {
 
 
 
-    public void addMessageHandler(MessageHandler handler){
+    public void addMessageHandler(SampleMessageHandler handler){
         messageHandlers.add(handler);
+        messageHandler = handler;
     }
     public void removeMessageHandler(MessageHandler handler){
         messageHandlers.remove(handler);
     }
+
+    public SampleMessageHandler getHandler(){
+        return messageHandler;
+    }
+
 
     //----- sendQueue methods
 

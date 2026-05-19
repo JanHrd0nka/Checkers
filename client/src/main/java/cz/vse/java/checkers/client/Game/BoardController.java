@@ -1,5 +1,6 @@
 package cz.vse.java.checkers.client.Game;
 
+import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
 import cz.vse.java.checkers.common.ClientMessage;
 import cz.vse.java.checkers.common.Figure;
 import cz.vse.java.checkers.common.Pos;
@@ -37,6 +38,8 @@ public class BoardController {
 
 
     private GridPane checkersBoard;
+
+
 
     @FXML
     public void initialize() {
@@ -183,7 +186,7 @@ public class BoardController {
         }
     }
 
-
-
-
+    public GameController getGameController() {
+        return gameController;
+    }
 }

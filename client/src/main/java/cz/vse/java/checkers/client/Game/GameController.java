@@ -2,6 +2,7 @@ package cz.vse.java.checkers.client.Game;
 
 import cz.vse.java.checkers.client.Networking.Connection;
 import cz.vse.java.checkers.client.Networking.ResponseManager;
+import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
 import cz.vse.java.checkers.common.*;
 import javafx.application.Platform;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ public class GameController extends Controller{
 
 
     private Game game;
-    private Connection connection = Connection.getInstance();
+    private SampleMessageHandler handler;
     private BoardController board;
 
 
@@ -31,6 +32,7 @@ public class GameController extends Controller{
     public GameController(boolean mustTake, BoardController board) {
         this.game = new Game(mustTake);
         this.board = board;
+        this.handler = Connection.getInstance().getHandler();
     }
 
 
@@ -42,7 +44,7 @@ public class GameController extends Controller{
     public void movePiece(Pos from, Pos to){
         if(from != null && to != null){
             String UID = generateID();
-            boolean result = connection.send(ClientMessage.MOVE, UID + " " + from.x() + "," + from.y() +
+            boolean result = handler.send(ClientMessage.MOVE, UID, from.x() + "," + from.y() +
                     " " + to.x() + "," + to.y());
             if(result){
                 CompletableFuture<Message> responseFuture = rm.registerRequest(UID);
@@ -67,6 +69,14 @@ public class GameController extends Controller{
             }
         }
     }
+
+    public void moveOpponentPiece(Pos from, Pos to){
+        if(from != null && to != null){
+            game.movePiece(from, to);
+            board.drawPieces();
+        }
+    }
+
 
     // 3. Read the data array and draw the pieces (The View)
 

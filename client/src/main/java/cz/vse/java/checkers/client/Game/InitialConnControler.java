@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 public class InitialConnControler extends Controller{
 
     private static final Logger log = LoggerFactory.getLogger(InitialConnControler.class);
-    private Connection connection = Connection.getInstance();
+    private SampleMessageHandler handler;
 
     private ResponseManager rm = ResponseManager.getInstance();
 
@@ -44,6 +44,7 @@ public class InitialConnControler extends Controller{
     @FXML
     private void initialize() {
         waitingRoomButton.setOnAction(event ->requestWaitingRoom());
+        handler = Connection.getInstance().getHandler();
     }
 
 
@@ -55,13 +56,13 @@ public class InitialConnControler extends Controller{
             try{
                 log.info("Sending login message with name: {}", name);
                 String UID = generateID();
-                boolean result = connection.send(ClientMessage.LOGIN, UID + " " + name);
+                boolean result = handler.send(ClientMessage.LOGIN, UID, name);
                 if(result){
                     CompletableFuture<Message> responseFuture = rm.registerRequest(UID);
                     waitingRoomButton.setDisable(true);
                     // 3. Handle the response whenever it arrives without blocking the UI
                     responseFuture.thenAccept(response -> {
-                                connection.setName(name);
+                                Connection.getInstance().setName(name);
                                 // CRITICAL: GUI updates must happen on the main UI thread
                                 Platform.runLater(() -> {
                                     if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {

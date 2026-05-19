@@ -2,6 +2,7 @@ package cz.vse.java.checkers.client.Game;
 
 import cz.vse.java.checkers.client.Networking.Connection;
 import cz.vse.java.checkers.client.Networking.ResponseManager;
+import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
 import cz.vse.java.checkers.common.ClientMessage;
 import cz.vse.java.checkers.common.Message;
 import javafx.fxml.FXML;
@@ -22,7 +23,7 @@ public class WaitingRoomController extends Controller{
 
     private ResponseManager rm = ResponseManager.getInstance();
 
-    private Connection connection = Connection.getInstance();
+    private SampleMessageHandler handler = Connection.getInstance().getHandler();
 
     private Set<String> playersAvailable = new HashSet<>();
     private Set<String> requestedMatches = new HashSet<>();
@@ -48,7 +49,7 @@ public class WaitingRoomController extends Controller{
         if(availablePlayersList != null){
             availablePlayersList.getItems().clear();
             for (String name : playersAvailable){
-                if(!Objects.equals(name, connection.getName())){
+                if(!Objects.equals(name, Connection.getInstance().getName())){
                     if(!requestingMatches.contains(name)){
                         if(!requestedMatches.contains(name)){
                             availablePlayersList.getItems().add(name);
@@ -62,7 +63,7 @@ public class WaitingRoomController extends Controller{
     @Override
     public void updateRequestingMatches(String name){
         if(playersRequestingList != null){
-            if(!Objects.equals(name, connection.getName())){
+            if(!Objects.equals(name, Connection.getInstance().getName())){
                 requestingMatches.add(name);
                 playersRequestingList.getItems().add(name);
                 availablePlayersList.getItems().remove(name);
@@ -78,7 +79,7 @@ public class WaitingRoomController extends Controller{
 
     private void acceptMatch(String playerName) {
         String UID = generateID();
-        if(connection.send(ClientMessage.MATCH,UID + " " + playerName)){
+        if(handler.send(ClientMessage.MATCH,UID, playerName)){
             log.info("Accepted match from: {}", playerName);
         }
 
@@ -86,7 +87,7 @@ public class WaitingRoomController extends Controller{
 
     private void requestMatch(String playerName) {
         String UID = generateID();
-        if(connection.send(ClientMessage.MATCH,UID + " " + playerName)){
+        if(handler.send(ClientMessage.MATCH,UID, playerName)){
             log.info("Sent match request to: {}", playerName);
             requestedMatches.add(playerName);
             availablePlayersList.getItems().remove(playerName);
