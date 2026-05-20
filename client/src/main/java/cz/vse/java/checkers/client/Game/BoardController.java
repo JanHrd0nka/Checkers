@@ -41,11 +41,12 @@ public class BoardController {
 
 
 
+
     @FXML
     public void initialize() {
         logger.info("Initializing game.");
         checkersBoard = new GridPane();
-        gameController = new GameController(true, this);
+        gameController = new GameController(this);
         gameController.setupStartingPositions();
 
         logger.info("Drawing starting position.");
@@ -55,6 +56,7 @@ public class BoardController {
 
 
     }
+
 
     private void drawEmptyBoard() {
         for (int row = 0; row < 8; row++) {
@@ -144,7 +146,8 @@ public class BoardController {
     // --- CLICK HANDLERS ---
 
     private void handlePieceClick(Pos clickedPos, Figure figure) {
-        boolean valid = (gameController.getGame().getWhiteToMove() == (figure == Figure.WHITE_KING || figure == Figure.WHITE_MAN));
+        //boolean valid = (gameController.getGame().getWhiteToMove() == (figure == Figure.WHITE_KING || figure == Figure.WHITE_MAN));
+        boolean valid = gameController.isPlayerTurn();
         if(valid) {
             gameController.setSelectedRow(clickedPos.x());
             gameController.setSelectedCol(clickedPos.y());

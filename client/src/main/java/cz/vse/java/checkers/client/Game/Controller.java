@@ -14,7 +14,7 @@ public class Controller {
 
     }
 
-    public void updateRequestingMatches(String name){
+    public void updateRequestingMatches(String name, boolean unmatch){
 
     }
 

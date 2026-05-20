@@ -61,12 +61,17 @@ public class WaitingRoomController extends Controller{
     }
 
     @Override
-    public void updateRequestingMatches(String name){
+    public void updateRequestingMatches(String name, boolean unmatch){
         if(playersRequestingList != null){
             if(!Objects.equals(name, Connection.getInstance().getName())){
-                requestingMatches.add(name);
-                playersRequestingList.getItems().add(name);
-                availablePlayersList.getItems().remove(name);
+                if (unmatch){
+                 requestingMatches.remove(name);
+                 playersRequestingList.getItems().remove(name);
+                } else{
+                    requestingMatches.add(name);
+                    playersRequestingList.getItems().add(name);
+                    availablePlayersList.getItems().remove(name);
+                }
             }
         }
     }

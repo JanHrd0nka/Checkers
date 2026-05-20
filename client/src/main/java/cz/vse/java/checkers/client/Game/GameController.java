@@ -23,18 +23,28 @@ public class GameController extends Controller{
     private Game game;
     private SampleMessageHandler handler;
     private BoardController board;
+    private boolean isWhite;
+    private boolean mustTake;
 
 
     // Variables to remember which piece the user clicked
     private int selectedRow = -1;
     private int selectedCol = -1;
 
-    public GameController(boolean mustTake, BoardController board) {
+    public GameController(BoardController board) {
         this.game = new Game(mustTake);
         this.board = board;
         this.handler = Connection.getInstance().getHandler();
     }
 
+
+    public void setWhite(boolean white) {
+        isWhite = white;
+    }
+
+    public void setMustTake(boolean mustTake) {
+        this.mustTake = mustTake;
+    }
 
     public void setupStartingPositions() {
         logger.info("Setting up starting position.");
@@ -75,6 +85,10 @@ public class GameController extends Controller{
             game.movePiece(from, to);
             board.drawPieces();
         }
+    }
+
+    public boolean isPlayerTurn(){
+        return game.getWhiteToMove() == isWhite;
     }
 
 

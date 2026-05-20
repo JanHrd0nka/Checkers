@@ -21,11 +21,13 @@ public class HelloApplication extends Application {
 
 
         FXMLLoader initialConnLoader = new FXMLLoader(HelloApplication.class.getClassLoader().getResource("initialConn-view.fxml"));
+        FXMLLoader setupLoader = new FXMLLoader(HelloApplication.class.getClassLoader().getResource("setup-view.fxml"));
         FXMLLoader gameLoader = new FXMLLoader(HelloApplication.class.getClassLoader().getResource("game-view.fxml"));
         FXMLLoader waitingRoomLoader = new FXMLLoader(HelloApplication.class.getClassLoader().getResource("waitingRoom-view.fxml"));
 
 
         Scene initialConnScene = new Scene(initialConnLoader.load(), 320, 240);
+        Scene setupScene = new Scene(setupLoader.load(), 400, 300);
         Scene gameScene = new Scene(gameLoader.load(), 600, 600);
         Scene waitingRoomScene = new Scene(waitingRoomLoader.load(), 400, 300);
 
@@ -35,9 +37,12 @@ public class HelloApplication extends Application {
         InitialConnControler initialConnControler = initialConnLoader.getController();
         initialConnControler.setNextScene(waitingRoomScene);
 
-
         WaitingRoomController waitingRoomController = waitingRoomLoader.getController();
-        waitingRoomController.setNextScene(gameScene);
+        waitingRoomController.setNextScene(setupScene);
+
+        SetupController setupController = setupLoader.getController();
+        setupController.setNextScene(gameScene);
+
 
         BoardController boardController = gameLoader.getController();
         GameController gameController = boardController.getGameController();
@@ -47,6 +52,7 @@ public class HelloApplication extends Application {
 
         handler.setInitialController(initialConnControler);
         handler.setWaitingRoomController(waitingRoomController);
+        handler.setSetupController(setupController);
         handler.setGameController(gameController);
 
 

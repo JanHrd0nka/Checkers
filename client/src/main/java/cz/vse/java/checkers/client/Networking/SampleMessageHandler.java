@@ -1,10 +1,7 @@
 package cz.vse.java.checkers.client.Networking;
 
 
-import cz.vse.java.checkers.client.Game.Controller;
-import cz.vse.java.checkers.client.Game.GameController;
-import cz.vse.java.checkers.client.Game.InitialConnControler;
-import cz.vse.java.checkers.client.Game.WaitingRoomController;
+import cz.vse.java.checkers.client.Game.*;
 import cz.vse.java.checkers.common.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,6 +19,7 @@ public class SampleMessageHandler extends MessageHandler{
 
    private final ArrayList<Controller> controllers  = new ArrayList<>();
    private InitialConnControler initialController;
+   private SetupController setupController;
    private WaitingRoomController waitingRoomController;
    private GameController gameController;
 
@@ -48,6 +46,10 @@ public class SampleMessageHandler extends MessageHandler{
         this.waitingRoomController = waitingRoomController;
     }
 
+    public void setSetupController(SetupController setupController) {
+        this.setupController = setupController;
+    }
+
     public void setGameController(GameController gameController) {
         this.gameController = gameController;
     }
@@ -68,14 +70,18 @@ public class SampleMessageHandler extends MessageHandler{
 
         Message msg = new Message(message);
         logger.info("Server message: {}",msg);
+        String content = msg.getContent();
+        content = StringUtils.substringBetween(content, "[", "]");
 
 
         switch (ServerMessage.valueOf(msg.getToken())){
             case OK -> handleOK(msg);
-            case PLAYERS_WAITING -> updateWaitingRoom(msg.getContent());
-            case MATCH -> updateRequestingMatches(msg.getContent());
-            case SETUP -> setUpMatch(msg.getContent());
-            case MOVED -> updateBoardState(msg.getContent());
+            case PLAYERS_WAITING -> updateWaitingRoom(content);
+            case MATCH -> updateRequestingMatches(content);
+            case SETUP -> setUpMatch(content);
+            case MOVED -> updateBoardState(content);
+            case UNMATCH -> unmatchPlayer(content);
+            case STATE -> handleState(content);
         }
         rm.dispatchResponse(msg.getID(), msg);
 
@@ -93,29 +99,25 @@ public class SampleMessageHandler extends MessageHandler{
 
     private void updateWaitingRoom(String message){
         logger.info("updating players");
-        String result = StringUtils.substringBetween(message, "[", "]");
-        String[] players = result.split(", ");
+        String[] players = message.split(", ");
         controllers.getFirst().updatePlayersWaiting(players);
 
     }
 
     private void updateRequestingMatches(String playerName){
         logger.info("updating requesting matches");
-        String result = StringUtils.substringBetween(playerName, "[", "]");
-        controllers.getFirst().updateRequestingMatches(result);
+        controllers.getFirst().updateRequestingMatches(playerName, false);
 
     }
 
     private void setUpMatch(String setupWith){
         logger.info("Setting up match with: {}", setupWith);
-        String result = StringUtils.substringBetween(setupWith, "[", "]");
-        controllers.getFirst().setUpMatch(result);
+        controllers.getFirst().setUpMatch(setupWith);
     }
 
     private void updateBoardState(String move){
-        String tmp = StringUtils.substringBetween(move, "[", "]");
         logger.info("Moving opponent piece to: {}", move);
-        String[] parts = tmp.split(" ");
+        String[] parts = move.split(" ");
 
         int[] a1 = Arrays.stream(parts[0].split(","))
                 .mapToInt(Integer::parseInt)
@@ -130,6 +132,20 @@ public class SampleMessageHandler extends MessageHandler{
 
         gameController.moveOpponentPiece(from, to);
 
+    }
+
+    private void unmatchPlayer(String content){
+        waitingRoomController.updateRequestingMatches(content, true);
+    }
+
+    private void handleState(String content){
+        logger.info("Game set up by opponent");
+        String[] parts = content.split(", ");
+        boolean color = (parts[0].equals("w"));
+        boolean mustTake = parts[1].equals("must");
+        gameController.setWhite(color);
+        gameController.setMustTake(mustTake);
+        setupController.setupGame();
     }
 
 

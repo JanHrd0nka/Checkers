@@ -13,6 +13,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -39,6 +40,8 @@ public class InitialConnControler extends Controller{
     private TextField nameField;
     @FXML
     private Button waitingRoomButton;
+    @FXML
+    private Label errorLbl;
 
 
     @FXML
@@ -69,8 +72,10 @@ public class InitialConnControler extends Controller{
                                         Stage stage = (Stage)  waitingRoomButton.getScene().getWindow();
                                         stage.setScene(nextScene);
                                         waitingRoomButton.setDisable(false);
+                                        errorLbl.setVisible(false);
                                     } else {
                                         waitingRoomButton.setDisable(false);
+                                        errorLbl.setVisible(true);
                                         log.error("Invalid credentials");
                                     }
                                 });
