@@ -5,7 +5,6 @@ import java.util.List;
 public interface IGame
 {
     Figure getPiece(Pos pos);
-    List<Pos> getPossibleMoves(Pos pos);
-    void setPiece(Pos pos, Figure figure);
-
+    List<List<Pos>> getPossibleMoves(Pos pos);
+    Figure setPiece(Pos pos, Figure figure);
 }

@@ -1,6 +1,7 @@
 package cz.vse.java.checkers.server;
 
 import cz.vse.java.checkers.common.ClientMessage;
+import cz.vse.java.checkers.common.Pos;
 import cz.vse.java.checkers.common.ServerMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -206,7 +207,27 @@ public class ClientHandler implements Runnable {
     }
 
     private void handleMove(String[] tokens) {
-        log.info("MOVE request with ID: {}", tokens[1]);
+        log.info("MOVE request");
+        if (validateGameAndLength(2, tokens)){
+            String move = tokens[1];
+            boolean isSyntaxValid = move.matches("[0-7]{4}");
+            if (isSyntaxValid){
+                int xFrom = move.charAt(0) - '0';
+                int yFrom = move.charAt(1) - '0';
+                int xTo = move.charAt(2) - '0';
+                int yTo = move.charAt(3) - '0';
+                Pos from = new Pos(xFrom, yFrom);
+                Pos to = new Pos(xTo, yTo);
+                //player.get TODO
+            }
+            else{
+                log.warn("Invalid move syntax");
+                send (ServerMessage.ERROR, tokens[1] + " Invalid_move_syntax");
+            }
+        }
+
+
+
         if(RandomGenerator.getDefault().nextBoolean()){
             send(ServerMessage.OK, tokens[1]);
             //docasny zasilani tahu protivnikovy, pouze pro test
@@ -290,6 +311,24 @@ public class ClientHandler implements Runnable {
                 if (match.isSetup()){
                     log.warn("Match already setup");
                     send(ServerMessage.ERROR, "Zapas uz je nastaven");
+                }
+            }
+            else{
+                log.warn("Player not paired");
+                send(ServerMessage.ERROR, "Nemas soupere");
+            }
+        }
+        return result;
+    }
+
+    private boolean validateGameAndLength(int expectedLenght, String[] tokens){
+        boolean result = validatePlayerAndLength(expectedLenght, tokens);
+        if (result){
+            var match = player.getMatch();
+            if (match != null){
+                if (!match.isSetup()){
+                    log.warn("Match is not setup yet");
+                    send(ServerMessage.ERROR, "Zapas jeste neni nastaven");
                 }
             }
             else{
