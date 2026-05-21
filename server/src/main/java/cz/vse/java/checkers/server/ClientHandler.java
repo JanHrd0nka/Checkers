@@ -1,6 +1,7 @@
 package cz.vse.java.checkers.server;
 
 import cz.vse.java.checkers.common.ClientMessage;
+import cz.vse.java.checkers.common.Game2;
 import cz.vse.java.checkers.common.Pos;
 import cz.vse.java.checkers.common.ServerMessage;
 import org.slf4j.Logger;
@@ -9,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import javax.swing.plaf.OptionPaneUI;
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.random.RandomGenerator;
 
@@ -191,7 +194,7 @@ public class ClientHandler implements Runnable {
                 send (ServerMessage.ERROR, tokens[1] + " Invalid_setup");
             }
             var match = player.getMatch();
-            Player opponent = player.getMatch().getOpponent(player);
+            Player opponent = match.getOpponent(player);
             Player white;
             if (isW){
                 white = player;
@@ -210,33 +213,35 @@ public class ClientHandler implements Runnable {
         log.info("MOVE request");
         if (validateGameAndLength(2, tokens)){
             String move = tokens[1];
-            boolean isSyntaxValid = move.matches("[0-7]{4}");
+            boolean isSyntaxValid =
+                    move.matches("[0-7]+")
+                            && move.length() >= 4
+                            && move.length() % 2 == 0;
             if (isSyntaxValid){
-                int xFrom = move.charAt(0) - '0';
-                int yFrom = move.charAt(1) - '0';
-                int xTo = move.charAt(2) - '0';
-                int yTo = move.charAt(3) - '0';
-                Pos from = new Pos(xFrom, yFrom);
-                Pos to = new Pos(xTo, yTo);
-                //player.get TODO
+                List<Pos> path = new ArrayList<>();
+                for (int i = 0; i < move.length(); i += 2) {
+                    int x = move.charAt(i) - '0';
+                    int y = move.charAt(i + 1) - '0';
+                    path.add(new Pos(x, y));
+                }
+                Match match = player.getMatch();
+                String error = match.makeMove(player, path);
+                if (error.isEmpty()){
+                    String currentState = match.getGameContent();
+                    send(ServerMessage.OK, tokens[1]);
+                    send(ServerMessage.STATE, "server-id " + currentState);
+                    match.getOpponent (player).getClientHandler().send(ServerMessage.STATE, "server-id " + currentState);
+                }
+                else{
+                    log.warn("Invalid move");
+                    send (ServerMessage.ERROR, tokens[1] + error);
+                }
             }
             else{
                 log.warn("Invalid move syntax");
                 send (ServerMessage.ERROR, tokens[1] + " Invalid_move_syntax");
             }
         }
-
-
-
-        if(RandomGenerator.getDefault().nextBoolean()){
-            send(ServerMessage.OK, tokens[1]);
-            //docasny zasilani tahu protivnikovy, pouze pro test
-            player.getMatch().getOpponent(player).getClientHandler().send(ServerMessage.MOVED,"server-id " +  tokens[2] + " "  + tokens[3]);
-        }else{
-            send(ServerMessage.ERROR, tokens[1]);
-        }
-
-        // později: server.getGameSession(...).move(...)
     }
 
     private void handleHistory(String[] tokens) {
