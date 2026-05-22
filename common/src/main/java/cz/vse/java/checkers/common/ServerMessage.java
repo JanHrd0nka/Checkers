@@ -8,5 +8,7 @@ public enum ServerMessage {
     UNMATCH,
     SETUP,
     STATE,
-    MOVED
+    MOVED,
+    HISTORY,
+    RESULT
 }

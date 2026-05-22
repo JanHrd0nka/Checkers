@@ -152,6 +152,7 @@ public class ClientHandler implements Runnable {
             }
         }
         player.clearOfferedMatches();
+        player.setName(server.getWaitingRoom().getName(player));
         server.getWaitingRoom().removePlayer(player);
         var handler = player.getClientHandler();
         handler.send(ServerMessage.SETUP, "server-id " + opponentName);
@@ -211,8 +212,8 @@ public class ClientHandler implements Runnable {
 
     private void handleMove(String[] tokens) {
         log.info("MOVE request");
-        if (validateGameAndLength(2, tokens)){
-            String move = tokens[1];
+        if (validateGameAndLength(3, tokens)){
+            String move = tokens[2];
             boolean isSyntaxValid =
                     move.matches("[0-7]+")
                             && move.length() >= 4
@@ -231,6 +232,13 @@ public class ClientHandler implements Runnable {
                     send(ServerMessage.OK, tokens[1]);
                     send(ServerMessage.STATE, "server-id " + currentState);
                     match.getOpponent (player).getClientHandler().send(ServerMessage.STATE, "server-id " + currentState);
+                    if (!match.checkGameState()){
+                        Player winner = match.getWinner();
+                        winner.incrementScore();
+                        send(ServerMessage.RESULT, "server-id" + " " + winner.getName());
+                        match.getOpponent(winner).getClientHandler().send(ServerMessage.RESULT, "server-id" + " " + winner.getName());
+                        match.endGame();
+                    }
                 }
                 else{
                     log.warn("Invalid move");
@@ -246,6 +254,22 @@ public class ClientHandler implements Runnable {
 
     private void handleHistory(String[] tokens) {
         log.info("HISTORY request");
+        if (validateGameAndLength(3, tokens)){
+            int index;
+            try {
+                index = Integer.parseInt(tokens[2]);
+                String history = player.getMatch().getHistory(index);
+                if (history.isEmpty()){
+                    send(ServerMessage.ERROR, tokens[1] + " Histrory_index_out_of_bounds.");
+                }
+                else{
+                    send(ServerMessage.HISTORY, tokens[1] + " " + history);
+                }
+            }
+            catch (NumberFormatException e){
+                send (ServerMessage.ERROR, tokens[1] + " Invalid_history_index");
+            }
+        }
     }
 
     private void handleDraw() {
@@ -269,11 +293,6 @@ public class ClientHandler implements Runnable {
         String message = name.name() + " " + content;
         log.info("Sending message: {}", message);
         out.println(message);
-    }
-
-    public synchronized void send(ServerMessage name){
-        log.info("Sending message: {}", name.name());
-        out.println(name.name());
     }
 
     private void disconnect() {

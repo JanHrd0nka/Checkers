@@ -36,6 +36,9 @@ public class Match {
     public String getGameContent(){
         return game.toContent();
     }
+    public String getHistory(int index){
+        return game.getHistory(index);
+    }
     public String makeMove(Player player, List<Pos> path){
         String error = new String();
         if (player == currentPlayer){
@@ -59,4 +62,16 @@ public class Match {
             currentPlayer = p1;
         }
     }
+    public boolean checkGameState (){
+        return game.checkGameState();
+    }
+
+    public Player getWinner(){
+        return getOpponent(currentPlayer);
+    }
+
+    public void endGame(){
+        game = null;
+    }
+
 }

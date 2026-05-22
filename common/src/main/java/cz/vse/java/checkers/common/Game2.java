@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Game2 implements IGame {
+    private List<String> gameHistory;
     private List<List<Figure>> board;
     private boolean whiteToMove;
     private static final int BOARD_SIZE = 8;
@@ -12,8 +13,11 @@ public class Game2 implements IGame {
         setPieces();
         whiteToMove = true;
         this.mustTake = mustTake;
+        gameHistory = new ArrayList<>();
+        gameHistory.add(toContent());
     }
     public Game2(String content){
+        gameHistory = new ArrayList<>();
         whiteToMove = true;
         mustTake = false;
         board = new ArrayList<>(BOARD_SIZE);
@@ -79,6 +83,7 @@ public class Game2 implements IGame {
             setPiece(path.getLast(), figure);
             checkPromote(path.getLast());
             whiteToMove = !whiteToMove;
+            gameHistory.add(toContent());
             result = true;
             }
         return result;
@@ -221,7 +226,14 @@ public class Game2 implements IGame {
         }
         return result;
     }
-
+    public String getHistory(int index){
+        String result = new String();
+        if (index < gameHistory.size())
+        {
+            result = gameHistory.get(index);
+        }
+        return result;
+    }
     private boolean requireCaptureMove(){
         boolean result = mustTake;
         if (result){
