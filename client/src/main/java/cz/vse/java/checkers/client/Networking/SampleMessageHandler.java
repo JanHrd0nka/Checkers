@@ -141,10 +141,10 @@ public class SampleMessageHandler extends MessageHandler{
     private void handleState(String content){
         logger.info("Game set up by opponent");
         String[] parts = content.split(", ");
-        boolean color = (parts[0].equals("w"));
-        boolean mustTake = parts[1].equals("must");
-        gameController.setWhite(color);
-        gameController.setMustTake(mustTake);
+//        boolean color = (parts[0].equals("w"));
+//        boolean mustTake = parts[1].equals("must");
+        gameController.setWhite(true);
+        gameController.setMustTake(true);
         setupController.setupGame();
     }
 

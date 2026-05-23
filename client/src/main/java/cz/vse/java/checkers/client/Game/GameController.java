@@ -19,7 +19,7 @@ public class GameController extends Controller{
 
     private final Logger logger = LoggerFactory.getLogger(GameController.class);
 
-    private ResponseManager rm = ResponseManager.getInstance();
+    private final ResponseManager rm = ResponseManager.getInstance();
 
 
     private Game2 game;
@@ -59,7 +59,7 @@ public class GameController extends Controller{
                             // CRITICAL: GUI updates must happen on the main UI thread
                             Platform.runLater(() -> {
                                 if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
-                                    List<Pos> path = new ArrayList<Pos>();
+                                    List<Pos> path = new ArrayList<>();
                                     path.add(from);
                                     path.add(to);
                                     game.makeMove(path);

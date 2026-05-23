@@ -212,7 +212,7 @@ public class ClientHandler implements Runnable {
 
     private void handleMove(String[] tokens) {
         log.info("MOVE request");
-        if (validateGameAndLength(3, tokens)){
+        if (validateGameAndLength(4, tokens)){
             String move = tokens[2];
             boolean isSyntaxValid =
                     move.matches("[0-7]+")

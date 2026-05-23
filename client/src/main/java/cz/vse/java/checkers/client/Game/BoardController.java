@@ -1,14 +1,10 @@
 package cz.vse.java.checkers.client.Game;
 
-import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
-import cz.vse.java.checkers.common.ClientMessage;
 import cz.vse.java.checkers.common.Figure;
 import cz.vse.java.checkers.common.Pos;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -19,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class BoardController {
 
@@ -29,12 +24,6 @@ public class BoardController {
 
     @FXML
     private StackPane boardContainer;
-    @FXML
-    private Button offerMatch;
-    @FXML
-    private Button loginButton;
-    @FXML
-    private TextField loginName;
 
 
 
@@ -159,17 +148,17 @@ public class BoardController {
     }
 
     public void drawPossibleMoves(Pos pos, Figure figure){
-        List<Pos> path = new ArrayList<Pos>();
-        path.add(pos);
         List<List<Pos>> possibleMoves = gameController.getGame().getPossibleMoves(pos);
 
         for(List<Pos> movePath : possibleMoves){
             if(movePath.size() > 1){
-                Pos move = movePath.get(movePath.size() - 1);
-                Rectangle highlight = new Rectangle(60, 60);
-                highlight.setFill(Color.web("#FFFF00", 0.5)); // Semi-transparent yellow
-                checkersBoard.add(highlight, move.y(), move.x());
-                highlight.setOnMouseClicked(event -> handleSquareClick(move));
+                for(Pos move : movePath){
+                    Rectangle highlight = new Rectangle(60, 60);
+                    highlight.setFill(Color.web("#FFFF00", 0.5)); // Semi-transparent yellow
+                    checkersBoard.add(highlight, move.y(), move.x());
+                    highlight.setOnMouseClicked(event -> handleSquareClick(move));
+                }
+
             }
         }
 //        for (Pos move : possibleMoves) {
