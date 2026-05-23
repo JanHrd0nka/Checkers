@@ -17,6 +17,7 @@ import javafx.scene.shape.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -47,7 +48,6 @@ public class BoardController {
         logger.info("Initializing game.");
         checkersBoard = new GridPane();
         gameController = new GameController(this);
-        gameController.setupStartingPositions();
 
         logger.info("Drawing starting position.");
         drawPieces();
@@ -159,15 +159,25 @@ public class BoardController {
     }
 
     public void drawPossibleMoves(Pos pos, Figure figure){
-        List<Pos> possibleMoves = gameController.getGame().getPossibleMoves(pos);
+        List<Pos> path = new ArrayList<Pos>();
+        path.add(pos);
+        List<List<Pos>> possibleMoves = gameController.getGame().getPossibleMoves(pos);
 
-
-        for (Pos move : possibleMoves) {
-            Rectangle highlight = new Rectangle(60, 60);
-            highlight.setFill(Color.web("#FFFF00", 0.5)); // Semi-transparent yellow
-            checkersBoard.add(highlight, move.y(), move.x());
-            highlight.setOnMouseClicked(event -> handleSquareClick(move));
+        for(List<Pos> movePath : possibleMoves){
+            if(movePath.size() > 1){
+                Pos move = movePath.get(movePath.size() - 1);
+                Rectangle highlight = new Rectangle(60, 60);
+                highlight.setFill(Color.web("#FFFF00", 0.5)); // Semi-transparent yellow
+                checkersBoard.add(highlight, move.y(), move.x());
+                highlight.setOnMouseClicked(event -> handleSquareClick(move));
+            }
         }
+//        for (Pos move : possibleMoves) {
+//            Rectangle highlight = new Rectangle(60, 60);
+//            highlight.setFill(Color.web("#FFFF00", 0.5)); // Semi-transparent yellow
+//            checkersBoard.add(highlight, move.y(), move.x());
+//            highlight.setOnMouseClicked(event -> handleSquareClick(move));
+//        }
     }
 
     private void handleSquareClick(Pos pos) {

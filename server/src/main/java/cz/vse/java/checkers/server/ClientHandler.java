@@ -205,7 +205,7 @@ public class ClientHandler implements Runnable {
             }
             match.setUp(time, white, isMust);
             send(ServerMessage.OK, tokens[1]);
-            send(ServerMessage.STATE, tokens[1]);
+            send(ServerMessage.STATE, "server-id");
             opponent.getClientHandler().send(ServerMessage.STATE, "server-id");
         }
     }

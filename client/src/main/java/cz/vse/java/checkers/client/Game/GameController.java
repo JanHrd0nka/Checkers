@@ -8,6 +8,8 @@ import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +22,7 @@ public class GameController extends Controller{
     private ResponseManager rm = ResponseManager.getInstance();
 
 
-    private Game game;
+    private Game2 game;
     private SampleMessageHandler handler;
     private BoardController board;
     private boolean isWhite;
@@ -32,7 +34,7 @@ public class GameController extends Controller{
     private int selectedCol = -1;
 
     public GameController(BoardController board) {
-        this.game = new Game(mustTake);
+        this.game = new Game2(mustTake);
         this.board = board;
         this.handler = Connection.getInstance().getHandler();
     }
@@ -46,11 +48,6 @@ public class GameController extends Controller{
         this.mustTake = mustTake;
     }
 
-    public void setupStartingPositions() {
-        logger.info("Setting up starting position.");
-        game.setPieces();
-    }
-
     public void movePiece(Pos from, Pos to){
         if(from != null && to != null){
             String UID = generateID();
@@ -62,7 +59,10 @@ public class GameController extends Controller{
                             // CRITICAL: GUI updates must happen on the main UI thread
                             Platform.runLater(() -> {
                                 if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
-                                    game.movePiece(from, to);
+                                    List<Pos> path = new ArrayList<Pos>();
+                                    path.add(from);
+                                    path.add(to);
+                                    game.makeMove(path);
                                 } else {
                                     logger.info("Invalid move");
                                 }
@@ -82,13 +82,16 @@ public class GameController extends Controller{
 
     public void moveOpponentPiece(Pos from, Pos to){
         if(from != null && to != null){
-            game.movePiece(from, to);
+            List<Pos> path = new ArrayList<Pos>();
+            path.add(from);
+            path.add(to);
+            game.makeMove(path);
             board.drawPieces();
         }
     }
 
     public boolean isPlayerTurn(){
-        return game.getWhiteToMove() == isWhite;
+        return game.isWhiteToMove() == isWhite;
     }
 
 
@@ -96,7 +99,7 @@ public class GameController extends Controller{
 
 
 
-    public Game getGame() {
+    public Game2 getGame() {
         return game;
     }
 
