@@ -62,6 +62,7 @@ public class SetupController extends Controller{
                             Platform.runLater(() -> {
                                 if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
                                     log.info("Setup successful, moving to game scene.");
+                                    handler.getGameController().setWhite(true); //temporary solution -- remove for production
                                     Stage stage = (Stage) confirmBtn.getScene().getWindow();
                                     stage.setScene(nextScene);
                                 } else {

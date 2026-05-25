@@ -72,6 +72,7 @@ public class SampleMessageHandler extends MessageHandler{
         logger.info("Server message: {}",msg);
         String content = msg.getContent();
         content = StringUtils.substringBetween(content, "[", "]");
+        String ID = msg.getID();
 
 
         switch (ServerMessage.valueOf(msg.getToken())){
@@ -79,11 +80,11 @@ public class SampleMessageHandler extends MessageHandler{
             case PLAYERS_WAITING -> updateWaitingRoom(content);
             case MATCH -> updateRequestingMatches(content);
             case SETUP -> setUpMatch(content);
-            case MOVED -> updateBoardState(content);
             case UNMATCH -> unmatchPlayer(content);
-            case STATE -> handleState(content);
+            case STATE -> handleState(content, ID);
+            case RESULT -> handleResult(content);
         }
-        rm.dispatchResponse(msg.getID(), msg);
+        rm.dispatchResponse(ID, msg);
 
     }
 
@@ -138,14 +139,28 @@ public class SampleMessageHandler extends MessageHandler{
         waitingRoomController.updateRequestingMatches(content, true);
     }
 
-    private void handleState(String content){
+    private void handleState(String content, String ID){
         logger.info("Game set up by opponent");
         String[] parts = content.split(", ");
-//        boolean color = (parts[0].equals("w"));
-//        boolean mustTake = parts[1].equals("must");
-        gameController.setWhite(true);
-        gameController.setMustTake(true);
-        setupController.setupGame();
+        if(ID.equalsIgnoreCase("match-setup")){
+            int time = Integer.parseInt(parts[0]);
+            boolean isWhite = parts[1].equalsIgnoreCase("true");
+            boolean mustTake = parts[2].equalsIgnoreCase("true");
+            gameController.setWhite(isWhite);
+            gameController.setMustTake(mustTake);
+            setupController.setupGame();
+        } else if (ID.equalsIgnoreCase("op-moved")) {
+            gameController.updateBoard(content);
+        }
+    }
+
+    private void handleResult(String content){
+        boolean isWin = content.split(", ")[0].equals(connection.getName());
+        gameController.showResult(isWin);
+    }
+
+    public GameController getGameController(){
+        return gameController;
     }
 
 

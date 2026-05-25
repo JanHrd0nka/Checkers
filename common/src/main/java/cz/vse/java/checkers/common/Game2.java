@@ -68,9 +68,34 @@ public class Game2 implements IGame {
 
         return sb.toString();
     }
+
+    public boolean updateBoard(String state){
+        if(state.length() == 64) {
+            for (int i = 0; i < 64; ++i) {
+                int x = i % 8;
+                int y = 7 - (i / 8);
+                char charFigure = state.charAt(i);
+                Figure figure;
+                switch (charFigure) {
+                    case '1' -> figure = Figure.WHITE_MAN;
+                    case '2' -> figure = Figure.WHITE_KING;
+                    case '3' -> figure = Figure.BLACK_MAN;
+                    case '4' -> figure = Figure.BLACK_KING;
+                    default -> figure = Figure.NONE;
+                }
+                setPiece(new Pos(x, y), figure);
+            }
+            whiteToMove = !whiteToMove;
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+
     public boolean makeMove(List<Pos> path){
         boolean result = false;
-        if (path.size() >= 2 && (getPossibleMoves(path.getFirst()).contains(path.subList(1, path.size() - 1)))) {
+        if (path.size() >= 2 && (getPossibleMoves(path.getFirst()).contains(path))) {
             Pos from = path.getFirst();
             var figure = setPiece(from, Figure.NONE);
             if (from.isCaptureMove(path.get(1))) {
@@ -106,7 +131,7 @@ public class Game2 implements IGame {
             for (Pos direction : directions){
                 exploreDirection(new ArrayList<>(List.of(pos)), direction, directions, result, new ArrayList<>());
             }
-            trimPossibleMoves(result);
+            //trimPossibleMoves(result);
         }
         return result;
     }
@@ -114,7 +139,7 @@ public class Game2 implements IGame {
     private void trimPossibleMoves(List<List<Pos>> moves){
         moves.removeIf(move -> move.size() <= 1);
         if (requireCaptureMove()){
-            moves.removeIf(move -> move.getFirst().isCaptureMove(move.get(1)));
+            moves.removeIf(move -> !move.getFirst().isCaptureMove(move.get(1)));
         }
         for (List<Pos> move : moves) {
             move.removeFirst();
@@ -160,10 +185,10 @@ public class Game2 implements IGame {
         }
         else if (getPiece(pos) == Figure.WHITE_MAN){
             result.add(new Pos(-1, 1));
-            result.add(new Pos(1, 1));
-        }
-        else if (getPiece(pos) == Figure.WHITE_MAN){
             result.add(new Pos(-1, -1));
+        }
+        else if (getPiece(pos) == Figure.BLACK_MAN){
+            result.add(new Pos(1, 1));
             result.add(new Pos(1, -1));
         }
         return result;

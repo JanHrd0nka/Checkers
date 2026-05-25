@@ -205,14 +205,14 @@ public class ClientHandler implements Runnable {
             }
             match.setUp(time, white, isMust);
             send(ServerMessage.OK, tokens[1]);
-            send(ServerMessage.STATE, "server-id");
-            opponent.getClientHandler().send(ServerMessage.STATE, "server-id");
+            send(ServerMessage.STATE, "match-setup " + time + " " + isW + " " + isMust);
+            opponent.getClientHandler().send(ServerMessage.STATE, "match-setup " + time + " " + !isW + " " + isMust);
         }
     }
 
     private void handleMove(String[] tokens) {
         log.info("MOVE request");
-        if (validateGameAndLength(4, tokens)){
+        if (validateGameAndLength(3, tokens)){
             String move = tokens[2];
             boolean isSyntaxValid =
                     move.matches("[0-7]+")
@@ -231,7 +231,7 @@ public class ClientHandler implements Runnable {
                     String currentState = match.getGameContent();
                     send(ServerMessage.OK, tokens[1]);
                     send(ServerMessage.STATE, "server-id " + currentState);
-                    match.getOpponent (player).getClientHandler().send(ServerMessage.STATE, "server-id " + currentState);
+                    match.getOpponent (player).getClientHandler().send(ServerMessage.STATE, "op-moved " + currentState);
                     if (!match.checkGameState()){
                         Player winner = match.getWinner();
                         winner.incrementScore();

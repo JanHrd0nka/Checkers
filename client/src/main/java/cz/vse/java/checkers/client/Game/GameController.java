@@ -25,8 +25,8 @@ public class GameController extends Controller{
     private Game2 game;
     private SampleMessageHandler handler;
     private BoardController board;
-    private boolean isWhite;
-    private boolean mustTake;
+    public boolean isWhite = false;
+    private boolean mustTake = true;
 
 
     // Variables to remember which piece the user clicked
@@ -51,8 +51,8 @@ public class GameController extends Controller{
     public void movePiece(Pos from, Pos to){
         if(from != null && to != null){
             String UID = generateID();
-            boolean result = handler.send(ClientMessage.MOVE, UID, from.x() + "," + from.y() +
-                    " " + to.x() + "," + to.y());
+            boolean result = handler.send(ClientMessage.MOVE, UID, from.x() + ""+ from.y() +
+                    "" + to.x() + "" + to.y());
             if(result){
                 CompletableFuture<Message> responseFuture = rm.registerRequest(UID);
                 responseFuture.thenAccept(response -> {
@@ -63,6 +63,7 @@ public class GameController extends Controller{
                                     path.add(from);
                                     path.add(to);
                                     game.makeMove(path);
+                                    logger.info("Move successful");
                                 } else {
                                     logger.info("Invalid move");
                                 }
@@ -98,6 +99,11 @@ public class GameController extends Controller{
     // 3. Read the data array and draw the pieces (The View)
 
 
+    public void updateBoard(String content){
+        game.updateBoard(content);
+        board.drawPieces();
+    }
+
 
     public Game2 getGame() {
         return game;
@@ -120,4 +126,7 @@ public class GameController extends Controller{
     }
 
 
+    public void showResult(boolean isWin) {
+        board.showResultDialog(isWin);
+    }
 }

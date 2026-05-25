@@ -5,6 +5,8 @@ import cz.vse.java.checkers.common.Pos;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -15,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class BoardController {
 
@@ -58,7 +61,7 @@ public class BoardController {
                 }
                 checkersBoard.add(square, col, row);
 
-                final Pos pos = new Pos(row, col);
+                final Pos pos = new Pos(col, row);
 
                 square.setOnMouseClicked(event -> {
                     handleSquareClick(pos);
@@ -142,22 +145,20 @@ public class BoardController {
             gameController.setSelectedCol(clickedPos.y());
 
             drawPieces();
-            drawPossibleMoves(clickedPos, figure);
+            drawPossibleMoves(clickedPos);
         }
 
     }
 
-    public void drawPossibleMoves(Pos pos, Figure figure){
+    public void drawPossibleMoves(Pos pos){
         List<List<Pos>> possibleMoves = gameController.getGame().getPossibleMoves(pos);
 
         for(List<Pos> movePath : possibleMoves){
             if(movePath.size() > 1){
-                for(Pos move : movePath){
                     Rectangle highlight = new Rectangle(60, 60);
                     highlight.setFill(Color.web("#FFFF00", 0.5)); // Semi-transparent yellow
-                    checkersBoard.add(highlight, move.y(), move.x());
-                    highlight.setOnMouseClicked(event -> handleSquareClick(move));
-                }
+                    checkersBoard.add(highlight, movePath.getLast().y(), movePath.getLast().x());
+                    highlight.setOnMouseClicked(event -> handleSquareClick(movePath.getLast()));
 
             }
         }
@@ -190,5 +191,49 @@ public class BoardController {
 
     public GameController getGameController() {
         return gameController;
+    }
+
+    public void showResultDialog(boolean isWin) {
+        String title = isWin ? "Výhra" : "Prohra";
+        String header = isWin ? "Gratulace!" : "Bohužel...";
+        String content = isWin ? "Vyhráli jste zápas." : "Prohráli jste zápas.";
+
+        // vytvoříme dialog s dvěma vlastním tlačítky
+        ButtonType backButton = new ButtonType("Back to waiting room");
+        ButtonType rematchButton = new ButtonType("Offer rematch");
+        Alert alert = new Alert(Alert.AlertType.NONE, content, backButton, rematchButton);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+
+        Optional<ButtonType> result = alert.showAndWait();
+//        if (result.isPresent()) {
+//            if (result.get() == backButton) {
+//                // Přepnout scénu zpět do waiting room. Načteme FXML a nastavíme novou scénu.
+//                try {
+//                    FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("waitingRoom-view.fxml"));
+//                    Parent root = loader.load();
+//                    Scene scene = new Scene(root, 400, 300); // velikost stejná jako v HelloApplication
+//                    Stage stage = (Stage) boardContainer.getScene().getWindow();
+//                    stage.setScene(scene);
+//                } catch (IOException e) {
+//                    logger.error("Nelze načíst waitingRoom-view.fxml", e);
+//                }
+//            } else if (result.get() == rematchButton) {
+//                // Požádej server o rematch — pošleme jednoduchý REPLAY požadavek.
+//                // Pokud chcete, můžete zde poslat i jméno soupeře jako obsah.
+//                SampleMessageHandler handler = Connection.getInstance().getHandler();
+//                if (handler != null) {
+//                    String uid = UUID.randomUUID().toString();
+//                    boolean sent = handler.send(ClientMessage.REPLAY, uid, "");
+//                    if (!sent) {
+//                        logger.warn("Nepodařilo se odeslat rematch request");
+//                    } else {
+//                        logger.info("Odeslán rematch request (UID={})", uid);
+//                    }
+//                } else {
+//                    logger.warn("Message handler není dostupný, nelze odeslat rematch");
+//                }
+//            }
+//        }
     }
 }
