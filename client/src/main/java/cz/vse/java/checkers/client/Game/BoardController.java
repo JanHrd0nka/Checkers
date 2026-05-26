@@ -1,5 +1,8 @@
 package cz.vse.java.checkers.client.Game;
 
+import cz.vse.java.checkers.client.Networking.Connection;
+import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
+import cz.vse.java.checkers.common.ClientMessage;
 import cz.vse.java.checkers.common.Figure;
 import cz.vse.java.checkers.common.Pos;
 import javafx.fxml.FXML;
@@ -15,11 +18,12 @@ import javafx.scene.shape.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class BoardController {
+public class BoardController extends Controller {
 
     private final Logger logger = LoggerFactory.getLogger(BoardController.class);
 
@@ -33,18 +37,25 @@ public class BoardController {
     private GridPane checkersBoard;
 
 
-
-
-    @FXML
-    public void initialize() {
-        logger.info("Initializing game.");
+    public void createNewGame(){
         checkersBoard = new GridPane();
-        gameController = new GameController(this);
+        if(gameController == null){
+            gameController = new GameController(this);
+        }else{
+            gameController.setupNewGame();
+        }
 
         logger.info("Drawing starting position.");
         drawPieces();
 
         boardContainer.getChildren().add(checkersBoard);
+    }
+
+
+    @FXML
+    public void initialize() {
+        logger.info("Initializing game.");
+        createNewGame();
 
 
     }
@@ -206,34 +217,30 @@ public class BoardController {
         alert.setHeaderText(header);
 
         Optional<ButtonType> result = alert.showAndWait();
-//        if (result.isPresent()) {
-//            if (result.get() == backButton) {
-//                // Přepnout scénu zpět do waiting room. Načteme FXML a nastavíme novou scénu.
-//                try {
-//                    FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("waitingRoom-view.fxml"));
-//                    Parent root = loader.load();
-//                    Scene scene = new Scene(root, 400, 300); // velikost stejná jako v HelloApplication
-//                    Stage stage = (Stage) boardContainer.getScene().getWindow();
-//                    stage.setScene(scene);
-//                } catch (IOException e) {
-//                    logger.error("Nelze načíst waitingRoom-view.fxml", e);
-//                }
-//            } else if (result.get() == rematchButton) {
-//                // Požádej server o rematch — pošleme jednoduchý REPLAY požadavek.
-//                // Pokud chcete, můžete zde poslat i jméno soupeře jako obsah.
-//                SampleMessageHandler handler = Connection.getInstance().getHandler();
-//                if (handler != null) {
-//                    String uid = UUID.randomUUID().toString();
-//                    boolean sent = handler.send(ClientMessage.REPLAY, uid, "");
-//                    if (!sent) {
-//                        logger.warn("Nepodařilo se odeslat rematch request");
-//                    } else {
-//                        logger.info("Odeslán rematch request (UID={})", uid);
-//                    }
-//                } else {
-//                    logger.warn("Message handler není dostupný, nelze odeslat rematch");
-//                }
-//            }
-//        }
+        if (result.isPresent()) {
+            if (result.get() == backButton) {
+                // Přepnout scénu zpět do waiting room. Načteme FXML a nastavíme novou scénu.
+                gameController.returnToWaitingRoom();
+            } else if (result.get() == rematchButton) {
+                // Požádej server o rematch — pošleme jednoduchý REPLAY požadavek.
+                // Pokud chcete, můžete zde poslat i jméno soupeře jako obsah.
+                SampleMessageHandler handler = Connection.getInstance().getHandler();
+                if (handler != null) {
+                    String UID = generateID();
+                    boolean sent = handler.send(ClientMessage.REPLAY, UID, "");
+                    if (!sent) {
+                        logger.warn("Nepodařilo se odeslat rematch request");
+                    } else {
+                        logger.info("Odeslán rematch request (UID={})", UID);
+                    }
+                } else {
+                    logger.warn("Message handler není dostupný, nelze odeslat rematch");
+                }
+            }
+        }
+    }
+
+    public Object getScene() {
+        return checkersBoard.getScene().getWindow();
     }
 }

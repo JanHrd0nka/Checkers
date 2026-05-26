@@ -148,27 +148,29 @@ public class Game2 implements IGame {
 
     private void exploreDirection(List<Pos> path, Pos direction, List<Pos> possibleDirections, List<List<Pos>> out, List<Pos> capturedPieces){
         Pos newPos = path.getLast().add(direction);
-        if ((getPiece(newPos) == Figure.NONE || capturedPieces.contains(newPos))){
-            if (path.size() == 1)
-            {
-                path.add(newPos);
-                out.add(path);
+        if(isValidMove(newPos)){
+            if ((getPiece(newPos) == Figure.NONE || capturedPieces.contains(newPos))){
+                if (path.size() == 1)
+                {
+                    path.add(newPos);
+                    out.add(path);
+                }
             }
-        }
-        else if (isOppositeColor(newPos) && !capturedPieces.contains(newPos)){
-            Pos newPos2 = newPos.add(direction);
-            if (getPiece(newPos2) == Figure.NONE || capturedPieces.contains(newPos2)){
-                capturedPieces.add(newPos);
-                path.add(newPos2);
-                out.add(path);
-                // explore other options
-                for (Pos possibleDirection : possibleDirections){
-                    if (!newPos2.add(possibleDirection).equals(newPos)){
-                        exploreDirection(new ArrayList<>(path),
-                                            possibleDirection,
-                                            possibleDirections,
-                                            out,
-                                            new ArrayList<>(capturedPieces));
+            else if (isOppositeColor(newPos) && !capturedPieces.contains(newPos)){
+                Pos newPos2 = newPos.add(direction);
+                if (getPiece(newPos2) == Figure.NONE || capturedPieces.contains(newPos2)){
+                    capturedPieces.add(newPos);
+                    path.add(newPos2);
+                    out.add(path);
+                    // explore other options
+                    for (Pos possibleDirection : possibleDirections){
+                        if (!newPos2.add(possibleDirection).equals(newPos)){
+                            exploreDirection(new ArrayList<>(path),
+                                                possibleDirection,
+                                                possibleDirections,
+                                                out,
+                                                new ArrayList<>(capturedPieces));
+                        }
                     }
                 }
             }
@@ -232,11 +234,11 @@ public class Game2 implements IGame {
     }
 
     private void checkPromote(Pos pos){
-        if (pos.y() == 0 && getPiece(pos) == Figure.BLACK_MAN){
-            setPiece(pos, Figure.BLACK_KING);
-        }
-        else if ((pos.y() == BOARD_SIZE - 1) && getPiece(pos) == Figure.WHITE_MAN){
+        if (pos.x() == 0 && getPiece(pos) == Figure.WHITE_MAN){
             setPiece(pos, Figure.WHITE_KING);
+        }
+        else if ((pos.x() == BOARD_SIZE - 1) && getPiece(pos) == Figure.BLACK_MAN){
+            setPiece(pos, Figure.BLACK_KING);
         }
     }
     public boolean checkGameState(){
@@ -277,6 +279,13 @@ public class Game2 implements IGame {
         }
         return result;
     }
+
+    private boolean isValidMove(Pos pos){
+        boolean row_result = pos.x() >= 0 && pos.x() < BOARD_SIZE;
+        boolean col_result = pos.y() >= 0 && pos.y() < BOARD_SIZE;
+        return row_result && col_result;
+    }
+
 
     public boolean isWhiteToMove(){
         return whiteToMove;

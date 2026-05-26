@@ -66,6 +66,8 @@ public class WaitingRoomController extends Controller{
             if(!Objects.equals(name, Connection.getInstance().getName())){
                 if (unmatch){
                  requestingMatches.remove(name);
+                 playersAvailable.remove(name);
+                 availablePlayersList.getItems().remove(name);
                  playersRequestingList.getItems().remove(name);
                 } else{
                     requestingMatches.add(name);

@@ -17,7 +17,18 @@ public class Match {
         p2.setMatch(this);
     }
     public synchronized void setUp(int time, Player white, boolean mustTake){
-        game = new Game2(mustTake);
+        //game = new Game2(mustTake);
+        //test
+        game = new Game2("""
+        0 0 0 0 0 0 0 0
+        0 0 4 0 3 0 0 0
+        0 0 0 0 0 0 0 0
+        0 0 4 0 3 0 0 0
+        0 0 0 2 0 0 0 0
+        0 0 0 0 0 0 0 0
+        0 0 0 0 0 0 0 0
+        0 0 0 0 0 0 0 0
+        """.replace("\n", "").replace(" ", ""));
         currentPlayer = white;
     }
 

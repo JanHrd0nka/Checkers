@@ -84,7 +84,7 @@ public class ClientHandler implements Runnable {
                 case DRAW -> handleDraw();
                 case SURRENDER -> handleSurrender();
                 case QUIT -> disconnect();
-                case JOIN_WAITING_ROOM -> handleJoinWaitingRoom();
+                case JOIN_WAITING_ROOM -> handleJoinWaitingRoom(tokens);
                 case REPLAY -> handleReplay(tokens);
 
                 default -> log.warn("Unhandled message: {}", type);
@@ -205,7 +205,7 @@ public class ClientHandler implements Runnable {
             }
             match.setUp(time, white, isMust);
             send(ServerMessage.OK, tokens[1]);
-            send(ServerMessage.STATE, "match-setup " + time + " " + isW + " " + isMust);
+            send(ServerMessage.STATE, "server-id " + time + " " + isW + " " + isMust);
             opponent.getClientHandler().send(ServerMessage.STATE, "match-setup " + time + " " + !isW + " " + isMust);
         }
     }
@@ -280,9 +280,31 @@ public class ClientHandler implements Runnable {
         log.info("SURRENDER request");
     }
 
-    private void handleJoinWaitingRoom() {
+    private void handleJoinWaitingRoom(String[] tokens) {
         log.info("JOIN WAITING ROOM");
         //server.addToWaitingRoom(this);
+        if (validateLenght(3, tokens))
+        {
+            var wr = server.getWaitingRoom();
+            boolean success = true;
+            if (player == null){
+                player = wr.addPlayer(tokens[2], this);
+                if (player == null) {
+                    success = false;
+                }
+            }
+            else{
+                success = wr.renamePlayer(player, tokens[2]);
+                player.setMatch(null);
+            }
+            if (success){
+                send(ServerMessage.OK, tokens[1]);
+                server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
+            }
+            else{
+                send(ServerMessage.ERROR, tokens[1] + " Jmeno_obsazeno");
+            }
+        }
     }
 
     private void handleReplay(String[] tokens) {

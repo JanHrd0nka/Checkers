@@ -146,9 +146,7 @@ public class SampleMessageHandler extends MessageHandler{
             int time = Integer.parseInt(parts[0]);
             boolean isWhite = parts[1].equalsIgnoreCase("true");
             boolean mustTake = parts[2].equalsIgnoreCase("true");
-            gameController.setWhite(isWhite);
-            gameController.setMustTake(mustTake);
-            setupController.setupGame();
+            setupController.setupGame(isWhite, mustTake);
         } else if (ID.equalsIgnoreCase("op-moved")) {
             gameController.updateBoard(content);
         }

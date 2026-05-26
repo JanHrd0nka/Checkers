@@ -5,6 +5,8 @@ import cz.vse.java.checkers.client.Networking.ResponseManager;
 import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
 import cz.vse.java.checkers.common.*;
 import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +27,10 @@ public class GameController extends Controller{
     private Game2 game;
     private SampleMessageHandler handler;
     private BoardController board;
-    public boolean isWhite = false;
+    public boolean isWhite;
     private boolean mustTake = true;
+
+    private Scene WR;
 
 
     // Variables to remember which piece the user clicked
@@ -34,9 +38,25 @@ public class GameController extends Controller{
     private int selectedCol = -1;
 
     public GameController(BoardController board) {
-        this.game = new Game2(mustTake);
+        setupNewGame();
         this.board = board;
         this.handler = Connection.getInstance().getHandler();
+    }
+
+    protected void setupNewGame(){
+        //this.game = new Game2(mustTake);
+        //test
+
+        this.game = new Game2("""
+        0 0 0 0 0 0 0 0
+        0 0 4 0 3 0 0 0
+        0 0 0 0 0 0 0 0
+        0 0 4 0 3 0 0 0
+        0 0 0 2 0 0 0 0
+        0 0 0 0 0 0 0 0
+        0 0 0 0 0 0 0 0
+        0 0 0 0 0 0 0 0
+        """.replace("\n", "").replace(" ", ""));
     }
 
 
@@ -72,7 +92,7 @@ public class GameController extends Controller{
 
                         }).orTimeout(5, TimeUnit.SECONDS) // Avoid waiting forever if server goes down
                         .exceptionally(ex -> {
-                            Platform.runLater(() -> logger.error("Network timeout while waiting for response from server."));
+                            Platform.runLater(() -> logger.error("Network timeout while waiting for response from server on move command."));
                             return null;
                         });
 
@@ -129,4 +149,45 @@ public class GameController extends Controller{
     public void showResult(boolean isWin) {
         board.showResultDialog(isWin);
     }
+
+    public void returnToWaitingRoom() {
+        board.createNewGame();
+        try{
+            String name = Connection.getInstance().getName();
+            logger.info("Sending join waiting room message with name: {}", name);
+            String UID = generateID();
+            boolean result = handler.send(ClientMessage.JOIN_WAITING_ROOM, UID, name);
+            if(result){
+                CompletableFuture<Message> responseFuture = rm.registerRequest(UID);
+                // 3. Handle the response whenever it arrives without blocking the UI
+                responseFuture.thenAccept(response -> {
+                            // CRITICAL: GUI updates must happen on the main UI thread
+                            Platform.runLater(() -> {
+                                if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
+                                    Stage stage = (Stage) board.getScene();
+                                    stage.setScene(WR);
+                                } else {
+                                    logger.error("Invalid credentials");
+                                }
+                            });
+
+                        }).orTimeout(5, TimeUnit.SECONDS) // Avoid waiting forever if server goes down
+                        .exceptionally(ex -> {
+                            Platform.runLater(() -> logger.error("Network timeout while waiting for response from server on join waiting room command."));
+                            return null;
+                        });
+            }
+        } catch (Exception e){
+            logger.info("Failed to send join waiting room message", e);
+        }
+    }
+
+
+    public void setWR(Scene wr){
+        if(wr != null){
+            this.WR = wr;
+        }
+    }
+
+
 }
