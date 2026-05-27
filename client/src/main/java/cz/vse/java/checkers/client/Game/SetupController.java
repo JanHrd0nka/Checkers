@@ -1,8 +1,9 @@
 package cz.vse.java.checkers.client.Game;
 
+import cz.vse.java.checkers.client.Networking.MessageEventBus;
+import cz.vse.java.checkers.client.Networking.MessageListeners.SetupListener;
 import cz.vse.java.checkers.client.Networking.Connection;
-import cz.vse.java.checkers.client.Networking.ResponseManager;
-import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
+import cz.vse.java.checkers.client.Networking.MessageHandler;
 import cz.vse.java.checkers.common.ClientMessage;
 import cz.vse.java.checkers.common.Message;
 import cz.vse.java.checkers.common.ServerMessage;
@@ -11,8 +12,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,31 +20,41 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class SetupController extends Controller{
-
+/** * SetupController implementuje SetupListener. */
+public class SetupController extends Controller implements SetupListener {
     private static final Logger log = LoggerFactory.getLogger(SetupController.class);
-    private SampleMessageHandler handler;
 
-    private ResponseManager rm = ResponseManager.getInstance();
-
-
-    Scene nextScene;
+    private final MessageHandler handler = Connection.getInstance().getHandler();
+    private final MessageEventBus eventBus = MessageEventBus.getInstance();
 
     @FXML
     private CheckBox colorBox;
+
     @FXML
     private CheckBox takeBox;
+
     @FXML
     private Button confirmBtn;
 
-
     @FXML
     private void initialize() {
-        handler = Connection.getInstance().getHandler();
         confirmBtn.setOnAction(event -> confirm());
+        eventBus.registerSetupListener(this);
     }
 
-    public void confirm(){
+    public void cleanup() {
+        eventBus.unregisterSetupListener(this);
+    }
+
+    @Override
+    public void onSetupReceived(int time, boolean isWhite, boolean mustTake) {
+        Platform.runLater(() -> {
+            log.info("Setup received from opponent: white={}, mustTake={}", isWhite, mustTake);
+            setupGame(isWhite, mustTake);
+        });
+    }
+
+    private void confirm() {
         boolean isWhite = colorBox.isSelected();
         boolean mustTake = takeBox.isSelected();
         StringBuilder sb = new StringBuilder();
@@ -53,6 +62,7 @@ public class SetupController extends Controller{
         sb.append("60 ");
         sb.append(isWhite ? "w " : "b ");
         sb.append(mustTake ? "must" : "no");
+
         try {
             boolean result = handler.send(ClientMessage.SETUP, UID, sb.toString());
             if (result) {
@@ -61,41 +71,43 @@ public class SetupController extends Controller{
                 responseFuture.thenAccept(response -> {
                             Platform.runLater(() -> {
                                 if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
-                                    log.info("Setup successful, moving to game scene.");
+                                    log.info("Setup confirmed by server");
                                     setupGame(isWhite, mustTake);
                                 } else {
-                                    log.info("Setup failed: " + response.getContent());
+                                    log.error("Setup failed: {}", response.getContent());
+                                    resetUI();
                                 }
-
                             });
-                        }).orTimeout(5, TimeUnit.SECONDS) // Avoid waiting forever if server goes down
+                        })
+                        .orTimeout(5, TimeUnit.SECONDS)
                         .exceptionally(ex -> {
-                            Platform.runLater(() -> log.error("Network timeout while waiting for response from server."));
+                            Platform.runLater(() -> {
+                                log.error("Setup timeout");
+                                confirmBtn.setDisable(false);
+                            });
                             return null;
                         });
-
-                colorBox.setSelected(false);
-                takeBox.setSelected(false);
-                confirmBtn.setDisable(false);
             }
         } catch (Exception e) {
-            log.error("Error sending setup message: ", e);
+            log.error("Error sending setup: ", e);
+            confirmBtn.setDisable(false);
         }
-
-
-
-
     }
 
-    public void setupGame(boolean isWhite, boolean mustTake){
-        handler.getGameController().setWhite(isWhite);
-        handler.getGameController().setMustTake(mustTake);
+    private void setupGame(boolean isWhite, boolean mustTake) {
+        eventBus.publishGameSetup(60, isWhite, mustTake);
+        resetUI();
         Stage stage = (Stage) confirmBtn.getScene().getWindow();
-        stage.setScene(nextScene);
+        stage.setScene(getNextScene());
     }
 
-
-    public void setNextScene(Scene nextScene) {
-        this.nextScene = nextScene;
+    private void resetUI() {
+        Platform.runLater(() -> {
+            colorBox.setSelected(false);
+            takeBox.setSelected(false);
+            confirmBtn.setDisable(false);
+            log.debug("Setup UI reset");
+        });
     }
+
 }

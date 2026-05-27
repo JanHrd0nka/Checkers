@@ -11,4 +11,6 @@ module cz.vse.java.checkers.client {
     exports cz.vse.java.checkers.client.Networking to javafx.graphics;
     exports cz.vse.java.checkers.client.Game to javafx.fxml, javafx.graphics;
     opens cz.vse.java.checkers.client.Networking to javafx.fxml;
+    exports cz.vse.java.checkers.client.Networking.MessageListeners to javafx.graphics;
+    opens cz.vse.java.checkers.client.Networking.MessageListeners to javafx.fxml;
 }

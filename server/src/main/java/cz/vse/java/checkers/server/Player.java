@@ -11,8 +11,6 @@ public class Player {
     private String name;
     private boolean isInWaitingRoom = false;
 
-    //private int score;
-
     private final Map<String, Integer> opponentScores;
 
     public Player (ClientHandler clientHandler){

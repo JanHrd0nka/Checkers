@@ -1,17 +1,13 @@
 package cz.vse.java.checkers.client.Networking;
 
 import cz.vse.java.checkers.common.ClientMessage;
-import cz.vse.java.checkers.common.Message;
-import cz.vse.java.checkers.common.ServerMessage;
 import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.*;
 
 public class Connection {
@@ -21,14 +17,13 @@ public class Connection {
     private final Logger log = LoggerFactory.getLogger(Connection.class);
     Set<MessageHandler> messageHandlers = new CopyOnWriteArraySet<>();
     private final BlockingQueue<String> sendQueue = new LinkedBlockingQueue<>();
-    private final BlockingQueue<String> receiveQueue = new LinkedBlockingQueue<>();
     private final String stopMessage = "__QUIT__";
     private Thread writerThread;
     private Thread readerThread;
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
-    private SampleMessageHandler messageHandler;
+    private MessageHandler messageHandler;
 
 
     private String name;
@@ -58,7 +53,7 @@ public class Connection {
 
 
 
-    public void addMessageHandler(SampleMessageHandler handler){
+    public void addMessageHandler(MessageHandler handler){
         messageHandlers.add(handler);
         messageHandler = handler;
     }
@@ -66,7 +61,7 @@ public class Connection {
         messageHandlers.remove(handler);
     }
 
-    public SampleMessageHandler getHandler(){
+    public MessageHandler getHandler(){
         return messageHandler;
     }
 

@@ -1,8 +1,9 @@
 package cz.vse.java.checkers.client.Game;
 
+import cz.vse.java.checkers.client.Networking.MessageListeners.GameListener;
+import cz.vse.java.checkers.client.Networking.MessageEventBus;
 import cz.vse.java.checkers.client.Networking.Connection;
-import cz.vse.java.checkers.client.Networking.ResponseManager;
-import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
+import cz.vse.java.checkers.client.Networking.MessageHandler;
 import cz.vse.java.checkers.common.*;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -15,128 +16,65 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-public class GameController extends Controller{
+/** * GameController - spravuje herní logiku a interakci se serverem. * Implementuje GameListener pro příjem event notifikací. * Oddělena logika pro game state (GameStateManager) a scény (SceneNavigator). */
+public class GameController extends Controller implements GameListener {
 
-    private final Logger logger = LoggerFactory.getLogger(GameController.class);
+    private static final Logger logger = LoggerFactory.getLogger(GameController.class);
+    private static final int NETWORK_TIMEOUT_SECONDS = 5;
 
-    private final ResponseManager rm = ResponseManager.getInstance();
+    private final MessageHandler handler;
+    private final MessageEventBus eventBus;
+    private final GameStateManager gameStateManager;
+    private final SceneNavigator sceneNavigator;
 
-
-    private Game2 game;
-    private SampleMessageHandler handler;
     private BoardController board;
-    public boolean isWhite;
+
+    // Herní stav
+    private boolean isWhite;
     private boolean mustTake = true;
-
-    private Scene setupScene;
-
-    private Scene WR;
-
-
-    // Variables to remember which piece the user clicked
     private int selectedRow = -1;
     private int selectedCol = -1;
 
+    /**     * Konstruktor - GameController je nyní bez přímé závislosti na MessageHandler     */
     public GameController(BoardController board) {
-        setupNewGame();
         this.board = board;
         this.handler = Connection.getInstance().getHandler();
+        this.eventBus = MessageEventBus.getInstance();
+        this.gameStateManager = new GameStateManager();
+        this.sceneNavigator = new SceneNavigator(board, this);
+
+        gameStateManager.createNewGame();
+        eventBus.registerGameListener(this);
     }
 
-    protected void setupNewGame(){
-        //this.game = new Game2(mustTake);
-        //test
-
-        this.game = new Game2("""
-        0 0 0 0 0 0 0 0
-        0 0 4 0 3 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 4 0 3 0 0 0
-        0 0 0 2 0 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        """.replace("\n", "").replace(" ", ""));
+    /**     * Cleanup - odpojit listener když jde hra skončit     */
+    public void cleanup() {
+        eventBus.unregisterGameListener(this);
     }
 
+    // ===== METHOD DELEGATION =====
+
+    public void setupNewGame() {
+        gameStateManager.createNewGame();
+        board.resetBoardDisplay();
+    }
 
     public void setWhite(boolean white) {
-        isWhite = white;
+        this.isWhite = white;
+        gameStateManager.setIsWhite(white);
     }
 
     public void setMustTake(boolean mustTake) {
         this.mustTake = mustTake;
     }
 
-    public Scene getSetupScene() {
-        return setupScene;
+    public boolean isPlayerTurn() {
+        return gameStateManager.isWhiteToMove() == isWhite;
     }
-
-    public void setSetupScene(Scene setupScene) {
-        this.setupScene = setupScene;
-    }
-
-    public void movePiece(Pos from, Pos to){
-        if(from != null && to != null){
-            String UID = generateID();
-            boolean result = handler.send(ClientMessage.MOVE, UID, from.x() + ""+ from.y() +
-                    "" + to.x() + "" + to.y());
-            if(result){
-                CompletableFuture<Message> responseFuture = rm.registerRequest(UID);
-                responseFuture.thenAccept(response -> {
-                            // CRITICAL: GUI updates must happen on the main UI thread
-                            Platform.runLater(() -> {
-                                if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
-                                    List<Pos> path = new ArrayList<>();
-                                    path.add(from);
-                                    path.add(to);
-                                    game.makeMove(path);
-                                    logger.info("Move successful");
-                                } else {
-                                    logger.info("Invalid move");
-                                }
-                                board.drawPieces();
-                            });
-
-                        }).orTimeout(5, TimeUnit.SECONDS) // Avoid waiting forever if server goes down
-                        .exceptionally(ex -> {
-                            Platform.runLater(() -> logger.error("Network timeout while waiting for response from server on move command."));
-                            return null;
-                        });
-
-
-            }
-        }
-    }
-
-    public void moveOpponentPiece(Pos from, Pos to){
-        if(from != null && to != null){
-            List<Pos> path = new ArrayList<Pos>();
-            path.add(from);
-            path.add(to);
-            game.makeMove(path);
-            board.drawPieces();
-        }
-    }
-
-    public boolean isPlayerTurn(){
-        return game.isWhiteToMove() == isWhite;
-    }
-
-
-    // 3. Read the data array and draw the pieces (The View)
-
-
-    public void updateBoard(String content){
-        game.updateBoard(content);
-        board.drawPieces();
-    }
-
 
     public Game2 getGame() {
-        return game;
+        return gameStateManager.getGame();
     }
 
     public int getSelectedRow() {
@@ -155,55 +93,173 @@ public class GameController extends Controller{
         this.selectedCol = selectedCol;
     }
 
-
-    public void showResult(boolean isWin, String score) {
-        board.showResultDialog(isWin,score);
+    private void resetSelectedPosition() {
+        this.selectedRow = -1;
+        this.selectedCol = -1;
     }
 
-    public void returnToWaitingRoom() {
-        board.createNewGame();
-        try{
-            String name = Connection.getInstance().getName();
-            logger.info("Sending join waiting room message with name: {}", name);
-            String UID = generateID();
-            boolean result = handler.send(ClientMessage.JOIN_WAITING_ROOM, UID, name);
-            if(result){
-                CompletableFuture<Message> responseFuture = rm.registerRequest(UID);
-                // 3. Handle the response whenever it arrives without blocking the UI
-                responseFuture.thenAccept(response -> {
-                            // CRITICAL: GUI updates must happen on the main UI thread
-                            Platform.runLater(() -> {
-                                if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
-                                    Stage stage = (Stage) board.getScene();
-                                    stage.setScene(WR);
-                                } else {
-                                    logger.error("Invalid credentials");
-                                }
-                            });
 
-                        }).orTimeout(5, TimeUnit.SECONDS) // Avoid waiting forever if server goes down
-                        .exceptionally(ex -> {
-                            Platform.runLater(() -> logger.error("Network timeout while waiting for response from server on join waiting room command."));
-                            return null;
-                        });
+
+    // ===== NETWORK OPERATIONS =====
+
+    /**     * Odeslat hermický tah na server     */
+    public void movePiece(Pos from, Pos to) {
+        if (from == null || to == null) {
+            logger.warn("Invalid move: from or to position is null");
+            return;
+        }
+
+        String UID = generateID();
+        String moveData = formatMoveData(from, to);
+
+        if (!handler.send(ClientMessage.MOVE, UID, moveData)) {
+            logger.error("Failed to send move to server");
+            return;
+        }
+
+        // Registrovat očekávaní odpovědi a poslat zprávu
+        sendNetworkMessage(UID, response -> {
+            if (isSuccessResponse(response)) {
+                gameStateManager.makeMove(from, to);
+                updateBoardDisplay();
+                logger.info("Move successful");
+            } else {
+                logger.warn("Invalid move");
             }
-        } catch (Exception e){
-            logger.info("Failed to send join waiting room message", e);
+        });
+    }
+
+    /**     * Obdržena zpráva o pohybu soupeře     */
+    @Override
+    public void onOpponentMoved(String boardState) {
+        Platform.runLater(() -> {
+            logger.info("Opponent moved, updating board");
+            gameStateManager.updateBoard(boardState);
+            updateBoardDisplay();
+        });
+    }
+
+    /**     * Obdržena zpráva o výsledku hry     */
+    @Override
+    public void onGameResult(String winner, String score) {
+        Platform.runLater(() -> {
+            String currentPlayerName = Connection.getInstance().getName();
+            boolean isWin = Objects.equals(winner, currentPlayerName);
+            board.showResultDialog(isWin, score);
+        });
+    }
+
+    /**     * Obdržena nabídka na rematch     */
+    @Override
+    public void onRematchOffer(boolean accepted) {
+        Platform.runLater(() -> {
+            if (accepted) {
+                logger.info("Opponent accepted rematch");
+                setupNewGame();
+                sceneNavigator.navigateToSetup();
+            } else {
+                Platform.runLater(() -> {
+                    logger.info("Opponent declined rematch - returning to waiting room");
+                    board.closeResultDialog();
+                    returnToWaitingRoom();
+                });
+            }
+        });
+    }
+
+    @Override
+    public void onGameSetup(int i, boolean isWhite, boolean mustTake) {
+        Platform.runLater(() -> {
+            logger.info("Game setup received: time={}, isWhite={}, mustTake={}", i, isWhite, mustTake);
+            setWhite(isWhite);
+            setMustTake(mustTake);
+        });
+    }
+
+
+    /**     * Vrátit se do waiting roomu     */
+    public void returnToWaitingRoom() {
+        setupNewGame(); // Reset hry
+
+        String name = Connection.getInstance().getName();
+        String UID = generateID();
+
+        if (!handler.send(ClientMessage.JOIN_WAITING_ROOM, UID, name)) {
+            logger.error("Failed to send join waiting room message");
+            return;
+        }
+
+        sendNetworkMessage(UID, response -> {
+            if (isSuccessResponse(response)) {
+                logger.info("Successfully joined waiting room");
+                sceneNavigator.navigateToWaitingRoom();
+            } else {
+                logger.error("Failed to join waiting room");
+            }
+        });
+    }
+
+    /**     * Poslat rematch nabídku     */
+    public boolean sendRematchMessage(ClientMessage token, String UID, String message) {
+        if (!handler.send(token, UID, message)) {
+            logger.error("Failed to send rematch message");
+            return false;
+        }
+
+        sendNetworkMessage(UID, response -> {
+            if (isSuccessResponse(response)) {
+                String content = response.getContent();
+                if ("[to-WR]".equals(content)) {
+                    returnToWaitingRoom();
+                } else {
+                    logger.debug("Rematch response: {}", content);
+                }
+            } else {
+                logger.error("Rematch request failed");
+            }
+        });
+
+        return true;
+    }
+
+    // ===== PRIVATE HELPER METHODS =====
+
+    /**     * Formátovat data pohybu     */
+    private String formatMoveData(Pos from, Pos to) {
+        return from.x() + "" + from.y() + "" + to.x() + "" + to.y();
+    }
+
+    /**     * Kontrola, zda je odpověď úspěšná     */
+    private boolean isSuccessResponse(Message response) {
+        return Objects.equals(response.getToken(), ServerMessage.OK.name());
+    }
+
+    /**     * Poslat síťovou zprávu s timeoutem a error handling     * Centrální místo pro všechny síťové operace     */
+    private void sendNetworkMessage(String UID, java.util.function.Consumer<Message> onSuccess) {
+        CompletableFuture<Message> responseFuture = rm.registerRequest(UID);
+
+        responseFuture
+                .orTimeout(NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .thenAccept(response -> Platform.runLater(() -> onSuccess.accept(response)))
+                .exceptionally(ex -> {
+                    Platform.runLater(() ->
+                            logger.error("Network timeout after {} seconds", NETWORK_TIMEOUT_SECONDS)
+                    );
+                    return null;
+                });
+    }
+
+    /**     * Aktualizovat zobrazení desky     */
+    private void updateBoardDisplay() {
+        Platform.runLater(() -> board.drawPieces());
+    }
+
+    /**     * Přístupový bod pro BoardController     */
+    public void moveOpponentPiece(Pos from, Pos to) {
+        // Tato metoda se volá když BoardController či hra dostane zprávu o pohybu
+        if (from != null && to != null) {
+            gameStateManager.makeMove(from, to);
+            updateBoardDisplay();
         }
     }
-
-
-    public void setWR(Scene wr){
-        if(wr != null){
-            this.WR = wr;
-        }
-    }
-
-    public void sendToSetup(){
-        board.createNewGame();
-        Stage stage = (Stage) board.getScene();
-        stage.setScene(setupScene);
-    }
-
-
 }

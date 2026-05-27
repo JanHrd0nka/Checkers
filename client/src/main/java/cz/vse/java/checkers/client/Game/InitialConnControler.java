@@ -2,14 +2,11 @@ package cz.vse.java.checkers.client.Game;
 
 import cz.vse.java.checkers.client.Networking.Connection;
 import cz.vse.java.checkers.client.Networking.ResponseManager;
-import cz.vse.java.checkers.client.Networking.SampleMessageHandler;
+import cz.vse.java.checkers.client.Networking.MessageHandler;
 import cz.vse.java.checkers.common.ClientMessage;
 import cz.vse.java.checkers.common.Message;
 import cz.vse.java.checkers.common.ServerMessage;
-import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -19,22 +16,14 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
 import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class InitialConnControler extends Controller{
 
     private static final Logger log = LoggerFactory.getLogger(InitialConnControler.class);
-    private SampleMessageHandler handler;
-
-    private ResponseManager rm = ResponseManager.getInstance();
-
-
-    Scene nextScene;
+    private MessageHandler handler;
 
     @FXML
     private TextField nameField;
@@ -70,7 +59,7 @@ public class InitialConnControler extends Controller{
                                 Platform.runLater(() -> {
                                     if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
                                         Stage stage = (Stage)  waitingRoomButton.getScene().getWindow();
-                                        stage.setScene(nextScene);
+                                        stage.setScene(getNextScene());
                                         waitingRoomButton.setDisable(false);
                                         errorLbl.setVisible(false);
                                     } else {
@@ -91,9 +80,5 @@ public class InitialConnControler extends Controller{
             }
         }
 
-    }
-
-    public void setNextScene(Scene nextScene) {
-        this.nextScene = nextScene;
     }
 }
