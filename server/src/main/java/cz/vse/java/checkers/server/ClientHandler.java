@@ -152,8 +152,10 @@ public class ClientHandler implements Runnable {
             }
         }
         player.clearOfferedMatches();
+        player.clearOfferedRematches();
         player.setName(server.getWaitingRoom().getName(player));
-        server.getWaitingRoom().removePlayer(player);
+        //server.getWaitingRoom().removePlayer(player);
+        server.getWaitingRoom().setPlayerInWaitingRoom(player, false);
         var handler = player.getClientHandler();
         handler.send(ServerMessage.SETUP, "server-id " + opponentName);
     }
@@ -234,9 +236,16 @@ public class ClientHandler implements Runnable {
                     match.getOpponent (player).getClientHandler().send(ServerMessage.STATE, "op-moved " + currentState);
                     if (!match.checkGameState()){
                         Player winner = match.getWinner();
-                        winner.incrementScore();
-                        send(ServerMessage.RESULT, "server-id" + " " + winner.getName());
-                        match.getOpponent(winner).getClientHandler().send(ServerMessage.RESULT, "server-id" + " " + winner.getName());
+                        Player loser = match.getOpponent(winner);
+                        winner.incrementScoreAgainst(loser);
+
+                        int winnerScore = winner.getScoreAgainst(loser);
+                        int loserScore = loser.getScoreAgainst(winner);
+                        String score = winnerScore + ":" + loserScore;
+
+                        //winner.incrementScore();
+                        send(ServerMessage.RESULT, "server-id" + " " + winner.getName() + " " + score);
+                        match.getOpponent(winner).getClientHandler().send(ServerMessage.RESULT, "server-id" + " " + winner.getName()+ " " + score);
                         match.endGame();
                     }
                 }
@@ -286,18 +295,18 @@ public class ClientHandler implements Runnable {
         if (validateLenght(3, tokens))
         {
             var wr = server.getWaitingRoom();
-            boolean success = true;
-            if (player == null){
-                player = wr.addPlayer(tokens[2], this);
-                if (player == null) {
-                    success = false;
-                }
-            }
-            else{
-                success = wr.renamePlayer(player, tokens[2]);
-                player.setMatch(null);
+            boolean success;
+            // Hráč se vrací do waiting room - musíme kontrolovat, že jméno není obsazeno JINÝM hráčem v waiting room
+            Player existingPlayer = wr.getPlayer(tokens[2]);
+            if (existingPlayer != null && existingPlayer != player) {
+                success = false;
+            } else {
+                wr.renamePlayer(player, tokens[2]);
+                wr.setPlayerInWaitingRoom(player, true);  // Nastavit stav
+                success = true;
             }
             if (success){
+
                 send(ServerMessage.OK, tokens[1]);
                 server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
             }
@@ -308,7 +317,45 @@ public class ClientHandler implements Runnable {
     }
 
     private void handleReplay(String[] tokens) {
-        log.info("REPLAY request");
+        log.info("REPLAY (rematch) request");
+        if (validatePlayerAndLength(2, tokens)) {
+            var wr = server.getWaitingRoom();
+            Player opponent = player.getMatch().getOpponent(player);
+            if (opponent != null) {
+                // Pokud už opponent nabídl rematch tomuto hráči -> oboustranný souhlas
+                if (opponent.wantsRematch(player)) {
+                    String playerName = wr.getName(player);
+                    String opponentName = wr.getName(opponent);
+
+                    // Pokud už existuje Match instance mezi nimi, použijeme ji (tak zachováme skóre).
+                    // Pokud žádná instance neexistuje nebo reference neodpovídá, vytvoříme novou.
+                    Match currentMatch = player.getMatch();
+                    if (currentMatch == null || currentMatch.getOpponent(player) != opponent) {
+                        // vytvoříme novou instanci Match (to je fallback)
+                        new Match(player, opponent);
+                    }
+
+                    // Oba jdou do SETUP, použijeme stávající setUpBeforeGame (který už neodstraňuje jména)
+//                    setUpBeforeGame(player, playerName, opponentName, opponent);
+//                    setUpBeforeGame(opponent, opponentName, playerName, player);
+
+                    send(ServerMessage.REMATCH, "accepted");
+                    opponent.getClientHandler().send(ServerMessage.REMATCH, "accepted");
+
+
+                    // Notifikujeme waiting-room klienty (pokud je třeba)
+                    server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
+                } else {
+                    // Uložíme rematch nabídku a notify opponent
+                    player.offerRematch(opponent);
+                    var oppClient = opponent.getClientHandler();
+                    oppClient.send(ServerMessage.REMATCH, "op-offered " + wr.getName(player));
+                    send(ServerMessage.OK, tokens[1]);
+                }
+            } else {
+                send(ServerMessage.ERROR, tokens[1] + " Hrac_neni_dostupny");
+            }
+        }
     }
 
     public synchronized void send(ServerMessage name, String content) {
@@ -324,7 +371,11 @@ public class ClientHandler implements Runnable {
             log.error("Error closing socket", e);
         }
 
-       //server.removeClient(this);
+       server.removeClient(this);
+        WaitingRoom wr = server.getWaitingRoom();
+        wr.disconnectPlayer(player);
+
+        server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
         log.info("Client disconnected");
     }
 

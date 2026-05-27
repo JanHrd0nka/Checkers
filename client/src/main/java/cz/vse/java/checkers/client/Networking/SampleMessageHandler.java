@@ -70,8 +70,7 @@ public class SampleMessageHandler extends MessageHandler{
 
         Message msg = new Message(message);
         logger.info("Server message: {}",msg);
-        String content = msg.getContent();
-        content = StringUtils.substringBetween(content, "[", "]");
+        String[] content = StringUtils.substringBetween(msg.getContent(), "[", "]").split(", ");
         String ID = msg.getID();
 
 
@@ -83,6 +82,7 @@ public class SampleMessageHandler extends MessageHandler{
             case UNMATCH -> unmatchPlayer(content);
             case STATE -> handleState(content, ID);
             case RESULT -> handleResult(content);
+            case REMATCH -> handleRematch(ID);
         }
         rm.dispatchResponse(ID, msg);
 
@@ -98,22 +98,25 @@ public class SampleMessageHandler extends MessageHandler{
 
 
 
-    private void updateWaitingRoom(String message){
+    private void updateWaitingRoom(String[] message){
         logger.info("updating players");
-        String[] players = message.split(", ");
-        controllers.getFirst().updatePlayersWaiting(players);
+        waitingRoomController.updatePlayersWaiting(message);
 
     }
 
-    private void updateRequestingMatches(String playerName){
+    private void updateRequestingMatches(String[] playerName){
         logger.info("updating requesting matches");
-        controllers.getFirst().updateRequestingMatches(playerName, false);
+        if(playerName.length > 0) {
+            waitingRoomController.updateRequestingMatches(playerName[0], false);
+        }
 
     }
 
-    private void setUpMatch(String setupWith){
+    private void setUpMatch(String[] setupWith){
         logger.info("Setting up match with: {}", setupWith);
-        controllers.getFirst().setUpMatch(setupWith);
+        if(setupWith.length > 0) {
+            waitingRoomController.setUpMatch(setupWith[0]);
+        }
     }
 
     private void updateBoardState(String move){
@@ -135,26 +138,39 @@ public class SampleMessageHandler extends MessageHandler{
 
     }
 
-    private void unmatchPlayer(String content){
-        waitingRoomController.updateRequestingMatches(content, true);
+    private void unmatchPlayer(String[] content){
+        waitingRoomController.updateRequestingMatches(content[0], true);
     }
 
-    private void handleState(String content, String ID){
+    private void handleState(String[] content, String ID){
         logger.info("Game set up by opponent");
-        String[] parts = content.split(", ");
         if(ID.equalsIgnoreCase("match-setup")){
-            int time = Integer.parseInt(parts[0]);
-            boolean isWhite = parts[1].equalsIgnoreCase("true");
-            boolean mustTake = parts[2].equalsIgnoreCase("true");
+            int time = Integer.parseInt(content[0]);
+            boolean isWhite = content[1].equalsIgnoreCase("true");
+            boolean mustTake = content[2].equalsIgnoreCase("true");
             setupController.setupGame(isWhite, mustTake);
         } else if (ID.equalsIgnoreCase("op-moved")) {
-            gameController.updateBoard(content);
+            gameController.updateBoard(content[0]);
         }
     }
 
-    private void handleResult(String content){
-        boolean isWin = content.split(", ")[0].equals(connection.getName());
-        gameController.showResult(isWin);
+    private void handleResult(String[] content){
+        boolean isWin = content[0].equals(connection.getName());
+        String score = content[1];
+        gameController.showResult(isWin, score);
+    }
+
+    private void handleRematch(String content){
+        logger.info("Opponent offered rematch: {}", content);
+        // content je např. "[opponentName]" (záleží na formátu), zde můžeme:
+        // - logovat,
+        // - pokud jste v Game scéně, notify BoardController/GameController,
+        // - nebo zprostředkovat přes waitingRoomController jako updateRequestingMatches.
+        // Pro jednoduchost:
+        //waitingRoomController.updateRequestingMatches(content, false);
+        if(Objects.equals(content, "accepted")){
+            gameController.sendToSetup();
+        }
     }
 
     public GameController getGameController(){

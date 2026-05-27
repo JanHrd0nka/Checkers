@@ -45,7 +45,12 @@ public class WaitingRoomController extends Controller{
 
     @Override
     public void updatePlayersWaiting(String[] playersList){
+        playersAvailable.clear();
         playersAvailable.addAll(Arrays.asList(playersList));
+
+        requestingMatches.clear();
+        requestedMatches.clear();
+
         if(availablePlayersList != null){
             availablePlayersList.getItems().clear();
             for (String name : playersAvailable){
@@ -87,6 +92,9 @@ public class WaitingRoomController extends Controller{
     private void acceptMatch(String playerName) {
         String UID = generateID();
         if(handler.send(ClientMessage.MATCH,UID, playerName)){
+            requestingMatches.remove(playerName);
+            requestedMatches.remove(playerName);
+            playersRequestingList.getItems().remove(playerName);
             log.info("Accepted match from: {}", playerName);
         }
 

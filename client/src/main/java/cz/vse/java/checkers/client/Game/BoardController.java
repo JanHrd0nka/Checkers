@@ -204,10 +204,10 @@ public class BoardController extends Controller {
         return gameController;
     }
 
-    public void showResultDialog(boolean isWin) {
+    public void showResultDialog(boolean isWin, String score) {
         String title = isWin ? "Výhra" : "Prohra";
         String header = isWin ? "Gratulace!" : "Bohužel...";
-        String content = isWin ? "Vyhráli jste zápas." : "Prohráli jste zápas.";
+        String content = isWin ? "Vyhráli jste zápas \nSkóre: " + score : "Prohráli jste zápas.\nSkóre: " + score;
 
         // vytvoříme dialog s dvěma vlastním tlačítky
         ButtonType backButton = new ButtonType("Back to waiting room");

@@ -59,4 +59,8 @@ public class Server {
             log.info("Server stopped");
         }
     }
+
+    public void removeClient(ClientHandler clientHandler) {
+        clients.remove(clientHandler);
+    }
 }

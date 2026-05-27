@@ -30,6 +30,8 @@ public class GameController extends Controller{
     public boolean isWhite;
     private boolean mustTake = true;
 
+    private Scene setupScene;
+
     private Scene WR;
 
 
@@ -66,6 +68,14 @@ public class GameController extends Controller{
 
     public void setMustTake(boolean mustTake) {
         this.mustTake = mustTake;
+    }
+
+    public Scene getSetupScene() {
+        return setupScene;
+    }
+
+    public void setSetupScene(Scene setupScene) {
+        this.setupScene = setupScene;
     }
 
     public void movePiece(Pos from, Pos to){
@@ -146,8 +156,8 @@ public class GameController extends Controller{
     }
 
 
-    public void showResult(boolean isWin) {
-        board.showResultDialog(isWin);
+    public void showResult(boolean isWin, String score) {
+        board.showResultDialog(isWin,score);
     }
 
     public void returnToWaitingRoom() {
@@ -187,6 +197,12 @@ public class GameController extends Controller{
         if(wr != null){
             this.WR = wr;
         }
+    }
+
+    public void sendToSetup(){
+        board.createNewGame();
+        Stage stage = (Stage) board.getScene();
+        stage.setScene(setupScene);
     }
 
 

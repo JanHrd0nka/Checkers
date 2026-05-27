@@ -48,6 +48,7 @@ public class HelloApplication extends Application {
         GameController gameController = boardController.getGameController();
 
         gameController.setWR(waitingRoomScene);
+        gameController.setSetupScene(setupScene);
 
         handler.registerController(waitingRoomController);
         handler.registerController(initialConnControler);
