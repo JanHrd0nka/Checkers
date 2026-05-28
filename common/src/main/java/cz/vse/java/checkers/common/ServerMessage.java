@@ -11,5 +11,6 @@ public enum ServerMessage {
     MOVED,
     HISTORY,
     RESULT,
-    REMATCH
+    REMATCH,
+    DRAW
 }

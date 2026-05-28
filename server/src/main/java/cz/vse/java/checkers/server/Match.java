@@ -10,6 +10,7 @@ public class Match {
     private final Player p2;
     private Game2 game;
     private Player currentPlayer;
+    private boolean drawOffered;
     public Match (Player p1, Player p2){
         this.p1 = p1;
         this.p2 = p2;
@@ -79,6 +80,14 @@ public class Match {
 
     public Player getWinner(){
         return getOpponent(currentPlayer);
+    }
+
+    public boolean isDrawOffered() {
+        return drawOffered;
+    }
+
+    public void setDrawOffered(boolean drawOffered) {
+        this.drawOffered = drawOffered;
     }
 
     public void endGame(){

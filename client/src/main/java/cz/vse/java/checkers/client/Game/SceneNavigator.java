@@ -40,6 +40,6 @@ public class SceneNavigator {
 
     /**     * Získat stage     */
     private Stage getStage() {
-        return (Stage) boardController.getScene();
+        return boardController.getStage();
     }
 }

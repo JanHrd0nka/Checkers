@@ -82,8 +82,8 @@ public class ClientHandler implements Runnable {
                 case SETUP -> handleSetup(tokens);
                 case MOVE -> handleMove(tokens);
                 case HISTORY -> handleHistory(tokens);
-                case DRAW -> handleDraw();
-                case SURRENDER -> handleSurrender();
+                case DRAW -> handleDraw(tokens);
+                case SURRENDER -> handleSurrender(tokens);
                 case QUIT -> disconnect();
                 case JOIN_WAITING_ROOM -> handleJoinWaitingRoom(tokens);
                 case REPLAY -> handleReplay(tokens);
@@ -127,8 +127,10 @@ public class ClientHandler implements Runnable {
                 if (opponent.wantsMatch(player)){
                     String playerName = wr.getName(player);
                     String opponentName = wr.getName(opponent);
+                    opponent.offerMatch(player);
                     setUpBeforeGame(player, playerName, opponentName, opponent);
                     setUpBeforeGame(opponent, opponentName, playerName, player);
+                    send(ServerMessage.OK, tokens[1]);
                     new Match(player, opponent);
                     server.broadcast(ServerMessage.PLAYERS_WAITING,wr.getPlayerNames());
                 } else {
@@ -235,18 +237,7 @@ public class ClientHandler implements Runnable {
                     send(ServerMessage.STATE, "server-id " + currentState);
                     match.getOpponent (player).getClientHandler().send(ServerMessage.STATE, "op-moved " + currentState);
                     if (!match.checkGameState()){
-                        Player winner = match.getWinner();
-                        Player loser = match.getOpponent(winner);
-                        winner.incrementScoreAgainst(loser);
-
-                        int winnerScore = winner.getScoreAgainst(loser);
-                        int loserScore = loser.getScoreAgainst(winner);
-                        String score = winnerScore + ":" + loserScore;
-
-                        //winner.incrementScore();
-                        send(ServerMessage.RESULT, "server-id" + " " + winner.getName() + " " + score);
-                        match.getOpponent(winner).getClientHandler().send(ServerMessage.RESULT, "server-id" + " " + winner.getName()+ " " + score);
-                        match.endGame();
+                        sendResult(player, false);
                     }
                 }
                 else{
@@ -281,12 +272,48 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    private void handleDraw() {
+    private void handleDraw(String[] tokens) {
         log.info("DRAW request");
+        Match match = player.getMatch();
+        Player opponent = match.getOpponent(player);
+        if(validateLenght(2, tokens)){
+            drawResult(tokens, match, opponent);
+        }else if(validateLenght(3, tokens)){
+            boolean accepted = tokens[2].equals("accept");
+            if(accepted){
+                drawResult(tokens, match, opponent);
+            }else{
+                match.setDrawOffered(false);
+                opponent.getClientHandler().send(ServerMessage.DRAW, "server-id no");
+            }
+            send(ServerMessage.OK, tokens[1]);
+
+        }
+
     }
 
-    private void handleSurrender() {
+    private void drawResult(String[] tokens, Match match, Player opponent) {
+        if (match.isDrawOffered()){
+            send(ServerMessage.OK, tokens[1]);
+            int playerScore = player.getScoreAgainst(opponent);
+            int opponentScore = opponent.getScoreAgainst(player);
+            String score = playerScore + ":" + opponentScore;
+            send(ServerMessage.RESULT, tokens[1] + " draw " + score);
+            opponent.getClientHandler().send(ServerMessage.RESULT, tokens[1] + " draw " + score);
+        }
+        else{
+            match.setDrawOffered(true);
+            opponent.getClientHandler().send(ServerMessage.DRAW, "server-id offered");
+            send(ServerMessage.OK, tokens[1]);
+        }
+    }
+
+    private void handleSurrender(String[] tokens) {
         log.info("SURRENDER request");
+        if(validateLenght(2, tokens)){
+            sendResult(player, true);
+            log.info("Sent surrender results");
+        }
     }
 
     private void handleJoinWaitingRoom(String[] tokens) {
@@ -306,7 +333,6 @@ public class ClientHandler implements Runnable {
                 success = true;
             }
             if (success){
-
                 send(ServerMessage.OK, tokens[1]);
                 server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
             }
@@ -324,8 +350,8 @@ public class ClientHandler implements Runnable {
             if(tokens[2].equals("no")){
                 wr.setPlayerInWaitingRoom(player, true);
                 send(ServerMessage.OK, tokens[1] + " to-WR");
-                opponent.getClientHandler().send(ServerMessage.REMATCH, tokens[1] + " no");
-                wr.setPlayerInWaitingRoom(opponent, true);
+//                opponent.getClientHandler().send(ServerMessage.REMATCH, tokens[1] + " no");
+//                wr.setPlayerInWaitingRoom(opponent, true);
                 server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
             } else if (opponent != null) {
                 // Pokud už opponent nabídl rematch tomuto hráči -> oboustranný souhlas
@@ -364,6 +390,31 @@ public class ClientHandler implements Runnable {
             }
         }
     }
+
+    private synchronized void sendResult(Player player, boolean isSurrender){
+        Match match = player.getMatch();
+        Player winner;
+        Player loser;
+        String ID = isSurrender ? "surrender" : "server-id";
+        if(isSurrender){
+            winner = match.getOpponent(player);
+            loser = player;
+        }else{
+            winner = match.getWinner();
+            loser = match.getOpponent(winner);
+        }
+        winner.incrementScoreAgainst(loser);
+
+        int winnerScore = winner.getScoreAgainst(loser);
+        int loserScore = loser.getScoreAgainst(winner);
+        String score = winnerScore + ":" + loserScore;
+
+        winner.getClientHandler().send(ServerMessage.RESULT, ID + " " + winner.getName() + " " + score);
+        loser.getClientHandler().send(ServerMessage.RESULT, ID + " " + winner.getName()+ " " + score);
+        match.endGame();
+    }
+
+
 
     public synchronized void send(ServerMessage name, String content) {
         String message = name.name() + " " + content;

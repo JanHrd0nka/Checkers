@@ -7,12 +7,14 @@ import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,13 +35,22 @@ public class BoardController extends Controller {
 
     @FXML
     private StackPane boardContainer;
+    @FXML
+    private Button forfeightBtn;
+    @FXML
+    private Button drawBtn;
+
+
 
     /**     * Inicializace scény     */
     @FXML
     public void initialize() {
         logger.info("Initializing board");
         createNewGame();
+        forfeightBtn.setOnAction(actionEvent -> forgeightMatch());
+        drawBtn.setOnAction(actionEvent -> offerDraw());
     }
+
 
     /**     * Vytvořit novou hru     */
     public void createNewGame() {
@@ -189,7 +200,6 @@ public class BoardController extends Controller {
         if (result.isPresent()) {
             String UID = generateID();
             if (result.get() == backButton) {
-                gameController.sendRematchMessage(ClientMessage.REPLAY, UID, "no");
                 gameController.returnToWaitingRoom();
             } else if (result.get() == rematchButton) {
                 gameController.sendRematchMessage(ClientMessage.REPLAY, UID, "yes");
@@ -204,18 +214,48 @@ public class BoardController extends Controller {
         }
     }
 
+    private void forgeightMatch() {
+        String UID = generateID();
+        gameController.sendForfeitMessage(ClientMessage.SURRENDER, UID, "");
+    }
+
+    private void offerDraw(){
+        String UID = generateID();
+        gameController.sendDrawRequest(ClientMessage.DRAW, UID, "");
+    }
+
+
     public GameController getGameController() {
         return gameController;
     }
 
-    public Object getScene() {
-        return checkersBoard.getScene().getWindow();
+    public Stage getStage() {
+        return (Stage) checkersBoard.getScene().getWindow();
     }
 
     /**     * Cleanup - zavolat když se hra skončí     */
     public void cleanup() {
         if (gameController != null) {
             gameController.cleanup();
+        }
+    }
+
+    public void displayDraw() {
+        ButtonType decline = new ButtonType("Odmíntout");
+        ButtonType accept = new ButtonType("Přijmout");
+
+        Alert drawAlert = new Alert(Alert.AlertType.NONE, "",decline, accept);
+        drawAlert.setTitle("Remíza");
+        drawAlert.setHeaderText("Soupeř nabídl remízu");
+
+
+        Optional<ButtonType> result = drawAlert.showAndWait();
+        if (result.isPresent() && result.get() == decline) {
+            gameController.sendDrawOffer(false);
+            logger.info("Sending draw decline");
+        } else if(result.isPresent() && result.get() == accept){
+            gameController.sendDrawOffer(true);
+            logger.info("Sending draw accept");
         }
     }
 }

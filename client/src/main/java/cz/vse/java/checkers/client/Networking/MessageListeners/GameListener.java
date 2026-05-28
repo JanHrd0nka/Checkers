@@ -6,4 +6,6 @@ public interface GameListener extends MessageListener {
     void onGameResult(String winner, String score);
     void onRematchOffer(boolean accepted);
     void onGameSetup(int i, boolean isWhite, boolean mustTake);
+
+    void onDrawOffer();
 }

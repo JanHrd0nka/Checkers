@@ -62,9 +62,6 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
             playersAvailable.clear();
             playersAvailable.addAll(Arrays.asList(playersList));
 
-//            requestingMatches.clear();
-//            requestedMatches.clear();
-
             if (availablePlayersList != null) {
                 availablePlayersList.getItems().clear();
                 for (String name : playersAvailable) {
@@ -86,6 +83,7 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
                     if (unmatched) {
                         requestingMatches.remove(playerName);
                         playersAvailable.remove(playerName);
+                        requestedMatches.remove(playerName);
                         availablePlayersList.getItems().remove(playerName);
                         playersRequestingList.getItems().remove(playerName);
                     } else {
@@ -101,6 +99,7 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
 
     @Override
     public void onSetupMatch(String playerName) {
+        cleanLists();
         Platform.runLater(() -> {
             Stage stage = (Stage) availablePlayersList.getScene().getWindow();
             stage.setScene(getNextScene());
@@ -119,6 +118,7 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
                                 requestingMatches.remove(playerName);
                                 requestedMatches.remove(playerName);
                                 playersRequestingList.getItems().remove(playerName);
+
                                 log.info("Match accepted from: {}", playerName);
                             } else {
                                 log.error("Invalid credentials");
@@ -146,4 +146,14 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
             }
         }
     }
+
+    public void cleanLists(){
+        requestedMatches.clear();
+        requestingMatches.clear();
+        playersRequestingList.getItems().clear();
+        playersRequestingList.getItems().clear();
+    }
+
+
+
 }

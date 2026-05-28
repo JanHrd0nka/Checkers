@@ -119,4 +119,9 @@ public class MessageEventBus {
         logger.debug("Publishing GameSetup event from SetupController to GameController: white={}, mustTake={}", isWhite, mustTake);
         gameListeners.forEach(listener -> listener.onGameSetup(i, isWhite, mustTake));
     }
+
+    public void publishDrawOffer() {
+        logger.debug("Publishing DrawOffer event");
+        gameListeners.forEach(GameListener::onDrawOffer);
+    }
 }

@@ -41,7 +41,7 @@ public class MessageHandler {
             // Bezpečné parsování obsahu (kezde null-safe)
             String[] content = parseContent(contentStr);
 
-            if (content != null && content.length > 0) {
+            if (content.length > 0) {
                 ServerMessage msgType = ServerMessage.valueOf(msg.getToken());
                 publishEvent(msgType, content, ID);
             }
@@ -89,8 +89,13 @@ public class MessageHandler {
                 }
             }
             case STATE -> handleStateEvent(content, ID);
-            case RESULT -> handleGameResult(content);
+            case RESULT -> handleGameResult(content, ID);
             case REMATCH -> handleRematchEvent(content);
+            case DRAW -> {
+                if(content[0].equals("offered")) {
+                    eventBus.publishDrawOffer();
+                }
+            }
             default -> logger.warn("Unknown server message type: {}", msgType);
         }
     }
@@ -112,7 +117,7 @@ public class MessageHandler {
         }
     }
 
-    private void handleGameResult(String[] content) {
+    private void handleGameResult(String[] content, String ID) {
         if (content.length >= 2) {
             String winner = content[0];
             String score = content[1];

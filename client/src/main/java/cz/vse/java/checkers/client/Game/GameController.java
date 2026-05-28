@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.rmi.server.UID;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -176,6 +177,14 @@ public class GameController extends Controller implements GameListener {
         });
     }
 
+    @Override
+    public void onDrawOffer(){
+        Platform.runLater(() -> {
+            logger.info("Received draw offer from opponent, displaying draw alert");
+            board.displayDraw();
+        });
+    }
+
 
     /**     * Vrátit se do waiting roomu     */
     public void returnToWaitingRoom() {
@@ -192,7 +201,7 @@ public class GameController extends Controller implements GameListener {
         sendNetworkMessage(UID, response -> {
             if (isSuccessResponse(response)) {
                 logger.info("Successfully joined waiting room");
-                sceneNavigator.navigateToWaitingRoom();
+                sceneNavigator. navigateToWaitingRoom();
             } else {
                 logger.error("Failed to join waiting room");
             }
@@ -262,4 +271,51 @@ public class GameController extends Controller implements GameListener {
             updateBoardDisplay();
         }
     }
+
+    public void sendForfeitMessage(ClientMessage clientMessage, String uid, String s) {
+        if (!handler.send(clientMessage, uid, s)) {
+            logger.error("Failed to send foresight message");
+        } else{
+            logger.info("Sent forfeit message");
+            sendNetworkMessage(uid, response -> {
+                if (isSuccessResponse(response)) {
+                    logger.debug("Successful server response on forfeit message");
+                } else {
+                    logger.warn("Server didn't respond to forfeit message");
+                }
+            });
+        }
+    }
+
+    public void sendDrawRequest(ClientMessage clientMessage, String uid, String s) {
+        if (!handler.send(clientMessage, uid, s)) {
+            logger.error("Failed to send draw request message");
+        } else{
+            logger.info("Sent draw request message");
+            sendNetworkMessage(uid, response -> {
+                if (isSuccessResponse(response)) {
+                    logger.debug("Successful server response on draw request message");
+                } else {
+                    logger.warn("Server didn't respond to draw request message");
+                }
+            });
+        }
+    }
+
+    public void sendDrawOffer(boolean b) {
+        String UID  = generateID();
+        String message = b ? "accept" : "decline";
+        if(!handler.send(ClientMessage.DRAW, UID, message)){
+            logger.error("Failed to send draw response");
+        }else{
+            sendNetworkMessage(UID, response -> {;
+                if (isSuccessResponse(response)) {
+                    logger.debug("Successful server response on draw offer: {}", message);
+                } else {
+                    logger.warn("Server didn't respond to draw offer: {}", message);
+                }
+            });
+        }
+        }
+
 }

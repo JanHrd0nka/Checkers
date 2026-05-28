@@ -32,7 +32,7 @@ public class Server {
 
     public synchronized void broadcast(ServerMessage name, String message){
         log.info("----Broadcast Started----");
-        for (var client : clients){
+        for (ClientHandler client : clients){
             client.send(name, "server-id " + message);
         }
         log.info("----Broadcast finished---");
