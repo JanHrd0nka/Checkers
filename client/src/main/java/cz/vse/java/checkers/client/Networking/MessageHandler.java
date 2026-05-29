@@ -94,6 +94,8 @@ public class MessageHandler {
             case DRAW -> {
                 if(content[0].equals("offered")) {
                     eventBus.publishDrawOffer();
+                } else if(content[0].equals("no")){
+                    eventBus.publishDrawDeclined();
                 }
             }
             default -> logger.warn("Unknown server message type: {}", msgType);

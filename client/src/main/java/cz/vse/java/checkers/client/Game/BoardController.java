@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 /** * BoardController - odpovídá za UI vykreslování desky. * Deleguje herní logiku GameControlleru. */
 public class BoardController extends Controller {
@@ -32,6 +33,7 @@ public class BoardController extends Controller {
     private GameController gameController;
     private GridPane checkersBoard;
     private Alert resultDialog;
+    private Alert drawAlert;
 
     @FXML
     private StackPane boardContainer;
@@ -184,6 +186,8 @@ public class BoardController extends Controller {
 
     /**     * Zobrazit dialog s výsledkem hry     */
     public void showResultDialog(boolean isWin, String score) {
+        drawBtn.setDisable(false);
+        forfeightBtn.setDisable(false);
         String title = isWin ? "Výhra" : "Prohra";
         String header = isWin ? "Gratulace!" : "Bohužel...";
         String content = isWin
@@ -222,6 +226,8 @@ public class BoardController extends Controller {
     private void offerDraw(){
         String UID = generateID();
         gameController.sendDrawRequest(ClientMessage.DRAW, UID, "");
+        drawBtn.setDisable(true);
+        forfeightBtn.setDisable(true);
     }
 
 
@@ -241,10 +247,12 @@ public class BoardController extends Controller {
     }
 
     public void displayDraw() {
+        drawBtn.setDisable(true);
+        forfeightBtn.setDisable(true);
         ButtonType decline = new ButtonType("Odmíntout");
         ButtonType accept = new ButtonType("Přijmout");
 
-        Alert drawAlert = new Alert(Alert.AlertType.NONE, "",decline, accept);
+        drawAlert = new Alert(Alert.AlertType.NONE, "",decline, accept);
         drawAlert.setTitle("Remíza");
         drawAlert.setHeaderText("Soupeř nabídl remízu");
 
@@ -252,10 +260,25 @@ public class BoardController extends Controller {
         Optional<ButtonType> result = drawAlert.showAndWait();
         if (result.isPresent() && result.get() == decline) {
             gameController.sendDrawOffer(false);
+            drawBtn.setDisable(false);
+            forfeightBtn.setDisable(false);
             logger.info("Sending draw decline");
         } else if(result.isPresent() && result.get() == accept){
             gameController.sendDrawOffer(true);
+            drawBtn.setDisable(false);
+            forfeightBtn.setDisable(false);
             logger.info("Sending draw accept");
         }
+
+    }
+
+    public void drawDeclined() {
+        drawAlert = new Alert(Alert.AlertType.INFORMATION, "Soupeř odmítl remízu", ButtonType.OK);
+        drawAlert.setTitle("Remíza odmítnuta");
+        drawAlert.onCloseRequestProperty().set(event -> {
+            drawBtn.setDisable(false);
+            forfeightBtn.setDisable(false);
+        });
+        drawAlert.show();
     }
 }

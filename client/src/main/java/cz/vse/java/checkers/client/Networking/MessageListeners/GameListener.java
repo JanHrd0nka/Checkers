@@ -8,4 +8,6 @@ public interface GameListener extends MessageListener {
     void onGameSetup(int i, boolean isWhite, boolean mustTake);
 
     void onDrawOffer();
+
+    void onDrawDeclined();
 }

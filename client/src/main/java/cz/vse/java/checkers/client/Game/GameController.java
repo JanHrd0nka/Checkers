@@ -185,6 +185,14 @@ public class GameController extends Controller implements GameListener {
         });
     }
 
+    @Override
+    public void onDrawDeclined() {
+        Platform.runLater(() -> {
+            logger.info("Opponent declined draw offer, displaying declined alert");
+            board.drawDeclined();
+        });
+    }
+
 
     /**     * Vrátit se do waiting roomu     */
     public void returnToWaitingRoom() {

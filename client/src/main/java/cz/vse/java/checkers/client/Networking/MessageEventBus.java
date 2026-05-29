@@ -124,4 +124,9 @@ public class MessageEventBus {
         logger.debug("Publishing DrawOffer event");
         gameListeners.forEach(GameListener::onDrawOffer);
     }
+
+    public void publishDrawDeclined() {
+        logger.debug("Publishing DrawDeclined event");
+        gameListeners.forEach(GameListener::onDrawDeclined);
+    }
 }
