@@ -25,14 +25,14 @@ public class GameStateManager {
         // Zde by měly přijít parametry ze serveru (čas, pravidla, počáteční pozice)
         // Zatím test pozice:
         this.game = new Game2("""
-            0 0 0 0 0 0 0 0
-            0 0 4 0 3 0 0 0
-            0 0 0 0 0 0 0 0
-            0 0 4 0 3 0 0 0
-            0 0 0 2 0 0 0 0
+            0 3 0 3 0 3 0 3
+            3 0 3 0 3 0 3 0
+            0 3 0 3 0 3 0 3
             0 0 0 0 0 0 0 0
             0 0 0 0 0 0 0 0
-            0 0 0 0 0 0 0 0
+            1 0 1 0 1 0 1 0
+            0 1 0 1 0 1 0 1
+            1 0 1 0 1 0 1 0
             """.replace("\n", "").replace(" ", ""));
         logger.info("New game created");
     }

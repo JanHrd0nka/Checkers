@@ -83,24 +83,24 @@ public class BoardController extends Controller {
     /**     * Vykreslit kousky na desku     */
     public void drawPieces() {
         drawEmptyBoard();
-        for (int row = 0; row < BOARD_SIZE; row++) {
-            for (int col = 0; col < BOARD_SIZE; col++) {
+        for (int col = BOARD_SIZE-1; col >= 0; col--) {
+            for (int row = 0; row < BOARD_SIZE; row++) {
                 Pos current = new Pos(row, col);
                 Figure figure = gameController.getGame().getPiece(current);
 
                 if (figure != Figure.NONE) {
-                    drawPiece(current, figure, row, col);
+                    drawPiece(current, figure);
                 }
             }
         }
     }
 
     /**     * Vykreslit jednu figurku     */
-    private void drawPiece(Pos pos, Figure figure, int row, int col) {
+    private void drawPiece(Pos pos, Figure figure) {
         Circle piece = new Circle(PIECE_RADIUS);
-        piece.setFill(getFigureColor(figure, row, col));
+        piece.setFill(getFigureColor(figure, pos.x(), pos.y()));
 
-        checkersBoard.add(piece, pos.y(), pos.x());
+        checkersBoard.add(piece, pos.x(), pos.y());
         GridPane.setHalignment(piece, HPos.CENTER);
         GridPane.setValignment(piece, VPos.CENTER);
 
@@ -124,17 +124,17 @@ public class BoardController extends Controller {
     /**     * Vykreslit prázdnou desku (šachovnici)     */
     private void drawEmptyBoard() {
         checkersBoard.getChildren().clear();
-        for (int row = 0; row < BOARD_SIZE; row++) {
-            for (int col = 0; col < BOARD_SIZE; col++) {
+        for (int row = BOARD_SIZE-1; row >= 0; row--) {
+            for (int col = BOARD_SIZE-1; col >= 0; col--) {
                 Rectangle square = new Rectangle(SQUARE_SIZE, SQUARE_SIZE);
                 square.setFill((row + col) % 2 == 0
                         ? Color.web("#F0D9B5")  // Light square
                         : Color.web("#B58863")  // Dark square
                 );
 
-                Pos pos = new Pos(col, row);
+                Pos pos = new Pos(row, col);
                 square.setOnMouseClicked(event -> handleSquareClick(pos));
-                checkersBoard.add(square, col, row);
+                checkersBoard.add(square, row, col);
             }
         }
     }
@@ -145,6 +145,7 @@ public class BoardController extends Controller {
             logger.debug("Not player turn");
             return;
         }
+        logger.debug("Clicked piece on: {}", clickedPos.x() + ":" + clickedPos.y());
 
         gameController.setSelectedRow(clickedPos.x());
         gameController.setSelectedCol(clickedPos.y());
@@ -163,7 +164,7 @@ public class BoardController extends Controller {
                 Rectangle highlight = new Rectangle(SQUARE_SIZE, SQUARE_SIZE);
                 highlight.setFill(Color.web("#FFFF00", 0.5)); // Semi-transparent yellow
 
-                checkersBoard.add(highlight, targetPos.y(), targetPos.x());
+                checkersBoard.add(highlight, targetPos.x(), targetPos.y());
                 highlight.setOnMouseClicked(event -> handleSquareClick(targetPos));
             }
         }
