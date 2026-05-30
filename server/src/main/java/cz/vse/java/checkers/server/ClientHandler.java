@@ -23,8 +23,6 @@ public class ClientHandler implements Runnable {
     private BufferedReader in;
     private Player player;
 
-    // TODO: private GameSession session;
-
     public ClientHandler(Socket socket, Server server) {
         this.socket = socket;
         this.server = server;

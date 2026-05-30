@@ -140,7 +140,6 @@ public class Game {
             for (Pos direction : directions){
                 exploreDirection(new ArrayList<>(List.of(pos)), direction, directions, result, new ArrayList<>());
             }
-            //trimPossibleMoves(result);
         }
         return result;
     }
@@ -150,9 +149,6 @@ public class Game {
         if (requireCaptureMove()){
             moves.removeIf(move -> !move.getFirst().isCaptureMove(move.get(1)));
         }
-//        for (List<Pos> move : moves) {
-//            move.removeFirst();
-//        }
     }
 
     private void exploreDirection(List<Pos> path, Pos direction, List<Pos> possibleDirections, List<List<Pos>> out, List<Pos> capturedPieces){
@@ -167,18 +163,21 @@ public class Game {
             }
             else if (isOppositeColor(newPos) && !capturedPieces.contains(newPos)){
                 Pos newPos2 = newPos.add(direction);
-                if (getPiece(newPos2) == Figure.NONE || capturedPieces.contains(newPos2)){
-                    capturedPieces.add(newPos);
-                    path.add(newPos2);
-                    out.add(path);
-                    // explore other options
-                    for (Pos possibleDirection : possibleDirections){
-                        if (!newPos2.add(possibleDirection).equals(newPos)){
-                            exploreDirection(new ArrayList<>(path),
-                                                possibleDirection,
-                                                possibleDirections,
-                                                out,
-                                                new ArrayList<>(capturedPieces));
+                if (isValidMove(newPos2))
+                {
+                    if (getPiece(newPos2) == Figure.NONE || capturedPieces.contains(newPos2)) {
+                        capturedPieces.add(newPos);
+                        path.add(newPos2);
+                        out.add(path);
+                        // explore other options
+                        for (Pos possibleDirection : possibleDirections) {
+                            if (!newPos2.add(possibleDirection).equals(newPos)) {
+                                exploreDirection(new ArrayList<>(path),
+                                        possibleDirection,
+                                        possibleDirections,
+                                        out,
+                                        new ArrayList<>(capturedPieces));
+                            }
                         }
                     }
                 }
