@@ -16,6 +16,7 @@ public class Game {
         gameHistory = new ArrayList<>();
         gameHistory.add(toContent());
     }
+    // Constructor for testing purposes.
     public Game(String content){
         gameHistory = new ArrayList<>();
         whiteToMove = true;
@@ -46,7 +47,7 @@ public class Game {
     }
     public String toContent() {
 
-        StringBuilder sb = new StringBuilder(64);
+        StringBuilder sb = new StringBuilder(65);
 
         for (int i = 0; i < 64; ++i) {
 
@@ -65,12 +66,12 @@ public class Game {
 
             sb.append(c);
         }
-
+        sb.append(isWhiteToMove() ? '1' : '0');
         return sb.toString();
     }
 
     public boolean updateBoard(String state){
-        if(state.length() == 64) {
+        if(state.length() == 65) {
             for (int i = 0; i < 64; ++i) {
                 int x = i % 8;
                 int y = 7 - (i / 8);
@@ -85,7 +86,7 @@ public class Game {
                 }
                 setPiece(new Pos(x, y), figure);
             }
-            whiteToMove = !whiteToMove;
+            whiteToMove = state.charAt(64) == '1';
             return true;
         }else{
             return false;
