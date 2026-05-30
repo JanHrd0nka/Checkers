@@ -407,10 +407,18 @@ public class ClientHandler implements Runnable {
         }
 
        server.removeClient(this);
-        WaitingRoom wr = server.getWaitingRoom();
-        wr.disconnectPlayer(player);
-
-        server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
+        if (player != null){
+            WaitingRoom wr = server.getWaitingRoom();
+            wr.disconnectPlayer(player);
+            server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
+            var match = player.getMatch();
+            if (match != null){
+                var opponent = match.getOpponent(player);
+                if (opponent != null){
+                    sendResult(player, true);
+                }
+            }
+        }
         log.info("Client disconnected");
     }
 
