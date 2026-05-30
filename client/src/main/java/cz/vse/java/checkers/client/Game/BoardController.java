@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 /** * BoardController - odpovídá za UI vykreslování desky. * Deleguje herní logiku GameControlleru. */
 public class BoardController extends Controller {
@@ -83,13 +82,30 @@ public class BoardController extends Controller {
     /**     * Vykreslit kousky na desku     */
     public void drawPieces() {
         drawEmptyBoard();
-        for (int col = BOARD_SIZE-1; col >= 0; col--) {
-            for (int row = 0; row < BOARD_SIZE; row++) {
-                Pos current = new Pos(row, col);
-                Figure figure = gameController.getGame().getPiece(current);
+        /*for(Node node : checkersBoard.getChildren()){
+            Integer row = GridPane.getRowIndex(node);
+            Integer column =
+        }*/
+        if(!gameController.isWhite()){
+            for (int col = 0; col < BOARD_SIZE ; col++) {
+                for (int row = 0; row < BOARD_SIZE; row++) {
+                    Pos current = new Pos(row, col);
+                    Figure figure = gameController.getGame().getPiece(current);
 
-                if (figure != Figure.NONE) {
-                    drawPiece(current, figure);
+                    if (figure != Figure.NONE) {
+                        drawPiece(current, figure);
+                    }
+                }
+            }
+        }else{
+            for (int col = BOARD_SIZE-1; col >= 0 ; col--) {
+                for (int row = BOARD_SIZE-1; row >= 0; row--) {
+                    Pos current = new Pos(row, col);
+                    Figure figure = gameController.getGame().getPiece(current);
+
+                    if (figure != Figure.NONE) {
+                        drawPiece(current, figure);
+                    }
                 }
             }
         }
@@ -124,8 +140,8 @@ public class BoardController extends Controller {
     /**     * Vykreslit prázdnou desku (šachovnici)     */
     private void drawEmptyBoard() {
         checkersBoard.getChildren().clear();
-        for (int row = BOARD_SIZE-1; row >= 0; row--) {
-            for (int col = BOARD_SIZE-1; col >= 0; col--) {
+        for (int col = 0; col < BOARD_SIZE ; col++) {
+            for (int row = 0; row < BOARD_SIZE; row++) {
                 Rectangle square = new Rectangle(SQUARE_SIZE, SQUARE_SIZE);
                 square.setFill((row + col) % 2 == 0
                         ? Color.web("#F0D9B5")  // Light square

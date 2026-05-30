@@ -83,6 +83,11 @@ public class MessageHandler {
                     eventBus.publishSetupMatch(content[0]);
                 }
             }
+
+            case SETUP_DONE -> handleSetupDone(content);
+
+
+
             case UNMATCH -> {
                 if (content.length > 0) {
                     eventBus.publishRequestingMatchesUpdated(content[0], true);
@@ -102,21 +107,22 @@ public class MessageHandler {
         }
     }
 
+    private void handleSetupDone(String[] content) {
+        logger.debug("handleSetupDone called");
+        if (content.length == 3) {
+            logger.debug("handleSetupDone content valid");
+            int time = Integer.parseInt(content[0]);
+            boolean isWhite = content[1].equalsIgnoreCase("true");
+            boolean mustTake = content[2].equalsIgnoreCase("true");
+            eventBus.publishSetupReceived(time, isWhite, mustTake);
+        }
+    }
+
+
     private void handleStateEvent(String[] content, String ID) {
-        if (content.length == 3 && ID.equalsIgnoreCase("match-setup")) {
-            try {
-                int time = Integer.parseInt(content[0]);
-                boolean isWhite = content[1].equalsIgnoreCase("true");
-                boolean mustTake = content[2].equalsIgnoreCase("true");
-                eventBus.publishSetupReceived(time, isWhite, mustTake);
-            } catch (NumberFormatException e) {
-                logger.error("Failed to parse setup state", e);
-            }
-        } else if (ID.equalsIgnoreCase("op-moved")) {
             if (content.length > 0) {
                 eventBus.publishOpponentMoved(content[0]);
             }
-        }
     }
 
     private void handleGameResult(String[] content, String ID) {

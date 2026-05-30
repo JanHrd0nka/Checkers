@@ -33,7 +33,7 @@ public class GameController extends Controller implements GameListener {
 
     // Herní stav
     private boolean isWhite;
-    private boolean mustTake = true;
+    private boolean mustTake;
     private int selectedRow = -1;
     private int selectedCol = -1;
 
@@ -45,7 +45,6 @@ public class GameController extends Controller implements GameListener {
         this.gameStateManager = new GameStateManager();
         this.sceneNavigator = new SceneNavigator(board, this);
 
-        gameStateManager.createNewGame();
         eventBus.registerGameListener(this);
     }
 
@@ -64,6 +63,10 @@ public class GameController extends Controller implements GameListener {
     public void setWhite(boolean white) {
         this.isWhite = white;
         gameStateManager.setIsWhite(white);
+    }
+
+    public boolean isWhite() {
+        return isWhite;
     }
 
     public void setMustTake(boolean mustTake) {

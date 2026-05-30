@@ -72,7 +72,6 @@ public class SetupController extends Controller implements SetupListener {
                             Platform.runLater(() -> {
                                 if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
                                     log.info("Setup confirmed by server");
-                                    setupGame(isWhite, mustTake);
                                 } else {
                                     log.error("Setup failed: {}", response.getContent());
                                     resetUI();

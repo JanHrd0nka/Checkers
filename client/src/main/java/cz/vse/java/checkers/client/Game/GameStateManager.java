@@ -14,7 +14,7 @@ public class GameStateManager {
 
     private Game2 game;
     private boolean isWhite;
-    private boolean mustTake = true;
+    private boolean mustTake;
 
     public GameStateManager() {
         this.game = new Game2(mustTake);
@@ -24,16 +24,9 @@ public class GameStateManager {
     public void createNewGame() {
         // Zde by měly přijít parametry ze serveru (čas, pravidla, počáteční pozice)
         // Zatím test pozice:
-        this.game = new Game2("""
-            0 3 0 3 0 3 0 3
-            3 0 3 0 3 0 3 0
-            0 3 0 3 0 3 0 3
-            0 0 0 0 0 0 0 0
-            0 0 0 0 0 0 0 0
-            1 0 1 0 1 0 1 0
-            0 1 0 1 0 1 0 1
-            1 0 1 0 1 0 1 0
-            """.replace("\n", "").replace(" ", ""));
+
+        //---end-test------
+        this.game = new Game2(mustTake);
         logger.info("New game created");
     }
 
