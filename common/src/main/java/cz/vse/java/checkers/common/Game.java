@@ -129,6 +129,17 @@ public class Game {
             for (Pos direction : directions){
                 exploreDirection(new ArrayList<>(List.of(pos)), direction, directions, result, new ArrayList<>());
             }
+            trimPossibleMoves(result);
+        }
+        return result;
+    }
+    public List<List<Pos>> getPossibleMovesNoTrim(Pos pos) {
+        List<List<Pos>> result = new ArrayList<>();
+        if (validateColor(pos)){
+            List<Pos> directions = getDirections(pos);
+            for (Pos direction : directions){
+                exploreDirection(new ArrayList<>(List.of(pos)), direction, directions, result, new ArrayList<>());
+            }
             //trimPossibleMoves(result);
         }
         return result;
@@ -139,9 +150,9 @@ public class Game {
         if (requireCaptureMove()){
             moves.removeIf(move -> !move.getFirst().isCaptureMove(move.get(1)));
         }
-        for (List<Pos> move : moves) {
-            move.removeFirst();
-        }
+//        for (List<Pos> move : moves) {
+//            move.removeFirst();
+//        }
     }
 
     private void exploreDirection(List<Pos> path, Pos direction, List<Pos> possibleDirections, List<List<Pos>> out, List<Pos> capturedPieces){
@@ -259,14 +270,14 @@ public class Game {
         return result;
     }
     private boolean requireCaptureMove(){
-        boolean result = mustTake;
-        if (result){
+        boolean result = false;
+        if (mustTake){
             for (int i = 0; i < BOARD_SIZE; ++i){
                 for (int j = 0; j < BOARD_SIZE; ++j) {
                     Pos pos = new Pos(i, j);
-                    var moves = getPossibleMoves(pos);
+                    var moves = getPossibleMovesNoTrim(pos);
                     for (var move : moves){
-                        if (move.size() > 1 || move.getFirst().isCaptureMove(pos)){
+                        if (move.size() > 2 || move.get(1).isCaptureMove(pos)){
                             result = true;
                             break;
                         }

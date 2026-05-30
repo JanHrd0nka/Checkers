@@ -32,7 +32,7 @@ public class TimeSender {
 
     public void run() {
         for (TimedGame g : games) {
-            g.sendTimes();
+            //g.sendTimes();
         }
     }
     public void shutdown() {
