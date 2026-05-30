@@ -1,0 +1,6 @@
+<configuration>
+    <server>
+        <host>localhost</host>
+        <port>5000</port>
+    </server>
+</configuration>

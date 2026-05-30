@@ -5,6 +5,7 @@ module cz.vse.java.checkers.client {
     requires org.slf4j;
     requires org.apache.commons.lang3;
     requires java.rmi;
+    requires java.xml;
 
     opens cz.vse.java.checkers.client to javafx.fxml;
     opens cz.vse.java.checkers.client.Game to javafx.fxml;
