@@ -291,9 +291,6 @@ public class Game {
         boolean row_result = pos.x() >= 0 && pos.x() < BOARD_SIZE;
         boolean col_result = pos.y() >= 0 && pos.y() < BOARD_SIZE;
         return row_result && col_result;
-//        boolean row_result = ((pos.x() >= 0) && (pos.x() < BOARD_SIZE));
-//        boolean col_result = ((pos.y() >= 0) && (pos.y() < BOARD_SIZE));
-//        return (row_result && col_result);
     }
 
     public boolean isWhiteToMove(){
