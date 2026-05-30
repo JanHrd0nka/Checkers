@@ -1,6 +1,6 @@
 package cz.vse.java.checkers.client.Game;
 
-import cz.vse.java.checkers.common.Game2;
+import cz.vse.java.checkers.common.Game;
 import cz.vse.java.checkers.common.Pos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,12 +12,12 @@ import java.util.List;
 public class GameStateManager {
     private static final Logger logger = LoggerFactory.getLogger(GameStateManager.class);
 
-    private Game2 game;
+    private Game game;
     private boolean isWhite;
     private boolean mustTake;
 
     public GameStateManager() {
-        this.game = new Game2(mustTake);
+        this.game = new Game(mustTake);
     }
 
     /**     * Vytvořit novou hru (ideálně s konfiguracemi ze serveru)     */
@@ -26,7 +26,7 @@ public class GameStateManager {
         // Zatím test pozice:
 
         //---end-test------
-        this.game = new Game2(mustTake);
+        this.game = new Game(mustTake);
         logger.info("New game created");
     }
 
@@ -55,7 +55,7 @@ public class GameStateManager {
     }
 
     /**     * Getter pro Game2     */
-    public Game2 getGame() {
+    public Game getGame() {
         return game;
     }
 
