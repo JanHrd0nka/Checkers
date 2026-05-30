@@ -192,8 +192,6 @@ public class ClientHandler implements Runnable {
                 log.warn("Invalid integer in SETUP: {}", tokens[2]);
                 send (ServerMessage.ERROR, tokens[1] + " Invalid_setup");
             }
-            // TODO smazat
-            time = 10;
             var match = player.getMatch();
             Player opponent = match.getOpponent(player);
             Player white;

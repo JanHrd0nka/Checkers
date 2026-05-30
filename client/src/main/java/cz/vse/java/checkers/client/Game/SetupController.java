@@ -59,7 +59,7 @@ public class SetupController extends Controller implements SetupListener {
         boolean mustTake = takeBox.isSelected();
         StringBuilder sb = new StringBuilder();
         String UID = generateID();
-        sb.append("60 ");
+        sb.append("600 ");
         sb.append(isWhite ? "w " : "b ");
         sb.append(mustTake ? "must" : "no");
 
