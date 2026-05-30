@@ -55,8 +55,10 @@ public class TimedGame extends Game {
 
     public synchronized void sendTimes(){
         updateTimes();
-        white.getClientHandler().send(ServerMessage.TIME, "server-id " + whiteRemainingTimeMsec + " " + blackRemainingTimeMsec);
-        black.getClientHandler().send(ServerMessage.TIME, "server-id " + whiteRemainingTimeMsec + " " + blackRemainingTimeMsec);
+        int whiteTime = (int)whiteRemainingTimeMsec / 1000;
+        int blackTime = (int)whiteRemainingTimeMsec / 1000;
+        white.getClientHandler().send(ServerMessage.TIME, "server-id " + whiteTime);
+        black.getClientHandler().send(ServerMessage.TIME, "server-id " + blackTime);
     }
 
     private synchronized void updateTimes(){
