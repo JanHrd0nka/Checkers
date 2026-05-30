@@ -50,8 +50,8 @@ public class TimedGame extends Game {
         if (!isFinished)
         {
             updateTimes();
-            int whiteTime = (int) whiteRemainingTimeMsec / 1000;
-            int blackTime = (int) blackRemainingTimeMsec / 1000;
+            int whiteTime = (int) (whiteRemainingTimeMsec / 1000);
+            int blackTime = (int) (blackRemainingTimeMsec / 1000);
             white.getClientHandler().send(ServerMessage.TIME, "server-id " + whiteTime);
             black.getClientHandler().send(ServerMessage.TIME, "server-id " + blackTime);
         }
