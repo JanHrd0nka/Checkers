@@ -75,6 +75,8 @@ public class HelloApplication extends Application {
         // Získání controllerů z FXML
         InitialConnControler initialConnControler = initialConnLoader.getController();
         initialConnControler.setNextScene(waitingRoomScene);
+        initialConnControler.setStage(stage);
+        initialConnControler.setThisScene(initialConnScene);
 
         WaitingRoomController waitingRoomController = waitingRoomLoader.getController();
         waitingRoomController.setNextScene(setupScene);
@@ -89,6 +91,7 @@ public class HelloApplication extends Application {
 
         gameController.setNextScene(waitingRoomScene);
         gameController.setPrevScene(setupScene);
+        boardController.setStage(stage);
 
         // Připojení MessageHandleru do Connection (aby mohl přijímat zprávy)
         // Controllery se registrují v eventBusu sami v initialize() metodě

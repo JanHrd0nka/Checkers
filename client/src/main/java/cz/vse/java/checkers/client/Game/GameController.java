@@ -129,11 +129,11 @@ public class GameController extends Controller implements GameListener {
 
     /**     * Obdržena zpráva o výsledku hry     */
     @Override
-    public void onGameResult(String winner, String score) {
+    public void onGameResult(String ID, String winner, String score) {
         Platform.runLater(() -> {
             String currentPlayerName = Connection.getInstance().getName();
             boolean isWin = Objects.equals(winner, currentPlayerName);
-            board.showResultDialog(isWin, score);
+            board.showResultDialog(ID, isWin, score);
         });
     }
 

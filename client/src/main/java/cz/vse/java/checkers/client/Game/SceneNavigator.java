@@ -1,5 +1,6 @@
 package cz.vse.java.checkers.client.Game;
 
+import cz.vse.java.checkers.client.Networking.Connection;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ public class SceneNavigator {
         this.boardController = boardController;
         this.gameController = gameController;
     }
+
 
     /**     * Navigovat do Setup scény     */
     public void navigateToSetup() {
@@ -42,4 +44,6 @@ public class SceneNavigator {
     private Stage getStage() {
         return boardController.getStage();
     }
+
+
 }

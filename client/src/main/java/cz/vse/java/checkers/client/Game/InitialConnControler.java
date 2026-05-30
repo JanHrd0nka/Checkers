@@ -1,6 +1,8 @@
 package cz.vse.java.checkers.client.Game;
 
 import cz.vse.java.checkers.client.Networking.Connection;
+import cz.vse.java.checkers.client.Networking.MessageEventBus;
+import cz.vse.java.checkers.client.Networking.MessageListeners.InitialConnectionListener;
 import cz.vse.java.checkers.client.Networking.ResponseManager;
 import cz.vse.java.checkers.client.Networking.MessageHandler;
 import cz.vse.java.checkers.common.ClientMessage;
@@ -9,21 +11,23 @@ import cz.vse.java.checkers.common.ServerMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class InitialConnControler extends Controller{
+public class InitialConnControler extends Controller implements InitialConnectionListener {
 
     private static final Logger log = LoggerFactory.getLogger(InitialConnControler.class);
     private MessageHandler handler;
+    private final MessageEventBus eventBus;
+    private Stage stage;
+    private Scene thisScene;
 
     @FXML
     private TextField nameField;
@@ -32,6 +36,10 @@ public class InitialConnControler extends Controller{
     @FXML
     private Label errorLbl;
 
+    public InitialConnControler() {
+        this.eventBus = MessageEventBus.getInstance();
+        eventBus.registerInitialConnectionListener(this);
+    }
 
     @FXML
     private void initialize() {
@@ -80,5 +88,36 @@ public class InitialConnControler extends Controller{
             }
         }
 
+    }
+
+    @Override
+    public void onServerDisconnected(){
+        log.debug("Initializing aletr window for server disconnected");
+        Platform.runLater(() -> {
+            Alert serverDisconnected = new Alert(Alert.AlertType.ERROR, "Server disconnected");
+
+            ButtonType reconnect = new ButtonType("Reconnect to server");
+            ButtonType close = new ButtonType("Close game");
+            serverDisconnected.getButtonTypes().setAll(reconnect, close);
+            Optional<ButtonType> result = serverDisconnected.showAndWait();
+            if (result.isPresent()) {
+                if (result.get() == reconnect) {
+                    Connection.getInstance().connect("localhost", 5000);
+                    stage.setScene(thisScene);
+                } else if (result.get() == close) {
+                    stage.close();
+                    System.exit(0);
+                }
+            }
+
+        });
+    }
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
+
+    public void setThisScene(Scene thisScene) {
+        this.thisScene = thisScene;
     }
 }

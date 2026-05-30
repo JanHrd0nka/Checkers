@@ -33,6 +33,8 @@ public class BoardController extends Controller {
     private static final int SQUARE_SIZE = 60;
     private static final int PIECE_RADIUS = 24;
 
+    private Stage stage;
+
     private GameController gameController;
     private GridPane checkersBoard;
     private Alert resultDialog;
@@ -209,15 +211,20 @@ public class BoardController extends Controller {
     }
 
     /**     * Zobrazit dialog s výsledkem hry     */
-    public void showResultDialog(boolean isWin, String score) {
+    public void showResultDialog(String ID, boolean isWin, String score) {
         drawBtn.setDisable(false);
         forfeightBtn.setDisable(false);
         String title = isWin ? "Výhra" : "Prohra";
         String header = isWin ? "Gratulace!" : "Bohužel...";
-        String content = isWin
-                ? "Vyhráli jste zápas \nSkóre: " + score
-                : "Prohráli jste zápas.\nSkóre: " + score;
+        String content;
 
+        if (ID.equals("surrender")) {
+            content = "Váš soupeř se vzdal\nSkóre: " + score;
+        }else{
+            content = isWin
+                    ? "Vyhráli jste zápas \nSkóre: " + score
+                    : "Prohráli jste zápas.\nSkóre: " + score;
+        }
         ButtonType backButton = new ButtonType("Back to waiting room");
         ButtonType rematchButton = new ButtonType("Offer rematch");
         resultDialog = new Alert(Alert.AlertType.NONE, content, backButton, rematchButton);
@@ -260,8 +267,13 @@ public class BoardController extends Controller {
     }
 
     public Stage getStage() {
-        return (Stage) drawBtn.getScene().getWindow();
+        return this.stage;
     }
+
+    public void setStage(Stage stage){
+        this.stage = stage;
+    }
+
 
     /**     * Cleanup - zavolat když se hra skončí     */
     public void cleanup() {

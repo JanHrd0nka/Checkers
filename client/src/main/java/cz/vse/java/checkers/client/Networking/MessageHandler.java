@@ -134,7 +134,7 @@ public class MessageHandler {
         if (content.length >= 2) {
             String winner = content[0];
             String score = content[1];
-            eventBus.publishGameResult(winner, score);
+            eventBus.publishGameResult(ID, winner, score);
         }
     }
 
@@ -158,10 +158,12 @@ public class MessageHandler {
 
     public void onConnectionFailed(IOException e) {
         logger.error("Connection failed: {}", e.getMessage());
+        eventBus.publishOnServerDisconnected();
     }
 
     public void onDisconnect() {
         logger.info("Disconnected from server");
+        eventBus.publishOnServerDisconnected();
     }
 
 }

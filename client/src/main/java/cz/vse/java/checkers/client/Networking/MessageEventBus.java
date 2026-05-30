@@ -99,20 +99,14 @@ public class MessageEventBus {
         gameListeners.forEach(listener -> listener.onOpponentMoved(boardState));
     }
 
-    public void publishGameResult(String winner, String score) {
+    public void publishGameResult(String ID, String winner, String score) {
         logger.debug("Publishing GameResult event: winner={}, score={}", winner, score);
-        gameListeners.forEach(listener -> listener.onGameResult(winner, score));
+        gameListeners.forEach(listener -> listener.onGameResult(ID, winner, score));
     }
 
     public void publishRematchOffer(boolean accepted) {
         logger.debug("Publishing RematchOffer event: accepted={}", accepted);
         gameListeners.forEach(listener -> listener.onRematchOffer(accepted));
-    }
-
-
-    public void publishConnectionResponse(String response) {
-        logger.debug("Publishing ConnectionResponse event");
-        initialConnectionListeners.forEach(listener -> listener.onConnectionResponse(response));
     }
 
     public void publishGameSetup(int i, boolean isWhite, boolean mustTake) {
@@ -133,5 +127,10 @@ public class MessageEventBus {
     public void publishTime(String s) {
         logger.debug("Publishing Time event: {}", s);
         gameListeners.forEach(listener -> listener.updateTime(s));
+    }
+
+    public void publishOnServerDisconnected() {
+        logger.debug("Publishing ServerDisconnected event");
+        initialConnectionListeners.forEach(InitialConnectionListener::onServerDisconnected);
     }
 }
