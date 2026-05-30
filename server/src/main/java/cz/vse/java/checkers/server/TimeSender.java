@@ -1,5 +1,7 @@
 package cz.vse.java.checkers.server;
 
+import cz.vse.java.checkers.common.Game;
+
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -8,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Timer {
 
-    private final Set<Player> players = ConcurrentHashMap.newKeySet();
+    private final Set<Game> games = ConcurrentHashMap.newKeySet();
 
     private final ScheduledExecutorService scheduler =
             Executors.newSingleThreadScheduledExecutor();
@@ -17,14 +19,12 @@ public class Timer {
         start();
     }
 
-    public void add(Player p1, Player p2) {
-        players.add(p1);
-        players.add(p2);
+    public void add(Game game) {
+        games.add(game);
     }
 
-    public void remove(Player p1, Player p2) {
-        players.remove(p1);
-        players.remove(p2);
+    public void remove(Game game) {
+        games.remove(game);
     }
 
     private void start() {
@@ -32,13 +32,8 @@ public class Timer {
     }
 
     public void run() {
-        for (Player p : players) {
-
-//            try {
-//                p.getClientHandler().sendTime();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
+        for (Game g : games) {
+            g.sendTime();
         }
     }
     public void shutdown() {
