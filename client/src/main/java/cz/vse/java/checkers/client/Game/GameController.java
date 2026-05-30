@@ -172,6 +172,7 @@ public class GameController extends Controller implements GameListener {
             logger.info("Game setup received: time={}, isWhite={}, mustTake={}", i, isWhite, mustTake);
             setWhite(isWhite);
             setMustTake(mustTake);
+            board.createNewGame();
         });
     }
 

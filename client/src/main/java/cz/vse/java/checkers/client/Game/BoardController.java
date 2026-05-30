@@ -6,6 +6,7 @@ import cz.vse.java.checkers.common.Pos;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
+import javafx.scene.Group;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -47,7 +48,7 @@ public class BoardController extends Controller {
     @FXML
     public void initialize() {
         logger.info("Initializing board");
-        createNewGame();
+        gameController = new GameController(this);
         forfeightBtn.setOnAction(actionEvent -> forgeightMatch());
         drawBtn.setOnAction(actionEvent -> offerDraw());
     }
@@ -56,17 +57,14 @@ public class BoardController extends Controller {
     /**     * Vytvořit novou hru     */
     public void createNewGame() {
         checkersBoard = new GridPane();
-        if (gameController == null) {
-            gameController = new GameController(this);
-        } else {
-            gameController.setupNewGame();
-        }
 
         logger.info("Drawing starting position");
         drawPieces();
 
         if (boardContainer.getChildren().isEmpty()) {
-            boardContainer.getChildren().add(checkersBoard);
+            Group boardWrapper = new Group(checkersBoard);
+            boardContainer.getChildren().add(boardWrapper);
+            checkersBoard.setRotate(gameController.isWhite() ? 90 : -90);
         }
     }
 
@@ -253,7 +251,7 @@ public class BoardController extends Controller {
     }
 
     public Stage getStage() {
-        return (Stage) checkersBoard.getScene().getWindow();
+        return (Stage) drawBtn.getScene().getWindow();
     }
 
     /**     * Cleanup - zavolat když se hra skončí     */
