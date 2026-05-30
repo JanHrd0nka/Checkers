@@ -5,8 +5,6 @@ import cz.vse.java.checkers.common.Pos;
 import cz.vse.java.checkers.common.ServerMessage;
 
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class TimedGame extends Game {
     private final Player white;
@@ -53,7 +51,7 @@ public class TimedGame extends Game {
         {
             updateTimes();
             int whiteTime = (int) whiteRemainingTimeMsec / 1000;
-            int blackTime = (int) whiteRemainingTimeMsec / 1000;
+            int blackTime = (int) blackRemainingTimeMsec / 1000;
             white.getClientHandler().send(ServerMessage.TIME, "server-id " + whiteTime);
             black.getClientHandler().send(ServerMessage.TIME, "server-id " + blackTime);
         }

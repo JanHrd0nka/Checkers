@@ -120,8 +120,8 @@ public class ClientHandler implements Runnable {
                     String playerName = wr.getName(player);
                     String opponentName = wr.getName(opponent);
                     opponent.offerMatch(player);
-                    setUpBeforeGame(player, playerName, opponentName, opponent);
-                    setUpBeforeGame(opponent, opponentName, playerName, player);
+                    setUpBeforeGame(player, playerName, opponentName);
+                    setUpBeforeGame(opponent, opponentName, playerName);
                     send(ServerMessage.OK, tokens[1]);
                     new Match(player, opponent);
                     server.broadcast(ServerMessage.PLAYERS_WAITING,wr.getPlayerNames());
@@ -137,14 +137,11 @@ public class ClientHandler implements Runnable {
             }
         }
     }
-    private void setUpBeforeGame(Player player, String playerName, String opponentName, Player opponent){
+    private void setUpBeforeGame(Player player, String playerName, String opponentName){
         Set<Player> playersToUnmatch = player.getOfferedMatches();
         for (Player playerToUnmatch : playersToUnmatch){
-            //if (playerToUnmatch != opponent)
-            //{
-                ClientHandler handler = playerToUnmatch.getClientHandler();
-                handler.send(ServerMessage.UNMATCH, "server-id " + playerName);
-            //}
+            ClientHandler handler = playerToUnmatch.getClientHandler();
+            handler.send(ServerMessage.UNMATCH, "server-id " + playerName);
         }
         player.clearOfferedMatches();
         player.clearOfferedRematches();
@@ -345,31 +342,16 @@ public class ClientHandler implements Runnable {
             if(tokens[2].equals("no")){
                 wr.setPlayerInWaitingRoom(player, true);
                 send(ServerMessage.OK, tokens[1] + " to-WR");
-//                opponent.getClientHandler().send(ServerMessage.REMATCH, tokens[1] + " no");
-//                wr.setPlayerInWaitingRoom(opponent, true);
                 server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
             } else if (opponent != null) {
                 // Pokud už opponent nabídl rematch tomuto hráči -> oboustranný souhlas
                 if (opponent.wantsRematch(player)) {
-                    String playerName = wr.getName(player);
-                    String opponentName = wr.getName(opponent);
-
-                    // Pokud už existuje Match instance mezi nimi, použijeme ji (tak zachováme skóre).
-                    // Pokud žádná instance neexistuje nebo reference neodpovídá, vytvoříme novou.
                     Match currentMatch = player.getMatch();
                     if (currentMatch == null || currentMatch.getOpponent(player) != opponent) {
-                        // vytvoříme novou instanci Match (to je fallback)
                         new Match(player, opponent);
                     }
-
-                    // Oba jdou do SETUP, použijeme stávající setUpBeforeGame (který už neodstraňuje jména)
-//                    setUpBeforeGame(player, playerName, opponentName, opponent);
-//                    setUpBeforeGame(opponent, opponentName, playerName, player);
-
                     send(ServerMessage.REMATCH, "accepted");
                     opponent.getClientHandler().send(ServerMessage.REMATCH, "accepted");
-
-
                     // Notifikujeme waiting-room klienty (pokud je třeba)
                     server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
                 }
