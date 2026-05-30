@@ -190,19 +190,21 @@ public class ClientHandler implements Runnable {
                 log.warn("Invalid integer in SETUP: {}", tokens[2]);
                 send (ServerMessage.ERROR, tokens[1] + " Invalid_setup");
             }
-            var match = player.getMatch();
-            Player opponent = match.getOpponent(player);
-            Player white;
-            if (isW){
-                white = player;
+            if (time > 0)
+            {
+                var match = player.getMatch();
+                Player opponent = match.getOpponent(player);
+                Player white;
+                if (isW) {
+                    white = player;
+                } else {
+                    white = opponent;
+                }
+                match.setUp(time, white, isMust, server.getTimeSender());
+                send(ServerMessage.OK, tokens[1]);
+                send(ServerMessage.SETUP_DONE, "server-id " + time + " " + isW + " " + isMust);
+                opponent.getClientHandler().send(ServerMessage.SETUP_DONE, "server-id " + time + " " + !isW + " " + isMust);
             }
-            else{
-                white = opponent;
-            }
-            match.setUp(time, white, isMust, server.getTimeSender());
-            send(ServerMessage.OK, tokens[1]);
-            send(ServerMessage.SETUP_DONE, "server-id " + time + " " + isW + " " + isMust);
-            opponent.getClientHandler().send(ServerMessage.SETUP_DONE, "server-id " + time + " " + !isW + " " + isMust);
         }
     }
 
