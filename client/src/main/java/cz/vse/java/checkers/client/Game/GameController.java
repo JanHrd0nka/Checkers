@@ -6,14 +6,9 @@ import cz.vse.java.checkers.client.Networking.Connection;
 import cz.vse.java.checkers.client.Networking.MessageHandler;
 import cz.vse.java.checkers.common.*;
 import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.rmi.server.UID;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -77,7 +72,7 @@ public class GameController extends Controller implements GameListener {
         return gameStateManager.isWhiteToMove() == isWhite;
     }
 
-    public Game2 getGame() {
+    public Game getGame() {
         return gameStateManager.getGame();
     }
 

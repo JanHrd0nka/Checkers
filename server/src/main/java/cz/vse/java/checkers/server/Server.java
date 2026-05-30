@@ -12,16 +12,17 @@ import java.util.Set;
 
 public class Server {
     private final Logger log;
-
     private final int port;
     private ServerSocket serverSocket;
     private final Set<ClientHandler> clients = new HashSet<>();
     private WaitingRoom waitingRoom;
+    private final TimeSender timeSender;
 
     public Server(int port) {
         this.port = port;
         log = LoggerFactory.getLogger(Server.class);
         waitingRoom = new WaitingRoom();
+        timeSender = new TimeSender();
     }
 
     public void start() {
@@ -58,6 +59,10 @@ public class Server {
             log.error(e.getMessage());
             log.info("Server stopped");
         }
+    }
+
+    public TimeSender getTimeSender(){
+        return timeSender;
     }
 
     public void removeClient(ClientHandler clientHandler) {

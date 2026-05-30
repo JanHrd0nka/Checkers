@@ -1,22 +1,16 @@
 package cz.vse.java.checkers.server;
 
 import cz.vse.java.checkers.common.ClientMessage;
-import cz.vse.java.checkers.common.Game2;
 import cz.vse.java.checkers.common.Pos;
 import cz.vse.java.checkers.common.ServerMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.plaf.OptionPaneUI;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
-import java.util.random.RandomGenerator;
-
-import static cz.vse.java.checkers.common.ServerMessage.OK;
 
 public class ClientHandler implements Runnable {
 
@@ -198,6 +192,8 @@ public class ClientHandler implements Runnable {
                 log.warn("Invalid integer in SETUP: {}", tokens[2]);
                 send (ServerMessage.ERROR, tokens[1] + " Invalid_setup");
             }
+            // TODO smazat
+            time = 10;
             var match = player.getMatch();
             Player opponent = match.getOpponent(player);
             Player white;
@@ -207,7 +203,7 @@ public class ClientHandler implements Runnable {
             else{
                 white = opponent;
             }
-            match.setUp(time, white, isMust);
+            match.setUp(time, white, isMust, server.getTimeSender());
             send(ServerMessage.OK, tokens[1]);
             send(ServerMessage.SETUP_DONE, "server-id " + time + " " + isW + " " + isMust);
             opponent.getClientHandler().send(ServerMessage.SETUP_DONE, "server-id " + time + " " + !isW + " " + isMust);
@@ -238,6 +234,7 @@ public class ClientHandler implements Runnable {
                     match.getOpponent (player).getClientHandler().send(ServerMessage.STATE, "server-id " + currentState);
                     if (!match.checkGameState()){
                         sendResult(player, false);
+                        server.getTimeSender().remove(match.getGame());
                     }
                 }
                 else{

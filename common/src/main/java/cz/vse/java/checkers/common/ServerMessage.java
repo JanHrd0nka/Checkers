@@ -13,5 +13,6 @@ public enum ServerMessage {
     HISTORY,
     RESULT,
     REMATCH,
-    DRAW
+    DRAW,
+    TIME
 }

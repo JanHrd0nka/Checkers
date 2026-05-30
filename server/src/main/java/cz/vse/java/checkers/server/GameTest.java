@@ -1,6 +1,6 @@
 package cz.vse.java.checkers.server;
 
-import cz.vse.java.checkers.common.Game2;
+import cz.vse.java.checkers.common.Game;
 import cz.vse.java.checkers.common.Pos;
 
 import java.util.ArrayList;
@@ -79,7 +79,7 @@ public class GameTest {
     }
 
     private void testPossibleMoves(String content, Pos pos) {
-        Game2 game = new Game2(content);
+        Game game = new Game(content);
         var moves = game.getPossibleMoves(pos);
 
         for (var path : moves) {
@@ -101,7 +101,7 @@ public class GameTest {
         }
     }
     private void testMove(String content, List<Pos> path){
-        Game2 game = new Game2(content);
+        Game game = new Game(content);
         printBoard(game);
         System.out.println("-----------");
         game.makeMove(path);
@@ -111,7 +111,7 @@ public class GameTest {
         System.out.println("-----------");
     }
 
-    private void printBoard(Game2 game) {
+    private void printBoard(Game game) {
 
         String content = game.toContent();
 

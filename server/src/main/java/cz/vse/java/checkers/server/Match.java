@@ -1,14 +1,14 @@
 package cz.vse.java.checkers.server;
 
-import cz.vse.java.checkers.common.Game2;
 import cz.vse.java.checkers.common.Pos;
 
+import java.sql.Time;
 import java.util.List;
 
 public class Match {
     private final Player p1;
     private final Player p2;
-    private Game2 game;
+    private TimedGame game;
     private Player currentPlayer;
     private boolean drawOffered;
     public Match (Player p1, Player p2){
@@ -17,20 +17,11 @@ public class Match {
         p1.setMatch(this);
         p2.setMatch(this);
     }
-    public synchronized void setUp(int time, Player white, boolean mustTake){
-        //game = new Game2(mustTake);
-        //test
-        game = new Game2("""
-        0 0 0 0 0 0 0 0
-        0 0 4 0 3 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 4 0 3 0 0 0
-        0 0 0 2 0 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        """.replace("\n", "").replace(" ", ""));
+    public synchronized void setUp(int time, Player white, boolean mustTake, TimeSender timeSender){
         currentPlayer = white;
+        var black = getOpponent(white);
+        game = new TimedGame(mustTake, white, black, time);
+        timeSender.add(game);
     }
 
     public synchronized boolean isSetup(){
@@ -94,4 +85,7 @@ public class Match {
         game = null;
     }
 
+    public TimedGame getGame(){
+        return game;
+    }
 }

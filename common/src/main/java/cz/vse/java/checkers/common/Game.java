@@ -3,20 +3,20 @@ package cz.vse.java.checkers.common;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Game2 {
+public class Game {
     private List<String> gameHistory;
     private List<List<Figure>> board;
     private boolean whiteToMove;
     private static final int BOARD_SIZE = 8;
     private final boolean mustTake;
-    public Game2(boolean mustTake){
+    public Game(boolean mustTake){
         setPieces();
         whiteToMove = true;
         this.mustTake = mustTake;
         gameHistory = new ArrayList<>();
         gameHistory.add(toContent());
     }
-    public Game2(String content){
+    public Game(String content){
         gameHistory = new ArrayList<>();
         whiteToMove = true;
         mustTake = false;
@@ -92,8 +92,7 @@ public class Game2 {
         }
     }
 
-
-    public boolean makeMove(List<Pos> path){
+    public synchronized boolean makeMove(List<Pos> path){
         boolean result = false;
         if (path.size() >= 2 && (getPossibleMoves(path.getFirst()).contains(path))) {
             Pos from = path.getFirst();
@@ -238,7 +237,7 @@ public class Game2 {
             setPiece(pos, Figure.BLACK_KING);
         }
     }
-    public boolean checkGameState(){
+    public synchronized boolean checkGameState(){
         boolean result = false;
         for (int i = 0; i < BOARD_SIZE; ++i){
             for (int j = 0; j < BOARD_SIZE; ++j){
@@ -282,7 +281,6 @@ public class Game2 {
         boolean col_result = pos.y() >= 0 && pos.y() < BOARD_SIZE;
         return row_result && col_result;
     }
-
 
     public boolean isWhiteToMove(){
         return whiteToMove;

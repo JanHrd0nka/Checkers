@@ -1,7 +1,5 @@
 package cz.vse.java.checkers.server;
 
-import cz.vse.java.checkers.common.Game2;
-
 public class ServerMain {
     public static void main(String[] args) {
        // test();
