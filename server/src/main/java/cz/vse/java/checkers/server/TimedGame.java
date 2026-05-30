@@ -63,13 +63,13 @@ public class TimedGame extends Game {
         if (isWhiteToMove()) {
             whiteRemainingTimeMsec -= delta;
             if (whiteRemainingTimeMsec < 0) {
-                white.getClientHandler().sendResult(white, false);
+                white.getClientHandler().stopGame(white, false);
                 isFinished = true;
             }
         } else {
             blackRemainingTimeMsec -= delta;
             if (blackRemainingTimeMsec < 0) {
-                black.getClientHandler().sendResult(black, false);
+                black.getClientHandler().stopGame(black, false);
                 isFinished = true;
             }
         }

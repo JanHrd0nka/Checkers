@@ -228,8 +228,7 @@ public class ClientHandler implements Runnable {
                     send(ServerMessage.STATE, "server-id " + currentState);
                     match.getOpponent (player).getClientHandler().send(ServerMessage.STATE, "server-id " + currentState);
                     if (!match.checkGameState()){
-                        sendResult(player, false);
-                        server.getTimeSender().remove(match.getGame());
+                        stopGame(player, false);
                     }
                 }
                 else{
@@ -303,7 +302,7 @@ public class ClientHandler implements Runnable {
     private void handleSurrender(String[] tokens) {
         log.info("SURRENDER request");
         if(validateLenght(2, tokens)){
-            sendResult(player, true);
+            stopGame(player, true);
             log.info("Sent surrender results");
         }
     }
@@ -368,7 +367,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public synchronized void sendResult(Player player, boolean isSurrender){
+    public synchronized void stopGame(Player player, boolean isSurrender){
         Match match = player.getMatch();
         Player winner;
         Player loser;
@@ -388,6 +387,7 @@ public class ClientHandler implements Runnable {
 
         winner.getClientHandler().send(ServerMessage.RESULT, ID + " " + winner.getName() + " " + score);
         loser.getClientHandler().send(ServerMessage.RESULT, ID + " " + winner.getName()+ " " + score);
+        server.getTimeSender().remove(match.getGame());
         match.endGame();
     }
 
@@ -415,7 +415,7 @@ public class ClientHandler implements Runnable {
             if (match != null){
                 var opponent = match.getOpponent(player);
                 if (opponent != null){
-                    sendResult(player, true);
+                    stopGame(player, true);
                 }
             }
         }

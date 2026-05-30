@@ -21,7 +21,10 @@ public class TimeSender {
     }
 
     public void remove(TimedGame game) {
-        games.remove(game);
+        if (game != null)
+        {
+            games.remove(game);
+        }
     }
 
     private void start() {
