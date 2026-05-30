@@ -103,6 +103,11 @@ public class MessageHandler {
                     eventBus.publishDrawDeclined();
                 }
             }
+            case TIME -> {
+                if(content.length == 1){
+                    eventBus.publishTime(content[0]);
+                }
+            }
             default -> logger.warn("Unknown server message type: {}", msgType);
         }
     }

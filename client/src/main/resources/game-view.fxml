@@ -27,7 +27,8 @@
      <buttons>
        <Button fx:id="forfeightBtn" mnemonicParsing="false" text="Forfeight" />
          <Button fx:id="drawBtn" mnemonicParsing="false" text="Offer draw" />
-         <Label text="Time remaining: XXXX" />
+         <Label text="Time remaining:" />
+         <Label fx:id="timeLabel" text="Time remaining:" />
      </buttons>
    </ButtonBar>
 

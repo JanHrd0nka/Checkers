@@ -129,4 +129,9 @@ public class MessageEventBus {
         logger.debug("Publishing DrawDeclined event");
         gameListeners.forEach(GameListener::onDrawDeclined);
     }
+
+    public void publishTime(String s) {
+        logger.debug("Publishing Time event: {}", s);
+        gameListeners.forEach(listener -> listener.updateTime(s));
+    }
 }

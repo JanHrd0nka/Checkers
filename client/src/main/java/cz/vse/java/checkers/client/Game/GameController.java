@@ -27,8 +27,6 @@ public class GameController extends Controller implements GameListener {
     private BoardController board;
 
     // Herní stav
-    private boolean isWhite;
-    private boolean mustTake;
     private int selectedRow = -1;
     private int selectedCol = -1;
 
@@ -50,27 +48,17 @@ public class GameController extends Controller implements GameListener {
 
     // ===== METHOD DELEGATION =====
 
-    public void setupNewGame() {
-        gameStateManager.createNewGame();
+    public void setupNewGame(boolean isWhite, boolean mustTake) {
+        gameStateManager.createNewGame(isWhite, mustTake);
         board.resetBoardDisplay();
     }
 
-    public void setWhite(boolean white) {
-        this.isWhite = white;
-        gameStateManager.setIsWhite(white);
-    }
-
     public boolean isWhite() {
-        return isWhite;
-    }
-
-    public void setMustTake(boolean mustTake) {
-        this.mustTake = mustTake;
-        gameStateManager.setMustTake(mustTake);
+        return gameStateManager.isWhite();
     }
 
     public boolean isPlayerTurn() {
-        return gameStateManager.isWhiteToMove() == isWhite;
+        return gameStateManager.isWhiteToMove() == gameStateManager.isWhite();
     }
 
     public Game getGame() {
@@ -171,9 +159,7 @@ public class GameController extends Controller implements GameListener {
     public void onGameSetup(int i, boolean isWhite, boolean mustTake) {
         Platform.runLater(() -> {
             logger.info("Game setup received: time={}, isWhite={}, mustTake={}", i, isWhite, mustTake);
-            setWhite(isWhite);
-            setMustTake(mustTake);
-            board.createNewGame();
+            board.createNewGame(isWhite, mustTake);
         });
     }
 
@@ -190,6 +176,14 @@ public class GameController extends Controller implements GameListener {
         Platform.runLater(() -> {
             logger.info("Opponent declined draw offer, displaying declined alert");
             board.drawDeclined();
+        });
+    }
+
+    @Override
+    public void updateTime(String s) {
+        Platform.runLater(() -> {
+            logger.info("Received time update from server: {}", s);
+            board.updateTime(s);
         });
     }
 
