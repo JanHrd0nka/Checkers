@@ -209,8 +209,8 @@ public class ClientHandler implements Runnable {
             }
             match.setUp(time, white, isMust);
             send(ServerMessage.OK, tokens[1]);
-            send(ServerMessage.STATE, "server-id " + time + " " + isW + " " + isMust);
-            opponent.getClientHandler().send(ServerMessage.STATE, "match-setup " + time + " " + !isW + " " + isMust);
+            send(ServerMessage.SETUP_DONE, "server-id " + time + " " + isW + " " + isMust);
+            opponent.getClientHandler().send(ServerMessage.SETUP_DONE, "server-id " + time + " " + !isW + " " + isMust);
         }
     }
 
@@ -235,7 +235,7 @@ public class ClientHandler implements Runnable {
                     String currentState = match.getGameContent();
                     send(ServerMessage.OK, tokens[1]);
                     send(ServerMessage.STATE, "server-id " + currentState);
-                    match.getOpponent (player).getClientHandler().send(ServerMessage.STATE, "op-moved " + currentState);
+                    match.getOpponent (player).getClientHandler().send(ServerMessage.STATE, "server-id " + currentState);
                     if (!match.checkGameState()){
                         sendResult(player, false);
                     }

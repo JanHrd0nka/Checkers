@@ -7,6 +7,7 @@ public enum ServerMessage {
     MATCH,
     UNMATCH,
     SETUP,
+    SETUP_DONE,
     STATE,
     MOVED,
     HISTORY,
