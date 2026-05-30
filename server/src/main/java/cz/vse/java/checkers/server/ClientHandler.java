@@ -201,7 +201,6 @@ public class ClientHandler implements Runnable {
             else{
                 white = opponent;
             }
-            time = 10;
             match.setUp(time, white, isMust, server.getTimeSender());
             send(ServerMessage.OK, tokens[1]);
             send(ServerMessage.SETUP_DONE, "server-id " + time + " " + isW + " " + isMust);
@@ -488,9 +487,5 @@ public class ClientHandler implements Runnable {
             }
         }
         return result;
-    }
-
-    public void onTimeout(){
-
     }
 }
