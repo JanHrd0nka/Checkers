@@ -3,6 +3,7 @@ package cz.vse.java.checkers.client.Game;
 import cz.vse.java.checkers.common.ClientMessage;
 import cz.vse.java.checkers.common.Figure;
 import cz.vse.java.checkers.common.Pos;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -10,6 +11,7 @@ import javafx.scene.Group;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -20,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /** * BoardController - odpovídá za UI vykreslování desky. * Deleguje herní logiku GameControlleru. */
@@ -41,6 +44,8 @@ public class BoardController extends Controller {
     private Button forfeightBtn;
     @FXML
     private Button drawBtn;
+    @FXML
+    private Label timeLabel;
 
     private Group boardWrapper;
 
@@ -57,9 +62,9 @@ public class BoardController extends Controller {
 
 
     /**     * Vytvořit novou hru     */
-    public void createNewGame() {
+    public void createNewGame(boolean isWhite, boolean mustTake) {
         checkersBoard = new GridPane();
-        gameController.setupNewGame();
+        gameController.setupNewGame(isWhite, mustTake);
 
         logger.info("Drawing starting position");
         drawPieces();
@@ -299,5 +304,12 @@ public class BoardController extends Controller {
             forfeightBtn.setDisable(false);
         });
         drawAlert.show();
+    }
+
+    public void updateTime(String s) {
+        String current = timeLabel.getText();
+        if(!Objects.equals(current, s)){
+            Platform.runLater(() -> timeLabel.setText(s));
+        }
     }
 }

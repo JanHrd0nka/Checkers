@@ -14,14 +14,14 @@ public class GameStateManager {
 
     private Game game;
     private boolean isWhite;
-    private boolean mustTake;
 
     public GameStateManager() {
     }
 
     /**     * Vytvořit novou hru (ideálně s konfiguracemi ze serveru)     */
-    public void createNewGame() {
+    public void createNewGame(boolean isWhite, boolean mustTake) {
         // Zde by měly přijít parametry ze serveru (čas, pravidla, počáteční pozice)
+        setIsWhite(isWhite);
         this.game = new Game(mustTake);
         logger.info("New game created");
     }
@@ -63,7 +63,4 @@ public class GameStateManager {
         return isWhite;
     }
 
-    public void setMustTake(boolean mustTake) {
-        this.mustTake = mustTake;
-    }
 }

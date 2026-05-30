@@ -10,4 +10,6 @@ public interface GameListener extends MessageListener {
     void onDrawOffer();
 
     void onDrawDeclined();
+
+    void updateTime(String s);
 }
