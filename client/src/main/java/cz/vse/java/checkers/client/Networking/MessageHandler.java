@@ -38,7 +38,7 @@ public class MessageHandler {
             String ID = msg.getID();
             String contentStr = msg.getContent();
 
-            // Bezpečné parsování obsahu (kezde null-safe)
+            // Bezpečné parsování obsahu (kazde null-safe)
             String[] content = parseContent(contentStr);
 
             if (content.length > 0) {

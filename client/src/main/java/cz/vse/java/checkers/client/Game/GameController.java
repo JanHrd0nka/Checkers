@@ -66,6 +66,7 @@ public class GameController extends Controller implements GameListener {
 
     public void setMustTake(boolean mustTake) {
         this.mustTake = mustTake;
+        gameStateManager.setMustTake(mustTake);
     }
 
     public boolean isPlayerTurn() {
@@ -154,7 +155,7 @@ public class GameController extends Controller implements GameListener {
         Platform.runLater(() -> {
             if (accepted) {
                 logger.info("Opponent accepted rematch");
-                setupNewGame();
+                //setupNewGame();
                 sceneNavigator.navigateToSetup();
             } else {
                 Platform.runLater(() -> {
@@ -195,7 +196,7 @@ public class GameController extends Controller implements GameListener {
 
     /**     * Vrátit se do waiting roomu     */
     public void returnToWaitingRoom() {
-        setupNewGame(); // Reset hry
+       // setupNewGame(); // Reset hry
 
         String name = Connection.getInstance().getName();
         String UID = generateID();

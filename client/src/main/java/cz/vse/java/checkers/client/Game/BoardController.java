@@ -42,6 +42,8 @@ public class BoardController extends Controller {
     @FXML
     private Button drawBtn;
 
+    private Group boardWrapper;
+
 
 
     /**     * Inicializace scény     */
@@ -57,12 +59,13 @@ public class BoardController extends Controller {
     /**     * Vytvořit novou hru     */
     public void createNewGame() {
         checkersBoard = new GridPane();
+        gameController.setupNewGame();
 
         logger.info("Drawing starting position");
         drawPieces();
 
         if (boardContainer.getChildren().isEmpty()) {
-            Group boardWrapper = new Group(checkersBoard);
+            boardWrapper = new Group(checkersBoard);
             boardContainer.getChildren().add(boardWrapper);
             checkersBoard.setRotate(gameController.isWhite() ? 90 : -90);
         }
@@ -73,6 +76,7 @@ public class BoardController extends Controller {
         logger.info("Resetting board display");
         gameController.setSelectedRow(-1);
         gameController.setSelectedCol(-1);
+        boardContainer.getChildren().remove(boardWrapper);
         drawPieces();
     }
 
@@ -173,7 +177,7 @@ public class BoardController extends Controller {
         List<List<Pos>> possibleMoves = gameController.getGame().getPossibleMoves(pos);
 
         for (List<Pos> movePath : possibleMoves) {
-            if (movePath.size() > 1) {
+            if (!movePath.isEmpty()) {
                 Pos targetPos = movePath.getLast();
                 Rectangle highlight = new Rectangle(SQUARE_SIZE, SQUARE_SIZE);
                 highlight.setFill(Color.web("#FFFF00", 0.5)); // Semi-transparent yellow

@@ -9,6 +9,8 @@
    <children>
       <CheckBox fx:id="colorBox" mnemonicParsing="false" text="white ?" />
       <CheckBox fx:id="takeBox" mnemonicParsing="false" text="must take" />
+      <Label text="Set time for move" />
+      <TextField fx:id="timeSelector" />
       <Button fx:id="confirmBtn" mnemonicParsing="false" text="Confirm setup" />
    </children>
 </VBox>

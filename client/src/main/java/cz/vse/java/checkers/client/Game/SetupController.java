@@ -12,6 +12,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,8 @@ public class SetupController extends Controller implements SetupListener {
 
     @FXML
     private Button confirmBtn;
+    @FXML
+    private TextField timeSelector;
 
     @FXML
     private void initialize() {
@@ -49,17 +53,18 @@ public class SetupController extends Controller implements SetupListener {
     @Override
     public void onSetupReceived(int time, boolean isWhite, boolean mustTake) {
         Platform.runLater(() -> {
-            log.info("Setup received from opponent: white={}, mustTake={}", isWhite, mustTake);
-            setupGame(isWhite, mustTake);
+            log.info("Setup received from opponent: time = {}, white={}, mustTake={}", time, isWhite, mustTake);
+            setupGame(time, isWhite, mustTake);
         });
     }
 
     private void confirm() {
+        String time = timeSelector.getText();
         boolean isWhite = colorBox.isSelected();
         boolean mustTake = takeBox.isSelected();
         StringBuilder sb = new StringBuilder();
         String UID = generateID();
-        sb.append("600 ");
+        sb.append(time).append(" ");
         sb.append(isWhite ? "w " : "b ");
         sb.append(mustTake ? "must" : "no");
 
@@ -93,8 +98,8 @@ public class SetupController extends Controller implements SetupListener {
         }
     }
 
-    private void setupGame(boolean isWhite, boolean mustTake) {
-        eventBus.publishGameSetup(60, isWhite, mustTake);
+    private void setupGame(int time, boolean isWhite, boolean mustTake) {
+        eventBus.publishGameSetup(time, isWhite, mustTake);
         resetUI();
         Stage stage = (Stage) confirmBtn.getScene().getWindow();
         stage.setScene(getNextScene());
@@ -104,6 +109,7 @@ public class SetupController extends Controller implements SetupListener {
         Platform.runLater(() -> {
             colorBox.setSelected(false);
             takeBox.setSelected(false);
+            timeSelector.setText("");
             confirmBtn.setDisable(false);
             log.debug("Setup UI reset");
         });

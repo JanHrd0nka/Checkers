@@ -17,15 +17,11 @@ public class GameStateManager {
     private boolean mustTake;
 
     public GameStateManager() {
-        this.game = new Game(mustTake);
     }
 
     /**     * Vytvořit novou hru (ideálně s konfiguracemi ze serveru)     */
     public void createNewGame() {
         // Zde by měly přijít parametry ze serveru (čas, pravidla, počáteční pozice)
-        // Zatím test pozice:
-
-        //---end-test------
         this.game = new Game(mustTake);
         logger.info("New game created");
     }
