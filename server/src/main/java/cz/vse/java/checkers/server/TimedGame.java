@@ -9,19 +9,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class TimedGame extends Game {
-
-    public interface TimeoutListener {
-        void onTimeout(Player loser);
-    }
     private final Player white;
     private final Player black;
 
     private long whiteRemainingTimeMsec;
     private long blackRemainingTimeMsec;
     private long lastUpdateMsec;
-
-    private final ScheduledExecutorService scheduler =
-            Executors.newSingleThreadScheduledExecutor();
+    private boolean isFinished;
 
     public TimedGame(boolean mustTake,
                      Player white,
@@ -34,6 +28,7 @@ public class TimedGame extends Game {
         whiteRemainingTimeMsec = (long)timeLimitSeconds * 1000;
         blackRemainingTimeMsec = (long)timeLimitSeconds * 1000;
         lastUpdateMsec = System.currentTimeMillis();
+        isFinished = false;
     }
 
     @Override
@@ -54,21 +49,31 @@ public class TimedGame extends Game {
     }
 
     public synchronized void sendTimes(){
-        updateTimes();
-        int whiteTime = (int)whiteRemainingTimeMsec / 1000;
-        int blackTime = (int)whiteRemainingTimeMsec / 1000;
-        white.getClientHandler().send(ServerMessage.TIME, "server-id " + whiteTime);
-        black.getClientHandler().send(ServerMessage.TIME, "server-id " + blackTime);
+        if (!isFinished)
+        {
+            updateTimes();
+            int whiteTime = (int) whiteRemainingTimeMsec / 1000;
+            int blackTime = (int) whiteRemainingTimeMsec / 1000;
+            white.getClientHandler().send(ServerMessage.TIME, "server-id " + whiteTime);
+            black.getClientHandler().send(ServerMessage.TIME, "server-id " + blackTime);
+        }
     }
 
     private synchronized void updateTimes(){
         long now = System.currentTimeMillis();
         long delta = now - lastUpdateMsec;
-        if (isWhiteToMove()){
+        if (isWhiteToMove()) {
             whiteRemainingTimeMsec -= delta;
-        }
-        else {
+            if (whiteRemainingTimeMsec < 0) {
+                white.getClientHandler().sendResult(white, false);
+                isFinished = true;
+            }
+        } else {
             blackRemainingTimeMsec -= delta;
+            if (blackRemainingTimeMsec < 0) {
+                black.getClientHandler().sendResult(black, false);
+                isFinished = true;
+            }
         }
         lastUpdateMsec = now;
     }

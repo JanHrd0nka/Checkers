@@ -20,6 +20,9 @@ public class Match {
     public synchronized void setUp(int time, Player white, boolean mustTake, TimeSender timeSender){
         currentPlayer = white;
         var black = getOpponent(white);
+        if (game != null){
+            timeSender.remove(game);
+        }
         game = new TimedGame(mustTake, white, black, time);
         timeSender.add(game);
     }
