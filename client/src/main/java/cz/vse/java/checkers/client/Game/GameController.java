@@ -20,11 +20,10 @@ public class GameController extends Controller implements GameListener {
     private static final int NETWORK_TIMEOUT_SECONDS = 5;
 
     private final MessageHandler handler;
-    private final MessageEventBus eventBus;
     private final GameStateManager gameStateManager;
     private final SceneNavigator sceneNavigator;
 
-    private BoardController board;
+    private final BoardController board;
 
     // Herní stav
     private int selectedRow = -1;
@@ -34,16 +33,11 @@ public class GameController extends Controller implements GameListener {
     public GameController(BoardController board) {
         this.board = board;
         this.handler = Connection.getInstance().getHandler();
-        this.eventBus = MessageEventBus.getInstance();
+        MessageEventBus eventBus = MessageEventBus.getInstance();
         this.gameStateManager = new GameStateManager();
         this.sceneNavigator = new SceneNavigator(board, this);
 
         eventBus.registerGameListener(this);
-    }
-
-    /**     * Cleanup - odpojit listener když jde hra skončit     */
-    public void cleanup() {
-        eventBus.unregisterGameListener(this);
     }
 
     // ===== METHOD DELEGATION =====
@@ -80,12 +74,6 @@ public class GameController extends Controller implements GameListener {
     public void setSelectedCol(int selectedCol) {
         this.selectedCol = selectedCol;
     }
-
-    private void resetSelectedPosition() {
-        this.selectedRow = -1;
-        this.selectedCol = -1;
-    }
-
 
 
     // ===== NETWORK OPERATIONS =====
@@ -210,11 +198,13 @@ public class GameController extends Controller implements GameListener {
         });
     }
 
-    /**     * Poslat rematch nabídku     */
-    public boolean sendRematchMessage(ClientMessage token, String UID, String message) {
+    /**
+     * Poslat rematch nabídku
+     */
+    public void sendRematchMessage(ClientMessage token, String UID, String message) {
         if (!handler.send(token, UID, message)) {
             logger.error("Failed to send rematch message");
-            return false;
+            return;
         }
 
         sendNetworkMessage(UID, response -> {
@@ -230,14 +220,13 @@ public class GameController extends Controller implements GameListener {
             }
         });
 
-        return true;
     }
 
     // ===== PRIVATE HELPER METHODS =====
 
     /**     * Formátovat data pohybu     */
     private String formatMoveData(Pos from, Pos to) {
-        return from.x() + "" + from.y() + "" + to.x() + "" + to.y();
+        return String.valueOf(from.x()) + from.y() + to.x() + to.y();
     }
 
     /**     * Kontrola, zda je odpověď úspěšná     */
@@ -262,16 +251,7 @@ public class GameController extends Controller implements GameListener {
 
     /**     * Aktualizovat zobrazení desky     */
     private void updateBoardDisplay() {
-        Platform.runLater(() -> board.drawPieces());
-    }
-
-    /**     * Přístupový bod pro BoardController     */
-    public void moveOpponentPiece(Pos from, Pos to) {
-        // Tato metoda se volá když BoardController či hra dostane zprávu o pohybu
-        if (from != null && to != null) {
-            gameStateManager.makeMove(from, to);
-            updateBoardDisplay();
-        }
+        Platform.runLater(board::drawPieces);
     }
 
     public void sendForfeitMessage(ClientMessage clientMessage, String uid, String s) {
@@ -310,7 +290,7 @@ public class GameController extends Controller implements GameListener {
         if(!handler.send(ClientMessage.DRAW, UID, message)){
             logger.error("Failed to send draw response");
         }else{
-            sendNetworkMessage(UID, response -> {;
+            sendNetworkMessage(UID, response -> {
                 if (isSuccessResponse(response)) {
                     logger.debug("Successful server response on draw offer: {}", message);
                 } else {

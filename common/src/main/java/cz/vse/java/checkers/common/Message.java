@@ -1,13 +1,11 @@
 package cz.vse.java.checkers.common;
 
-import java.sql.Time;
-import java.time.LocalTime;
 import java.util.*;
 
 public class Message {
-    private String ID;
-    private String token;
-    private String content;
+    private final String ID;
+    private final String token;
+    private final String content;
 
     public Message(String message){
         ArrayList<String> parts = new ArrayList<>(List.of(message.split(" ")));

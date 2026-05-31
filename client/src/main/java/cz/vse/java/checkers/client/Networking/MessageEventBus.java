@@ -1,6 +1,5 @@
 package cz.vse.java.checkers.client.Networking;
 
-import cz.vse.java.checkers.client.Game.GameController;
 import cz.vse.java.checkers.client.Networking.MessageListeners.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +8,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /** * Centrální event bus pro publikování zpráv od serveru. * Používá observer pattern pro decoupling MessageHandler od UI komponent. */
 public class MessageEventBus {
-    private static MessageEventBus instance;
+    private static volatile MessageEventBus instance;
     private static final Logger logger = LoggerFactory.getLogger(MessageEventBus.class);
 
     private final Set<WaitingRoomListener> waitingRoomListeners = new CopyOnWriteArraySet<>();
@@ -37,39 +36,21 @@ public class MessageEventBus {
         waitingRoomListeners.add(listener);
     }
 
-    public void unregisterWaitingRoomListener(WaitingRoomListener listener) {
-        logger.debug("Unregistering WaitingRoomListener: {}", listener.getClass().getSimpleName());
-        waitingRoomListeners.remove(listener);
-    }
-
     public void registerSetupListener(SetupListener listener) {
         logger.debug("Registering SetupListener: {}", listener.getClass().getSimpleName());
         setupListeners.add(listener);
     }
 
-    public void unregisterSetupListener(SetupListener listener) {
-        logger.debug("Unregistering SetupListener: {}", listener.getClass().getSimpleName());
-        setupListeners.remove(listener);
-    }
 
     public void registerGameListener(GameListener listener) {
         logger.debug("Registering GameListener: {}", listener.getClass().getSimpleName());
         gameListeners.add(listener);
     }
 
-    public void unregisterGameListener(GameListener listener) {
-        logger.debug("Unregistering GameListener: {}", listener.getClass().getSimpleName());
-        gameListeners.remove(listener);
-    }
 
     public void registerInitialConnectionListener(InitialConnectionListener listener) {
         logger.debug("Registering InitialConnectionListener: {}", listener.getClass().getSimpleName());
         initialConnectionListeners.add(listener);
-    }
-
-    public void unregisterInitialConnectionListener(InitialConnectionListener listener) {
-        logger.debug("Unregistering InitialConnectionListener: {}", listener.getClass().getSimpleName());
-        initialConnectionListeners.remove(listener);
     }
 
     // --- Publishing methods ---

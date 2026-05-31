@@ -3,7 +3,6 @@ package cz.vse.java.checkers.client.Game;
 import cz.vse.java.checkers.client.Networking.Connection;
 import cz.vse.java.checkers.client.Networking.MessageEventBus;
 import cz.vse.java.checkers.client.Networking.MessageListeners.InitialConnectionListener;
-import cz.vse.java.checkers.client.Networking.ResponseManager;
 import cz.vse.java.checkers.client.Networking.MessageHandler;
 import cz.vse.java.checkers.common.ClientMessage;
 import cz.vse.java.checkers.common.Message;
@@ -25,7 +24,6 @@ public class InitialConnControler extends Controller implements InitialConnectio
 
     private static final Logger log = LoggerFactory.getLogger(InitialConnControler.class);
     private MessageHandler handler;
-    private final MessageEventBus eventBus;
     private Stage stage;
     private Scene thisScene;
 
@@ -37,7 +35,7 @@ public class InitialConnControler extends Controller implements InitialConnectio
     private Label errorLbl;
 
     public InitialConnControler() {
-        this.eventBus = MessageEventBus.getInstance();
+        MessageEventBus eventBus = MessageEventBus.getInstance();
         eventBus.registerInitialConnectionListener(this);
     }
 

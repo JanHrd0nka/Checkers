@@ -1,7 +1,6 @@
 package cz.vse.java.checkers.client.Networking;
 
 
-import cz.vse.java.checkers.client.Game.GameController;
 import cz.vse.java.checkers.common.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -93,7 +92,7 @@ public class MessageHandler {
                     eventBus.publishRequestingMatchesUpdated(content[0], true);
                 }
             }
-            case STATE -> handleStateEvent(content, ID);
+            case STATE -> handleStateEvent(content);
             case RESULT -> handleGameResult(content, ID);
             case REMATCH -> handleRematchEvent(content);
             case DRAW -> {
@@ -124,7 +123,7 @@ public class MessageHandler {
     }
 
 
-    private void handleStateEvent(String[] content, String ID) {
+    private void handleStateEvent(String[] content) {
             if (content.length > 0) {
                 eventBus.publishOpponentMoved(content[0]);
             }

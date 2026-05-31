@@ -3,16 +3,14 @@ package cz.vse.java.checkers.client.Networking;
 import cz.vse.java.checkers.common.Message;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class ResponseManager {
     // Stores pending responses mapped by their unique Correlation ID
     private final Map<String, CompletableFuture<Message>> pendingRequests = new ConcurrentHashMap<>();
 
-    public static ResponseManager instance;
+    public static volatile ResponseManager instance;
 
     private ResponseManager() {}
 

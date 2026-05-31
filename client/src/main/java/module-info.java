@@ -4,7 +4,6 @@ module cz.vse.java.checkers.client {
     requires cz.vse.java.checkers.common;
     requires org.slf4j;
     requires org.apache.commons.lang3;
-    requires java.rmi;
     requires java.xml;
 
     opens cz.vse.java.checkers.client to javafx.fxml;

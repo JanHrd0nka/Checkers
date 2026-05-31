@@ -2,7 +2,6 @@ package cz.vse.java.checkers.server;
 
 import cz.vse.java.checkers.common.Pos;
 
-import java.sql.Time;
 import java.util.List;
 
 public class Match {
@@ -46,7 +45,7 @@ public class Match {
         return game.getHistory(index);
     }
     public String makeMove(Player player, List<Pos> path){
-        String error = new String();
+        String error = "";
         if (player == currentPlayer){
             if (game.makeMove(path)){
                 switchPlayersTurn();

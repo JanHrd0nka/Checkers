@@ -22,7 +22,7 @@ import java.io.IOException;
 /** * HelloApplication - inicializátor aplikace. * Nyní POUZE inicializuje UI a wiry dependency injection. * MessageHandler NEMÁ ŽÁDNÉ REFERENCE NA CONTROLLERY. */
 public class HelloApplication extends Application {
     private static final Logger logger = LoggerFactory.getLogger(HelloApplication.class);
-    private Document conf;
+
     @Override
     public void start(Stage stage){
         // Inicializace singleton komponent
@@ -116,15 +116,11 @@ public class HelloApplication extends Application {
         return loader;
     }
 
-    public static void main(String[] args) {
-        launch();
-    }
-
     private String[] loadConfig(){
         String host = "";
         String port = "";
         try{
-            conf = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse((
+            Document conf = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse((
                     HelloApplication.class.getClassLoader().getResourceAsStream("META-INF/config.xml")
             ));
             conf.getDocumentElement().normalize();

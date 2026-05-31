@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Game {
-    private List<String> gameHistory;
+    private final List<String> gameHistory;
     private List<List<Figure>> board;
     private boolean whiteToMove;
     private static final int BOARD_SIZE = 8;
@@ -70,7 +70,7 @@ public class Game {
         return sb.toString();
     }
 
-    public boolean updateBoard(String state){
+    public void updateBoard(String state){
         if(state.length() == 65) {
             for (int i = 0; i < 64; ++i) {
                 int x = i % 8;
@@ -87,9 +87,6 @@ public class Game {
                 setPiece(new Pos(x, y), figure);
             }
             whiteToMove = state.charAt(64) == '1';
-            return true;
-        }else{
-            return false;
         }
     }
 
@@ -261,7 +258,7 @@ public class Game {
         return result;
     }
     public String getHistory(int index){
-        String result = new String();
+        String result = "";
         if (index < gameHistory.size())
         {
             result = gameHistory.get(index);

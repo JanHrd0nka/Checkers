@@ -12,14 +12,12 @@ import java.util.concurrent.*;
 
 public class Connection {
 
-    private static Connection instance;
+    private static volatile Connection instance;
 
     private final Logger log = LoggerFactory.getLogger(Connection.class);
-    Set<MessageHandler> messageHandlers = new CopyOnWriteArraySet<>();
+    final Set<MessageHandler> messageHandlers = new CopyOnWriteArraySet<>();
     private final BlockingQueue<String> sendQueue = new LinkedBlockingQueue<>();
     private final String stopMessage = "__QUIT__";
-    private Thread writerThread;
-    private Thread readerThread;
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
@@ -57,9 +55,6 @@ public class Connection {
         messageHandlers.add(handler);
         messageHandler = handler;
     }
-    public void removeMessageHandler(MessageHandler handler){
-        messageHandlers.remove(handler);
-    }
 
     public MessageHandler getHandler(){
         return messageHandler;
@@ -78,7 +73,7 @@ public class Connection {
         return result;
     }
     public void connect(String host, int port) {
-        readerThread = new Thread(() -> {
+        Thread readerThread = new Thread(() -> {
             log.info("Thread started");
             try {
                 socket = new Socket(host, port);
@@ -116,12 +111,12 @@ public class Connection {
         }
     }
     private void startWriter() {
-        writerThread = new Thread(() -> {
-            log.info("Thread started");
+        Thread writerThread = new Thread(() -> {
+            log.info("Writer thread started");
             try {
                 while (!socket.isClosed()) {
                     String msg = sendQueue.take();
-                    if (msg.equals(stopMessage)){
+                    if (msg.equals(stopMessage)) {
                         log.info("Thread interrupted");
                         break;
                     }
@@ -132,7 +127,7 @@ public class Connection {
                 Thread.currentThread().interrupt();
                 log.error("Failed to send: {}", e.getMessage());
             }
-            log.info("Thread stopped");
+            log.info("Writer thread stopped");
         });
         writerThread.setName("Socket-Writer");
         writerThread.start();

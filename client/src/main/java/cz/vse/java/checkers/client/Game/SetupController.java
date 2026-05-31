@@ -9,10 +9,8 @@ import cz.vse.java.checkers.common.Message;
 import cz.vse.java.checkers.common.ServerMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -46,10 +44,6 @@ public class SetupController extends Controller implements SetupListener {
         eventBus.registerSetupListener(this);
     }
 
-    public void cleanup() {
-        eventBus.unregisterSetupListener(this);
-    }
-
     @Override
     public void onSetupReceived(int time, boolean isWhite, boolean mustTake) {
         Platform.runLater(() -> {
@@ -73,16 +67,14 @@ public class SetupController extends Controller implements SetupListener {
             if (result) {
                 CompletableFuture<Message> responseFuture = rm.registerRequest(UID);
                 confirmBtn.setDisable(true);
-                responseFuture.thenAccept(response -> {
-                            Platform.runLater(() -> {
-                                if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
-                                    log.info("Setup confirmed by server");
-                                } else {
-                                    log.error("Setup failed: {}", response.getContent());
-                                    resetUI();
-                                }
-                            });
-                        })
+                responseFuture.thenAccept(response -> Platform.runLater(() -> {
+                    if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
+                        log.info("Setup confirmed by server");
+                    } else {
+                        log.error("Setup failed: {}", response.getContent());
+                        resetUI();
+                    }
+                }))
                         .orTimeout(5, TimeUnit.SECONDS)
                         .exceptionally(ex -> {
                             Platform.runLater(() -> {

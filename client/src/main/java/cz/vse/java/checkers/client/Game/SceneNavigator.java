@@ -1,6 +1,5 @@
 package cz.vse.java.checkers.client.Game;
 
-import cz.vse.java.checkers.client.Networking.Connection;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

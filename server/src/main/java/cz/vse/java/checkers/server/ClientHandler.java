@@ -170,7 +170,7 @@ public class ClientHandler implements Runnable {
 
     private void handleSetup(String[] tokens) {
         log.info("SETUP request");
-        if (validateSetupAndLength(5, tokens)){
+        if (validateSetupAndLength(tokens)){
             boolean isW = "w".equalsIgnoreCase(tokens[3]);
             boolean isMust = "MUST".equalsIgnoreCase(tokens[4]);
             int time = -1;
@@ -207,7 +207,7 @@ public class ClientHandler implements Runnable {
 
     private void handleMove(String[] tokens) {
         log.info("MOVE request");
-        if (validateGameAndLength(3, tokens)){
+        if (validateGameAndLength(tokens)){
             String move = tokens[2];
             boolean isSyntaxValid =
                     move.matches("[0-7]+")
@@ -245,7 +245,7 @@ public class ClientHandler implements Runnable {
 
     private void handleHistory(String[] tokens) {
         log.info("HISTORY request");
-        if (validateGameAndLength(3, tokens)){
+        if (validateGameAndLength(tokens)){
             int index;
             try {
                 index = Integer.parseInt(tokens[2]);
@@ -443,8 +443,8 @@ public class ClientHandler implements Runnable {
         return result;
     }
 
-    private boolean validateSetupAndLength(int expectedLenght, String[] tokens){
-        boolean result = validatePlayerAndLength(expectedLenght, tokens);
+    private boolean validateSetupAndLength(String[] tokens){
+        boolean result = validatePlayerAndLength(5, tokens);
         if (result){
             var match = player.getMatch();
             if (match != null){
@@ -461,8 +461,8 @@ public class ClientHandler implements Runnable {
         return result;
     }
 
-    private boolean validateGameAndLength(int expectedLenght, String[] tokens){
-        boolean result = validatePlayerAndLength(expectedLenght, tokens);
+    private boolean validateGameAndLength(String[] tokens){
+        boolean result = validatePlayerAndLength(3, tokens);
         if (result){
             var match = player.getMatch();
             if (match != null){
@@ -472,7 +472,7 @@ public class ClientHandler implements Runnable {
                 }
             }
             else{
-                log.warn("Player not paired");
+                log.warn("No player paired in game");
                 send(ServerMessage.ERROR, "Nemas soupere");
             }
         }

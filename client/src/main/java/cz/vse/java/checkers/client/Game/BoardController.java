@@ -58,7 +58,7 @@ public class BoardController extends Controller {
     public void initialize() {
         logger.info("Initializing board");
         gameController = new GameController(this);
-        forfeightBtn.setOnAction(actionEvent -> forgeightMatch());
+        forfeightBtn.setOnAction(actionEvent -> forfeitMatch());
         drawBtn.setOnAction(actionEvent -> offerDraw());
     }
 
@@ -129,7 +129,7 @@ public class BoardController extends Controller {
         GridPane.setHalignment(piece, HPos.CENTER);
         GridPane.setValignment(piece, VPos.CENTER);
 
-        piece.setOnMouseClicked(event -> handlePieceClick(pos, figure));
+        piece.setOnMouseClicked(event -> handlePieceClick(pos));
     }
 
     /**     * Získat barvu pro figurku     */
@@ -165,7 +165,7 @@ public class BoardController extends Controller {
     }
 
     /**     * Obsluha kliknutí na figurku     */
-    private void handlePieceClick(Pos clickedPos, Figure figure) {
+    private void handlePieceClick(Pos clickedPos) {
         if (!gameController.isPlayerTurn()) {
             logger.debug("Not player turn");
             return;
@@ -249,7 +249,7 @@ public class BoardController extends Controller {
         }
     }
 
-    private void forgeightMatch() {
+    private void forfeitMatch() {
         String UID = generateID();
         gameController.sendForfeitMessage(ClientMessage.SURRENDER, UID, "");
     }
@@ -272,14 +272,6 @@ public class BoardController extends Controller {
 
     public void setStage(Stage stage){
         this.stage = stage;
-    }
-
-
-    /**     * Cleanup - zavolat když se hra skončí     */
-    public void cleanup() {
-        if (gameController != null) {
-            gameController.cleanup();
-        }
     }
 
     public void displayDraw() {

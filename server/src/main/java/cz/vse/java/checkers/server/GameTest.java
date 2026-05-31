@@ -66,8 +66,6 @@ public class GameTest {
         0 0 0 0 0 0 0 0
         """.replace("\n", "").replace(" ", "");
 
-        // Pos pos = new Pos(3, 3);
-        // testPossibleMoves(content, pos);
 
         List<Pos> move = new ArrayList<>();
         move.add(new Pos(3, 3));

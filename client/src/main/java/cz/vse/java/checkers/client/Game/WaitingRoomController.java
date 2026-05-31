@@ -9,7 +9,6 @@ import cz.vse.java.checkers.common.Message;
 import cz.vse.java.checkers.common.ServerMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -26,9 +25,9 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
     private final MessageHandler handler = Connection.getInstance().getHandler();
     private final MessageEventBus eventBus = MessageEventBus.getInstance();
 
-    private Set<String> playersAvailable = new HashSet<>();
-    private Set<String> requestedMatches = new HashSet<>();
-    private Set<String> requestingMatches = new HashSet<>();
+    private final Set<String> playersAvailable = new HashSet<>();
+    private final Set<String> requestedMatches = new HashSet<>();
+    private final Set<String> requestingMatches = new HashSet<>();
 
     @FXML
     private ListView<String> availablePlayersList;
@@ -49,10 +48,6 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
         eventBus.registerWaitingRoomListener(this);
     }
 
-    /**     * Odpojit listener když je scene skryta (optional - pro čištění zdrojů)     */
-    public void cleanup() {
-        eventBus.unregisterWaitingRoomListener(this);
-    }
 
     // ===== Observer implementace =====
 
@@ -112,19 +107,17 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
         String UID = generateID();
         CompletableFuture<Message> responseFuture = rm.registerRequest(UID);
         if (handler.send(ClientMessage.MATCH, UID, playerName)) {
-            responseFuture.thenAccept(response -> {
-                        Platform.runLater(() -> {
-                            if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
-                                requestingMatches.remove(playerName);
-                                requestedMatches.remove(playerName);
-                                playersRequestingList.getItems().remove(playerName);
+            responseFuture.thenAccept(response -> Platform.runLater(() -> {
+                if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
+                    requestingMatches.remove(playerName);
+                    requestedMatches.remove(playerName);
+                    playersRequestingList.getItems().remove(playerName);
 
-                                log.info("Match accepted from: {}", playerName);
-                            } else {
-                                log.error("Invalid credentials");
-                            }
-                        });
-                    }).orTimeout(5, TimeUnit.SECONDS)
+                    log.info("Match accepted from: {}", playerName);
+                } else {
+                    log.error("Invalid credentials");
+                }
+            })).orTimeout(5, TimeUnit.SECONDS)
                     .exceptionally(ex -> {
                         Platform.runLater(() -> log.error("Network timeout on match acceptance"));
                         return null;

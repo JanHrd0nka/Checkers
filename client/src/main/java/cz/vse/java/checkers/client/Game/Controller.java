@@ -6,29 +6,16 @@ import javafx.scene.Scene;
 import java.util.UUID;
 
 public class Controller {
-    //TODO
 
     private Scene nextScene;
     private Scene prevScene;
 
-    protected ResponseManager rm = ResponseManager.getInstance();
+    protected final ResponseManager rm = ResponseManager.getInstance();
 
     public static String generateID() {
         return UUID.randomUUID().toString();
     }
 
-
-    public void updatePlayersWaiting(String[] playersList){
-
-    }
-
-    public void updateRequestingMatches(String name, boolean unmatch){
-
-    }
-
-    public void setUpMatch(String playerName){
-
-    }
 
     public void setNextScene(Scene nextScene) {
         this.nextScene = nextScene;

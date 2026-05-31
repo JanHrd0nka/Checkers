@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Scanner;
 
 public class App {
-    private Server server;
     private final Logger log = LoggerFactory.getLogger(App.class);
 
     public void start() {
@@ -29,7 +28,7 @@ public class App {
             }
         }
 
-        server = new Server(port);
+        Server server = new Server(port);
         server.start();
     }
 }

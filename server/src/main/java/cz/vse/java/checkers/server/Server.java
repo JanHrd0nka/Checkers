@@ -13,9 +13,8 @@ import java.util.Set;
 public class Server {
     private final Logger log;
     private final int port;
-    private ServerSocket serverSocket;
     private final Set<ClientHandler> clients = new HashSet<>();
-    private WaitingRoom waitingRoom;
+    private final WaitingRoom waitingRoom;
     private final TimeSender timeSender;
 
     public Server(int port) {
@@ -46,8 +45,7 @@ public class Server {
     private void run() {
         log.info("Server Thread started");
         log.info("Listening on port {}", port);
-        try {
-            serverSocket = new ServerSocket(port);
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 ClientHandler client = new ClientHandler(clientSocket, this);
