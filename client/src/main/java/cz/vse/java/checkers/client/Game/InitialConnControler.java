@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Controller pro obsluhu přihlašovací obrazovky. Zajišťuje odeslání přihlašovacího požadavku na server a zpracování odpovědi.
  * @author Adam Filinger
- * @version 1.7
+ * @version 1.0
  */
 public class InitialConnControler extends Controller implements InitialConnectionListener {
 

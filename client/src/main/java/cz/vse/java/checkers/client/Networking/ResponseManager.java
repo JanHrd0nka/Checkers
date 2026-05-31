@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture;
 
 /** Třída zajišťující správné párování odeslaných a příchozích zpráv
  * @author Adam Filinger
- * @version 1.2
+ * @version 1.0
  */
 public class ResponseManager {
     // Stores pending responses mapped by their unique Correlation ID
@@ -29,14 +29,22 @@ public class ResponseManager {
         return instance;
     }
 
-    // Called by the Controller before sending a request
+    /**
+     * Uložení zprávy před zasláním na server - nutno volat z controlleru kde posílám zprávu
+     * @param ID
+     * @return
+     */
     public CompletableFuture<Message> registerRequest(String ID) {
         CompletableFuture<Message> future = new CompletableFuture<>();
         pendingRequests.put(ID, future);
         return future;
     }
 
-    // Called by the MessageHandler when a response arrives
+    /**
+     * Odbavení příchozí zprávy dle ID a notifikace čekajícího controlleru
+     * @param correlationId
+     * @param response
+     */
     public void dispatchResponse(String correlationId, Message response) {
         CompletableFuture<Message> future = pendingRequests.remove(correlationId);
         if (future != null) {

@@ -2,7 +2,7 @@ package cz.vse.java.checkers.client.Networking.MessageListeners;
 
 /** * Listener pro game state
  * @author Adam Filinger
- * @version 1.2
+ * @version 1.0
  * */
 public interface GameListener extends MessageListener {
     void onOpponentMoved(String boardState);

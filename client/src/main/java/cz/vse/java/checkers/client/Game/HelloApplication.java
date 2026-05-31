@@ -21,7 +21,7 @@ import java.io.IOException;
 
 /** * HelloApplication - inicializátor aplikace.
  * @author Adam Filinger
- * @version 1.3
+ * @version 1.0
  * */
 public class HelloApplication extends Application {
     private static final Logger logger = LoggerFactory.getLogger(HelloApplication.class);

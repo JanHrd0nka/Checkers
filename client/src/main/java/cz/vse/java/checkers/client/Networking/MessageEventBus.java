@@ -8,7 +8,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /** * Centrální event bus pro publikování zpráv od serveru..
  * @author Adam Filinger
- * @version 1.4
+ * @version 1.0
  * */
 public class MessageEventBus {
     private static volatile MessageEventBus instance;

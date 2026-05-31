@@ -12,7 +12,7 @@ import java.util.concurrent.*;
 
 /** Třída obsluhující připojení na server, příjem a posílání zpráv - centrální  bod
  * @author Adam Filinger
- * @version 1.5
+ * @version 1.0
  */
 public class Connection {
 
@@ -67,6 +67,12 @@ public class Connection {
 
     //----- sendQueue methods
 
+    /**
+     * Zaslání zprávy na server
+     * @param name
+     * @param content
+     * @return true pokud se zpráva úspěšně přidala do fronty, false pokud je fronta plná
+     */
     public boolean send(ClientMessage name, String content) {
         String message = name.name() + " " + content;
 
@@ -76,6 +82,12 @@ public class Connection {
         }
         return result;
     }
+
+    /**
+     * Připojení na server - nastartování vláken pro čtení a zápis
+     * @param host
+     * @param port
+     */
     public void connect(String host, int port) {
         Thread readerThread = new Thread(() -> {
             log.info("Thread started");
@@ -95,6 +107,10 @@ public class Connection {
         readerThread.setName("Socket-Reader");
         readerThread.start();
     }
+
+    /**
+     * Odpojení od serveru - zastavení vláken pro čtení a zápis
+     */
     public void disconnect(){
         log.info("Disconnecting...");
         try {
@@ -114,6 +130,10 @@ public class Connection {
             log.error("Disconnect error: ", e);
         }
     }
+
+    /**
+     * Start vlákna pro zápis
+     */
     private void startWriter() {
         Thread writerThread = new Thread(() -> {
             log.info("Writer thread started");
@@ -137,6 +157,9 @@ public class Connection {
         writerThread.start();
     }
 
+    /**
+     * Start vlákna pro čtení zpráv
+     */
     private void startReader(){
         try {
             String line;
@@ -151,6 +174,7 @@ public class Connection {
         }
         log.info("Thread stopped");
     }
+
     private void runOnFxThread(java.util.function.Consumer<MessageHandler> action) {
         Platform.runLater(() -> {
             for (var handler : messageHandlers) {

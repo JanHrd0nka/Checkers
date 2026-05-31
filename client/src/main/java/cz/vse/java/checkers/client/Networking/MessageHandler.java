@@ -10,7 +10,7 @@ import java.io.IOException;
 
 /** * Třída zpracovávající příchozí zprávy serveru.
  * @author Adam Filinger
- * @version 2.1
+ * @version 1.0
  * */
 public class MessageHandler {
     private final Connection connection;
@@ -32,6 +32,10 @@ public class MessageHandler {
         return connection.send(clientMessage, UID + " " + content);
     }
 
+    /**
+     * Zpracování příchozí zprávy
+     * @param message
+     */
     public void onMessage(String message) {
         logger.info("Received message: {}", message);
 
@@ -114,6 +118,10 @@ public class MessageHandler {
         }
     }
 
+    /**
+     * Zpracování zprávy typu SETUP_DONE - kontrola parametrů zprávy
+     * @param content
+     */
     private void handleSetupDone(String[] content) {
         logger.debug("handleSetupDone called");
         if (content.length == 3) {
@@ -124,7 +132,6 @@ public class MessageHandler {
             eventBus.publishSetupReceived(time, isWhite, mustTake);
         }
     }
-
 
     private void handleStateEvent(String[] content) {
             if (content.length > 0) {
@@ -140,6 +147,12 @@ public class MessageHandler {
         }
     }
 
+    /**
+     * Zpracování zprávy typu REMATCH.
+     * Kontrola parametrů zprávy a publikace rematch nabídky
+     * dle stavu REMATCH (accepted/no)
+     * @param content
+     */
     private void handleRematchEvent(String[] content) {
         if (content.length > 0) {
             String rematchStatus = content[0].toLowerCase();

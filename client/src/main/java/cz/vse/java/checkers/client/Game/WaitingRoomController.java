@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 /** * Controller pro obsluhu obrazovky čekárny
  * @author Adam Filinger
- * @version 1.6
+ * @version 1.0
  *
  * */
 public class WaitingRoomController extends Controller implements WaitingRoomListener {

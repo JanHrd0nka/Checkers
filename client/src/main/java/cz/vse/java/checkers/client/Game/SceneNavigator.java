@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 /** * SceneNavigator - centralizuje navigaci mezi scénami.
  * @author Adam Filinger
- * @version 1.3
+ * @version 1.0
  *
  * */
 public class SceneNavigator {

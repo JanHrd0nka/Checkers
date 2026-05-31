@@ -27,7 +27,7 @@ import java.util.Optional;
 
 /**BoardController - odpovídá za UI vykreslování desky. * Deleguje herní logiku GameControlleru.
  * @author Adam Filinger
- * @version 2.0
+ * @version 1.0
  * */
 public class BoardController extends Controller {
 
