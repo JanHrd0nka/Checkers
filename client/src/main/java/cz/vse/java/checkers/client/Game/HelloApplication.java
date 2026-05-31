@@ -32,7 +32,6 @@ public class HelloApplication extends Application {
      */
     @Override
     public void start(Stage stage){
-        // Inicializace singleton komponent
 
         String[] config = loadConfig();
         String host = config[0].isEmpty() ? "N/A" : config[0];
