@@ -4,7 +4,11 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** * SceneNavigator - centralizuje navigaci mezi scénami. * Odděluje scény od herní logiky. */
+/** * SceneNavigator - centralizuje navigaci mezi scénami.
+ * @author Adam Filinger
+ * @version 1.3
+ *
+ * */
 public class SceneNavigator {
     private static final Logger logger = LoggerFactory.getLogger(SceneNavigator.class);
 

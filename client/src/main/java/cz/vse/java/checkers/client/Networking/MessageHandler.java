@@ -8,7 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-/** * MessageHandler pouze pasuje zprávy ze serveru a publikuje eventy. * NEMÁ ŽÁDNÉ REFERENCE NA UI KOMPONENTY. */
+/** * Třída zpracovávající příchozí zprávy serveru.
+ * @author Adam Filinger
+ * @version 2.1
+ * */
 public class MessageHandler {
     private final Connection connection;
     private final MessageEventBus eventBus;

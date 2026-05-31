@@ -20,7 +20,10 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-/** * SetupController implementuje SetupListener. */
+/** * Controller pro obsluhu obrazovky nastavení parametrů hry.
+ * @author Adam Filinger
+ * @version 1.5
+ * */
 public class SetupController extends Controller implements SetupListener {
     private static final Logger log = LoggerFactory.getLogger(SetupController.class);
 
@@ -52,6 +55,9 @@ public class SetupController extends Controller implements SetupListener {
         });
     }
 
+    /**
+     * Zaslání parametrů hry na server
+     */
     private void confirm() {
         String time = timeSelector.getText();
         boolean isWhite = colorBox.isSelected();
@@ -90,6 +96,12 @@ public class SetupController extends Controller implements SetupListener {
         }
     }
 
+    /**
+     * Nastavení parametrů hry a přechod do herní obrazovky
+     * @param time
+     * @param isWhite
+     * @param mustTake
+     */
     private void setupGame(int time, boolean isWhite, boolean mustTake) {
         eventBus.publishGameSetup(time, isWhite, mustTake);
         resetUI();

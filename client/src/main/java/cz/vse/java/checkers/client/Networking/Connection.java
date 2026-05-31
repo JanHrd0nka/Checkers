@@ -10,6 +10,10 @@ import java.net.Socket;
 import java.util.Set;
 import java.util.concurrent.*;
 
+/** Třída obsluhující připojení na server, příjem a posílání zpráv - centrální  bod
+ * @author Adam Filinger
+ * @version 1.5
+ */
 public class Connection {
 
     private static volatile Connection instance;

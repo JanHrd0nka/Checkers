@@ -6,6 +6,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CompletableFuture;
 
+/** Třída zajišťující správné párování odeslaných a příchozích zpráv
+ * @author Adam Filinger
+ * @version 1.2
+ */
 public class ResponseManager {
     // Stores pending responses mapped by their unique Correlation ID
     private final Map<String, CompletableFuture<Message>> pendingRequests = new ConcurrentHashMap<>();

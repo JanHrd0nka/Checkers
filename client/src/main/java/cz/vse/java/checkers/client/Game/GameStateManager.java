@@ -8,7 +8,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-/** * GameStateManager - odděluje herní logiku a stav od UI kontrolery. * Jedinou odpovědností je spravovat stav Game2 objektu. */
+/** GameStateManager - odděluje herní logiku a stav od UI kontrolery.
+ * Jedinou odpovědností je spravovat stav Game2 objektu.
+ * @author Adam Filinger
+ * @version 1.2
+ * */
 public class GameStateManager {
     private static final Logger logger = LoggerFactory.getLogger(GameStateManager.class);
 
@@ -45,12 +49,11 @@ public class GameStateManager {
         }
     }
 
-    /**     * Zjistit, zda je bílý na tahu     */
+
     public boolean isWhiteToMove() {
         return game.isWhiteToMove();
     }
 
-    /**     * Getter pro Game2     */
     public Game getGame() {
         return game;
     }

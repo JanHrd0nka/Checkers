@@ -6,7 +6,10 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-/** * Centrální event bus pro publikování zpráv od serveru. * Používá observer pattern pro decoupling MessageHandler od UI komponent. */
+/** * Centrální event bus pro publikování zpráv od serveru..
+ * @author Adam Filinger
+ * @version 1.4
+ * */
 public class MessageEventBus {
     private static volatile MessageEventBus instance;
     private static final Logger logger = LoggerFactory.getLogger(MessageEventBus.class);

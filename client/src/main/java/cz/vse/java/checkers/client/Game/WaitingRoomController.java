@@ -18,7 +18,11 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-/** * WaitingRoomController implementuje WaitingRoomListener. * Přihlašuje se k event busů v initialize() a odhlašuje v destroy(). */
+/** * Controller pro obsluhu obrazovky čekárny
+ * @author Adam Filinger
+ * @version 1.6
+ *
+ * */
 public class WaitingRoomController extends Controller implements WaitingRoomListener {
     private static final Logger log = LoggerFactory.getLogger(WaitingRoomController.class);
 
@@ -51,6 +55,12 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
 
     // ===== Observer implementace =====
 
+
+    /**
+     * Aktualizace čekajících hráčů při příchozí zprávě serveru
+     * Kontrola vyždáných zápasů a vlastního jména
+     * @param playersList
+     */
     @Override
     public void onPlayersUpdated(String[] playersList) {
         Platform.runLater(() -> {
@@ -70,6 +80,14 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
         });
     }
 
+    /**
+     * Aktualizace vyžádaných zápasů při příchozí zprávě serveru
+     * včetně odstranění z listu dostupných hráčů a kontroly vlastního jména.
+     * Odstranění hráče z listu čekajících zápasů při odchodu hráče z čekárny do hry
+     *
+     * @param playerName
+     * @param unmatched
+     */
     @Override
     public void onRequestingMatchesUpdated(String playerName, boolean unmatched) {
         Platform.runLater(() -> {
@@ -103,6 +121,11 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
 
     // ===== UI akce =====
 
+    /**
+     * Přijetí zápasu - odstraní ze seznamu čekajících zápasů.
+     * Update UI
+     * @param playerName
+     */
     private void acceptMatch(String playerName) {
         String UID = generateID();
         CompletableFuture<Message> responseFuture = rm.registerRequest(UID);

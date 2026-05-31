@@ -19,10 +19,17 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
-/** * HelloApplication - inicializátor aplikace. * Nyní POUZE inicializuje UI a wiry dependency injection. * MessageHandler NEMÁ ŽÁDNÉ REFERENCE NA CONTROLLERY. */
+/** * HelloApplication - inicializátor aplikace.
+ * @author Adam Filinger
+ * @version 1.3
+ * */
 public class HelloApplication extends Application {
     private static final Logger logger = LoggerFactory.getLogger(HelloApplication.class);
 
+    /**
+     * Nastavení všech scén aplikace a binding controllerů
+     * @param stage
+     */
     @Override
     public void start(Stage stage){
         // Inicializace singleton komponent
@@ -116,6 +123,10 @@ public class HelloApplication extends Application {
         return loader;
     }
 
+    /**
+     * Načítání parametrů připojení z konfiguračního souboru
+     * @return String[] parametry připojení
+     */
     private String[] loadConfig(){
         String host = "";
         String port = "";

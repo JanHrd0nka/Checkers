@@ -13,7 +13,12 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-/** * GameController - spravuje herní logiku a interakci se serverem. * Implementuje GameListener pro příjem event notifikací. * Oddělena logika pro game state (GameStateManager) a scény (SceneNavigator). */
+/** * GameController - spravuje herní logiku a interakci se serverem.
+ * Implementuje GameListener pro příjem event notifikací.
+ * Oddělena logika pro game state (GameStateManager) a scény (SceneNavigator).
+ * @author Adam Filinger
+ * @version 2.1
+ * */
 public class GameController extends Controller implements GameListener {
 
     private static final Logger logger = LoggerFactory.getLogger(GameController.class);

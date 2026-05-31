@@ -20,6 +20,11 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Controller pro obsluhu přihlašovací obrazovky. Zajišťuje odeslání přihlašovacího požadavku na server a zpracování odpovědi.
+ * @author Adam Filinger
+ * @version 1.7
+ */
 public class InitialConnControler extends Controller implements InitialConnectionListener {
 
     private static final Logger log = LoggerFactory.getLogger(InitialConnControler.class);
@@ -46,6 +51,9 @@ public class InitialConnControler extends Controller implements InitialConnectio
     }
 
 
+    /**
+     * Odeslání požadavku přechodu do čekárny - vyčkává na odpověď
+     */
     private void requestWaitingRoom() {
         String name = nameField.getText();
         if(name.isEmpty()){
@@ -88,6 +96,9 @@ public class InitialConnControler extends Controller implements InitialConnectio
 
     }
 
+    /**
+     * Zobrazení dialogového okna při přerušení spojení se serverem
+     */
     @Override
     public void onServerDisconnected(){
         log.debug("Initializing aletr window for server disconnected");

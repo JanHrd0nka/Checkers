@@ -5,6 +5,11 @@ import javafx.scene.Scene;
 
 import java.util.UUID;
 
+/**
+ * Rodičovská třída pro všechny controllery.
+ * @author Adam Filinger
+ * @version 1.2
+ */
 public class Controller {
 
     private Scene nextScene;

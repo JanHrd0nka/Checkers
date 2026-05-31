@@ -25,7 +25,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-/** * BoardController - odpovídá za UI vykreslování desky. * Deleguje herní logiku GameControlleru. */
+/**BoardController - odpovídá za UI vykreslování desky. * Deleguje herní logiku GameControlleru.
+ * @author Adam Filinger
+ * @version 2.0
+ * */
 public class BoardController extends Controller {
 
     private static final Logger logger = LoggerFactory.getLogger(BoardController.class);
@@ -78,7 +81,7 @@ public class BoardController extends Controller {
         }
     }
 
-    /**     * Reset UI desky - vymazat vybrané pozice a překreslit     * DŮLEŽITÉ: Volat při vstupu do hry nebo na rematch     */
+    /**     * Reset UI desky - vymazat vybrané pozice a překreslit  */
     public void resetBoardDisplay() {
         logger.info("Resetting board display");
         gameController.setSelectedRow(-1);
@@ -91,10 +94,6 @@ public class BoardController extends Controller {
     /**     * Vykreslit kousky na desku     */
     public void drawPieces() {
         drawEmptyBoard();
-        /*for(Node node : checkersBoard.getChildren()){
-            Integer row = GridPane.getRowIndex(node);
-            Integer column =
-        }*/
         if(!gameController.isWhite()){
             for (int col = 0; col < BOARD_SIZE ; col++) {
                 for (int row = 0; row < BOARD_SIZE; row++) {
@@ -274,6 +273,9 @@ public class BoardController extends Controller {
         this.stage = stage;
     }
 
+    /**
+     * Zobrazení dialogového okna při příchozí nabídce na remízu
+     */
     public void displayDraw() {
         drawBtn.setDisable(true);
         forfeightBtn.setDisable(true);
