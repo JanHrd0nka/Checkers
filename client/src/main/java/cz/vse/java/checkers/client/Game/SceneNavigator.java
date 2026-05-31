@@ -4,11 +4,14 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** * SceneNavigator - centralizuje navigaci mezi scénami.
+/**
+ * SceneNavigator - centralizuje navigaci mezi scénami.
+ *
  * @author Adam Filinger
  * @version 1.0
  *
- * */
+ *
+ */
 public class SceneNavigator {
     private static final Logger logger = LoggerFactory.getLogger(SceneNavigator.class);
 
@@ -21,7 +24,9 @@ public class SceneNavigator {
     }
 
 
-    /**     * Navigovat do Setup scény     */
+    /**
+     * Navigovat do Setup scény
+     */
     public void navigateToSetup() {
         try {
             Stage stage = getStage();
@@ -32,7 +37,9 @@ public class SceneNavigator {
         }
     }
 
-    /**     * Navigovat do WaitingRoom scény     */
+    /**
+     * Navigovat do WaitingRoom scény
+     */
     public void navigateToWaitingRoom() {
         try {
             Stage stage = getStage();
@@ -43,7 +50,9 @@ public class SceneNavigator {
         }
     }
 
-    /**     * Získat stage     */
+    /**
+     * Získat stage
+     */
     private Stage getStage() {
         return boardController.getStage();
     }

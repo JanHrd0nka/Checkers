@@ -8,9 +8,9 @@
 <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
       prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="cz.vse.java.checkers.client.Game.SetupController">
-   <CheckBox fx:id="colorBox" mnemonicParsing="false" text="white ?"/>
-   <CheckBox fx:id="takeBox" mnemonicParsing="false" text="must take"/>
-   <Label text="Set time for move"/>
-   <TextField fx:id="timeSelector"/>
-   <Button fx:id="confirmBtn" mnemonicParsing="false" text="Confirm setup"/>
+    <CheckBox fx:id="colorBox" mnemonicParsing="false" text="white ?"/>
+    <CheckBox fx:id="takeBox" mnemonicParsing="false" text="must take"/>
+    <Label text="Set time for move"/>
+    <TextField fx:id="timeSelector"/>
+    <Button fx:id="confirmBtn" mnemonicParsing="false" text="Confirm setup"/>
 </VBox>

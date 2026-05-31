@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Controller pro obsluhu přihlašovací obrazovky. Zajišťuje odeslání přihlašovacího požadavku na server a zpracování odpovědi.
+ *
  * @author Adam Filinger
  * @version 1.0
  */
@@ -46,7 +47,7 @@ public class InitialConnControler extends Controller implements InitialConnectio
 
     @FXML
     private void initialize() {
-        waitingRoomButton.setOnAction(event ->requestWaitingRoom());
+        waitingRoomButton.setOnAction(event -> requestWaitingRoom());
         handler = Connection.getInstance().getHandler();
     }
 
@@ -56,14 +57,14 @@ public class InitialConnControler extends Controller implements InitialConnectio
      */
     private void requestWaitingRoom() {
         String name = nameField.getText();
-        if(name.isEmpty()){
+        if (name.isEmpty()) {
             log.info("Name field is empty!");
-        } else{
-            try{
+        } else {
+            try {
                 log.info("Sending login message with name: {}", name);
                 String UID = generateID();
                 boolean result = handler.send(ClientMessage.LOGIN, UID, name);
-                if(result){
+                if (result) {
                     CompletableFuture<Message> responseFuture = rm.registerRequest(UID);
                     waitingRoomButton.setDisable(true);
                     // 3. Handle the response whenever it arrives without blocking the UI
@@ -72,7 +73,7 @@ public class InitialConnControler extends Controller implements InitialConnectio
                                 // CRITICAL: GUI updates must happen on the main UI thread
                                 Platform.runLater(() -> {
                                     if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
-                                        Stage stage = (Stage)  waitingRoomButton.getScene().getWindow();
+                                        Stage stage = (Stage) waitingRoomButton.getScene().getWindow();
                                         stage.setScene(getNextScene());
                                         waitingRoomButton.setDisable(false);
                                         errorLbl.setVisible(false);
@@ -89,7 +90,7 @@ public class InitialConnControler extends Controller implements InitialConnectio
                                 return null;
                             });
                 }
-            } catch (Exception e){
+            } catch (Exception e) {
                 log.info("Failed to send login message", e);
             }
         }
@@ -100,7 +101,7 @@ public class InitialConnControler extends Controller implements InitialConnectio
      * Zobrazení dialogového okna při přerušení spojení se serverem
      */
     @Override
-    public void onServerDisconnected(){
+    public void onServerDisconnected() {
         log.debug("Initializing aletr window for server disconnected");
         Platform.runLater(() -> {
             Alert serverDisconnected = new Alert(Alert.AlertType.ERROR, "Server disconnected");

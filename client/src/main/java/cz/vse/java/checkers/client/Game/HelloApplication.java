@@ -19,19 +19,23 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
-/** * HelloApplication - inicializátor aplikace.
+/**
+ * HelloApplication - inicializátor aplikace.
+ *
  * @author Adam Filinger
  * @version 1.0
- * */
+ *
+ */
 public class HelloApplication extends Application {
     private static final Logger logger = LoggerFactory.getLogger(HelloApplication.class);
 
     /**
      * Nastavení všech scén aplikace a binding controllerů
+     *
      * @param stage
      */
     @Override
-    public void start(Stage stage){
+    public void start(Stage stage) {
 
         String[] config = loadConfig();
         String host = config[0].isEmpty() ? "N/A" : config[0];
@@ -51,10 +55,10 @@ public class HelloApplication extends Application {
             ResponseManager responseManager = ResponseManager.getInstance();
             MessageEventBus eventBus = MessageEventBus.getInstance();
 
-            if(!host.equals("N/A") && port != -1){
+            if (!host.equals("N/A") && port != -1) {
                 // Připojení k serveru
                 connection.connect(host, port);
-            }else{
+            } else {
                 logger.debug("No configuration found in config file");
             }
 
@@ -124,19 +128,20 @@ public class HelloApplication extends Application {
 
     /**
      * Načítání parametrů připojení z konfiguračního souboru
+     *
      * @return String[] parametry připojení
      */
-    private String[] loadConfig(){
+    private String[] loadConfig() {
         String host = "";
         String port = "";
-        try{
+        try {
             Document conf = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse((
                     HelloApplication.class.getClassLoader().getResourceAsStream("META-INF/config.xml")
             ));
             conf.getDocumentElement().normalize();
 
             Node serverNode = conf.getElementsByTagName("server").item(0);
-            if(serverNode.getNodeType() == Node.ELEMENT_NODE){
+            if (serverNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element serverElement = (Element) serverNode;
                 host = serverElement.getElementsByTagName("host").item(0).getTextContent();
                 logger.debug("Loaded host from config: {}", host);

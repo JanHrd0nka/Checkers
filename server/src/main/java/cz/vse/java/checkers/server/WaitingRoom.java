@@ -5,33 +5,32 @@ import java.util.Map;
 
 /**
  * Manages all connected players and their presence in the waiting room.
- *
+ * <p>
  * The WaitingRoom is responsible for:
  * - storing active players by name
  * - handling player registration and renaming
  * - tracking which players are available for matchmaking
  * - providing list of available players
  * - cleaning up player state on disconnect
- *
+ * <p>
  * This class acts as a central registry for all players
  * outside of active matches.
  *
  * @author Jan Hrdonka
  * @version 1.0
  */
-public class WaitingRoom
-{
+public class WaitingRoom {
     private final Map<String, Player> allPlayers = new HashMap<>();
 
 
-    public synchronized Player addPlayer(String name, ClientHandler clientHandler){
+    public synchronized Player addPlayer(String name, ClientHandler clientHandler) {
         Player result = null;
-            if (!allPlayers.containsKey(name)) {
-                result = new Player(clientHandler);
-                allPlayers.put(name, result);
-                result.setName(name);
-                result.setInWaitingRoom(true);
-            }
+        if (!allPlayers.containsKey(name)) {
+            result = new Player(clientHandler);
+            allPlayers.put(name, result);
+            result.setName(name);
+            result.setInWaitingRoom(true);
+        }
         return result;
     }
 
@@ -87,15 +86,12 @@ public class WaitingRoom
         return result.toString().trim();
     }
 
-    public synchronized void disconnectPlayer(Player player){
-        for(Map.Entry<String, Player> p : allPlayers.entrySet()){
+    public synchronized void disconnectPlayer(Player player) {
+        for (Map.Entry<String, Player> p : allPlayers.entrySet()) {
             p.getValue().setScoreAgainst(player, 0);
         }
         allPlayers.remove(player.getName());
     }
-
-
-
 
 
 }

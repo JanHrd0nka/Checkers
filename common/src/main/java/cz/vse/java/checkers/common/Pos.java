@@ -1,9 +1,10 @@
 package cz.vse.java.checkers.common;
 
 import static java.lang.Math.abs;
+
 /**
  * Represents a position on the checkers board.
- *
+ * <p>
  * This immutable record is used throughout the game logic
  * to represent coordinates of pieces and moves.
  *
@@ -32,7 +33,7 @@ public record Pos(int x, int y) {
         );
     }
 
-    public boolean isCaptureMove(Pos other){
+    public boolean isCaptureMove(Pos other) {
         return abs(this.x - other.x()) == 2;
     }
 }

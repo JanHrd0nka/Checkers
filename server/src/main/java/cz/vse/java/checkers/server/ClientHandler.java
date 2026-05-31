@@ -14,11 +14,11 @@ import java.util.Set;
 
 /**
  * Handles communication with a single connected client.
- *
+ * <p>
  * Processes incoming client messages, validates requests,
  * manages matchmaking and game actions, and sends responses
  * back to the client.
- *
+ * <p>
  * Each client connection is served in a separate thread.
  *
  * @author Jan Hrdonka, Adam Filinger
@@ -69,8 +69,7 @@ public class ClientHandler implements Runnable {
 
         String[] tokens = message.split(" ");
 
-        if (tokens.length > 0)
-        {
+        if (tokens.length > 0) {
             ClientMessage type;
 
             try {
@@ -100,24 +99,21 @@ public class ClientHandler implements Runnable {
 
     private void handleLogin(String[] tokens) {
         log.info("LOGIN request");
-        if (validateLenght(3, tokens))
-        {
+        if (validateLenght(3, tokens)) {
             var wr = server.getWaitingRoom();
             boolean success = true;
-            if (player == null){
+            if (player == null) {
                 player = wr.addPlayer(tokens[2], this);
                 if (player == null) {
                     success = false;
                 }
-            }
-            else{
+            } else {
                 success = wr.renamePlayer(player, tokens[2]);
             }
-            if (success){
+            if (success) {
                 send(ServerMessage.OK, tokens[1]);
                 server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
-            }
-            else{
+            } else {
                 send(ServerMessage.ERROR, tokens[1] + " Jmeno_obsazeno");
             }
         }
@@ -125,7 +121,7 @@ public class ClientHandler implements Runnable {
 
     /**
      * Handles a match request between two players.
-     *
+     * <p>
      * When a player requests a match with another player, a match offer
      * is sent to the selected opponent. If the opponent has already sent
      * a match request to the same player, the request is treated as mutual
@@ -135,11 +131,11 @@ public class ClientHandler implements Runnable {
      */
     private void handleMatch(String[] tokens) {
         log.info("MATCH request");
-        if (validatePlayerAndLength(3, tokens)){
+        if (validatePlayerAndLength(3, tokens)) {
             var wr = server.getWaitingRoom();
             Player opponent = wr.getPlayer(tokens[2]);
-            if (opponent != null){
-                if (opponent.wantsMatch(player)){
+            if (opponent != null) {
+                if (opponent.wantsMatch(player)) {
                     String playerName = wr.getName(player);
                     String opponentName = wr.getName(opponent);
                     opponent.offerMatch(player);
@@ -147,22 +143,22 @@ public class ClientHandler implements Runnable {
                     setUpBeforeGame(opponent, opponentName, playerName);
                     send(ServerMessage.OK, tokens[1]);
                     new Match(player, opponent);
-                    server.broadcast(ServerMessage.PLAYERS_WAITING,wr.getPlayerNames());
+                    server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
                 } else {
                     player.offerMatch(opponent);
                     var oppClient = opponent.getClientHandler();
                     oppClient.send(ServerMessage.MATCH, "server-id " + wr.getName(player));
                     send(ServerMessage.OK, tokens[1]);
                 }
-            }
-            else {
+            } else {
                 send(ServerMessage.ERROR, tokens[1] + " Hrac_neni_dostupny");
             }
         }
     }
-    private void setUpBeforeGame(Player player, String playerName, String opponentName){
+
+    private void setUpBeforeGame(Player player, String playerName, String opponentName) {
         Set<Player> playersToUnmatch = player.getOfferedMatches();
-        for (Player playerToUnmatch : playersToUnmatch){
+        for (Player playerToUnmatch : playersToUnmatch) {
             ClientHandler handler = playerToUnmatch.getClientHandler();
             handler.send(ServerMessage.UNMATCH, "server-id " + playerName);
         }
@@ -173,23 +169,24 @@ public class ClientHandler implements Runnable {
         ClientHandler handler = player.getClientHandler();
         handler.send(ServerMessage.SETUP, "server-id " + opponentName);
     }
+
     private void handleUnmatch(String[] tokens) {
         log.info("UNMATCH request");
-        if (validatePlayerAndLength(3, tokens)){
+        if (validatePlayerAndLength(3, tokens)) {
             var wr = server.getWaitingRoom();
             var opponent = wr.getPlayer(tokens[2]);
-            if (opponent != null){
+            if (opponent != null) {
                 player.removeMatch(opponent);
                 opponent.removeMatch(player);
                 var client = opponent.getClientHandler();
                 client.send(ServerMessage.UNMATCH, "server-id " + wr.getName(player));
                 send(ServerMessage.OK, tokens[1]);
-            }
-            else{
+            } else {
                 send(ServerMessage.ERROR, tokens[1] + " Hrac_neni_dostupny");
             }
         }
     }
+
     /**
      * Attempts to configure the current match.
      * The first player who submits a valid setup determines the game
@@ -199,7 +196,7 @@ public class ClientHandler implements Runnable {
      */
     private void handleSetup(String[] tokens) {
         log.info("SETUP request");
-        if (validateSetupAndLength(tokens)){
+        if (validateSetupAndLength(tokens)) {
             boolean isW = "w".equalsIgnoreCase(tokens[3]);
             boolean isMust = "MUST".equalsIgnoreCase(tokens[4]);
             int time = -1;
@@ -207,17 +204,14 @@ public class ClientHandler implements Runnable {
                 time = Integer.parseInt(tokens[2]);
                 if (time > 0) {
                     log.info("Parsed setup: value={}, isW={}, isMust={}", time, isW, isMust);
-                }
-                else {
+                } else {
                     throw new NumberFormatException("Negative time");
                 }
-            }
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 log.warn("Invalid integer in SETUP: {}", tokens[2]);
-                send (ServerMessage.ERROR, tokens[1] + " Invalid_setup");
+                send(ServerMessage.ERROR, tokens[1] + " Invalid_setup");
             }
-            if (time > 0)
-            {
+            if (time > 0) {
                 var match = player.getMatch();
                 Player opponent = match.getOpponent(player);
                 Player white;
@@ -233,6 +227,7 @@ public class ClientHandler implements Runnable {
             }
         }
     }
+
     /**
      * Attempts to perform a move in the current match.
      * If the move is valid, the updated game state is sent to both players.
@@ -243,13 +238,13 @@ public class ClientHandler implements Runnable {
      */
     private void handleMove(String[] tokens) {
         log.info("MOVE request");
-        if (validateGameAndLength(tokens)){
+        if (validateGameAndLength(tokens)) {
             String move = tokens[2];
             boolean isSyntaxValid =
                     move.matches("[0-7]+")
                             && move.length() >= 4
                             && move.length() % 2 == 0;
-            if (isSyntaxValid){
+            if (isSyntaxValid) {
                 List<Pos> path = new ArrayList<>();
                 for (int i = 0; i < move.length(); i += 2) {
                     int x = move.charAt(i) - '0';
@@ -258,49 +253,46 @@ public class ClientHandler implements Runnable {
                 }
                 Match match = player.getMatch();
                 String error = match.makeMove(player, path);
-                if (error.isEmpty()){
+                if (error.isEmpty()) {
                     String currentState = match.getGameContent();
                     send(ServerMessage.OK, tokens[1]);
                     send(ServerMessage.STATE, "server-id " + currentState);
-                    match.getOpponent (player).getClientHandler().send(ServerMessage.STATE, "server-id " + currentState);
-                    if (!match.checkGameState()){
+                    match.getOpponent(player).getClientHandler().send(ServerMessage.STATE, "server-id " + currentState);
+                    if (!match.checkGameState()) {
                         stopGame(player, false);
                     }
-                }
-                else{
+                } else {
                     log.warn("Invalid move");
-                    send (ServerMessage.ERROR, tokens[1] + error);
+                    send(ServerMessage.ERROR, tokens[1] + error);
                 }
-            }
-            else{
+            } else {
                 log.warn("Invalid move syntax");
-                send (ServerMessage.ERROR, tokens[1] + " Invalid_move_syntax");
+                send(ServerMessage.ERROR, tokens[1] + " Invalid_move_syntax");
             }
         }
     }
 
     private void handleHistory(String[] tokens) {
         log.info("HISTORY request");
-        if (validateGameAndLength(tokens)){
+        if (validateGameAndLength(tokens)) {
             int index;
             try {
                 index = Integer.parseInt(tokens[2]);
                 String history = player.getMatch().getHistory(index);
-                if (history.isEmpty()){
+                if (history.isEmpty()) {
                     send(ServerMessage.ERROR, tokens[1] + " Histrory_index_out_of_bounds.");
-                }
-                else{
+                } else {
                     send(ServerMessage.HISTORY, tokens[1] + " " + history);
                 }
-            }
-            catch (NumberFormatException e){
-                send (ServerMessage.ERROR, tokens[1] + " Invalid_history_index");
+            } catch (NumberFormatException e) {
+                send(ServerMessage.ERROR, tokens[1] + " Invalid_history_index");
             }
         }
     }
+
     /**
      * Handles draw offers between two players.
-     *
+     * <p>
      * A player can first send a draw offer, which is forwarded to the opponent.
      * If the opponent responds with a draw acceptance, the game ends in a draw
      * and the result is sent to both clients.
@@ -311,13 +303,13 @@ public class ClientHandler implements Runnable {
         log.info("DRAW request");
         Match match = player.getMatch();
         Player opponent = match.getOpponent(player);
-        if(validateLenght(2, tokens)){
+        if (validateLenght(2, tokens)) {
             drawResult(tokens, match, opponent);
-        }else if(validateLenght(3, tokens)){
+        } else if (validateLenght(3, tokens)) {
             boolean accepted = tokens[2].equals("accept");
-            if(accepted){
+            if (accepted) {
                 drawResult(tokens, match, opponent);
-            }else{
+            } else {
                 match.setDrawOffered(false);
                 opponent.getClientHandler().send(ServerMessage.DRAW, "server-id no");
             }
@@ -326,27 +318,27 @@ public class ClientHandler implements Runnable {
         }
 
     }
+
     /**
      * Processes the draw logic.
-     *
+     * <p>
      * If a draw offer has already been made, the second confirmation
      * ends the game as a draw and sends the result to both players.
      * Otherwise, a draw offer is stored and forwarded to the opponent.
      *
-     * @param tokens parsed client message tokens
-     * @param match current match instance
+     * @param tokens   parsed client message tokens
+     * @param match    current match instance
      * @param opponent opponent player
      */
     private void drawResult(String[] tokens, Match match, Player opponent) {
-        if (match.isDrawOffered()){
+        if (match.isDrawOffered()) {
             send(ServerMessage.OK, tokens[1]);
             int playerScore = player.getScoreAgainst(opponent);
             int opponentScore = opponent.getScoreAgainst(player);
             String score = playerScore + ":" + opponentScore;
             send(ServerMessage.RESULT, tokens[1] + " draw " + score);
             opponent.getClientHandler().send(ServerMessage.RESULT, tokens[1] + " draw " + score);
-        }
-        else{
+        } else {
             match.setDrawOffered(true);
             opponent.getClientHandler().send(ServerMessage.DRAW, "server-id offered");
             send(ServerMessage.OK, tokens[1]);
@@ -355,7 +347,7 @@ public class ClientHandler implements Runnable {
 
     private void handleSurrender(String[] tokens) {
         log.info("SURRENDER request");
-        if(validateLenght(2, tokens)){
+        if (validateLenght(2, tokens)) {
             stopGame(player, true);
             log.info("Sent surrender results");
         }
@@ -363,8 +355,7 @@ public class ClientHandler implements Runnable {
 
     private void handleJoinWaitingRoom(String[] tokens) {
         log.info("JOIN WAITING ROOM");
-        if (validateLenght(3, tokens))
-        {
+        if (validateLenght(3, tokens)) {
             var wr = server.getWaitingRoom();
             boolean success;
             // Hráč se vrací do waiting room - musíme kontrolovat, že jméno není obsazeno JINÝM hráčem v waiting room
@@ -376,11 +367,10 @@ public class ClientHandler implements Runnable {
                 wr.setPlayerInWaitingRoom(player, true);  // Nastavit stav
                 success = true;
             }
-            if (success){
+            if (success) {
                 send(ServerMessage.OK, tokens[1]);
                 server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
-            }
-            else{
+            } else {
                 send(ServerMessage.ERROR, tokens[1] + " Jmeno_obsazeno");
             }
         }
@@ -391,7 +381,7 @@ public class ClientHandler implements Runnable {
         if (validatePlayerAndLength(3, tokens)) {
             var wr = server.getWaitingRoom();
             Player opponent = player.getMatch().getOpponent(player);
-            if(tokens[2].equals("no")){
+            if (tokens[2].equals("no")) {
                 wr.setPlayerInWaitingRoom(player, true);
                 send(ServerMessage.OK, tokens[1] + " to-WR");
                 server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
@@ -406,8 +396,7 @@ public class ClientHandler implements Runnable {
                     opponent.getClientHandler().send(ServerMessage.REMATCH, "accepted");
                     // Notifikujeme waiting-room klienty (pokud je třeba)
                     server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
-                }
-                else {
+                } else {
                     // Uložíme rematch nabídku a notify opponent
                     player.offerMatch(opponent);
                     var oppClient = opponent.getClientHandler();
@@ -419,26 +408,27 @@ public class ClientHandler implements Runnable {
             }
         }
     }
+
     /**
      * Stops the current game and sends final results to both players.
-     *
+     * <p>
      * The method determines the winner and loser based on either normal
      * game result or surrender. It updates the score, sends the result
      * message to both clients, removes the game from the time sender,
      * and properly terminates the match.
      *
-     * @param player player who triggered the game end (or surrendered)
+     * @param player      player who triggered the game end (or surrendered)
      * @param isSurrender true if the game ended by surrender (or disconnect)
      */
-    public synchronized void stopGame(Player player, boolean isSurrender){
+    public synchronized void stopGame(Player player, boolean isSurrender) {
         Match match = player.getMatch();
         Player winner;
         Player loser;
         String ID = isSurrender ? "surrender" : "server-id";
-        if(isSurrender){
+        if (isSurrender) {
             winner = match.getOpponent(player);
             loser = player;
-        }else{
+        } else {
             winner = match.getWinner();
             loser = match.getOpponent(winner);
         }
@@ -449,11 +439,10 @@ public class ClientHandler implements Runnable {
         String score = winnerScore + ":" + loserScore;
 
         winner.getClientHandler().send(ServerMessage.RESULT, ID + " " + winner.getName() + " " + score);
-        loser.getClientHandler().send(ServerMessage.RESULT, ID + " " + winner.getName()+ " " + score);
+        loser.getClientHandler().send(ServerMessage.RESULT, ID + " " + winner.getName() + " " + score);
         server.getTimeSender().remove(match.getGame());
         match.endGame();
     }
-
 
 
     public synchronized void send(ServerMessage name, String content) {
@@ -469,15 +458,15 @@ public class ClientHandler implements Runnable {
             log.error("Error closing socket", e);
         }
 
-       server.removeClient(this);
-        if (player != null){
+        server.removeClient(this);
+        if (player != null) {
             WaitingRoom wr = server.getWaitingRoom();
             wr.disconnectPlayer(player);
             server.broadcast(ServerMessage.PLAYERS_WAITING, wr.getPlayerNames());
             var match = player.getMatch();
-            if (match != null){
+            if (match != null) {
                 var opponent = match.getOpponent(player);
-                if (opponent != null){
+                if (opponent != null) {
                     stopGame(player, true);
                 }
             }
@@ -485,38 +474,36 @@ public class ClientHandler implements Runnable {
         log.info("Client disconnected");
     }
 
-    private boolean validateLenght(int expectedLenght, String[] tokens){
+    private boolean validateLenght(int expectedLenght, String[] tokens) {
         boolean result = tokens.length == expectedLenght;
-        if (!result){
+        if (!result) {
             log.warn("Invalid message length");
             send(ServerMessage.ERROR, "Invalid message length.");
         }
         return result;
     }
 
-    private boolean validatePlayerAndLength(int expectedLenght, String[] tokens){
+    private boolean validatePlayerAndLength(int expectedLenght, String[] tokens) {
         boolean result = player != null;
-        if (!result){
+        if (!result) {
             log.warn("Player not registered");
             send(ServerMessage.ERROR, "Nejsi zaregistrovan");
-        }
-        else{
+        } else {
             result = validateLenght(expectedLenght, tokens);
         }
         return result;
     }
 
-    private boolean validateSetupAndLength(String[] tokens){
+    private boolean validateSetupAndLength(String[] tokens) {
         boolean result = validatePlayerAndLength(5, tokens);
-        if (result){
+        if (result) {
             var match = player.getMatch();
-            if (match != null){
-                if (match.isSetup()){
+            if (match != null) {
+                if (match.isSetup()) {
                     log.warn("Match already setup");
                     send(ServerMessage.ERROR, "Zapas uz je nastaven");
                 }
-            }
-            else{
+            } else {
                 log.warn("Player not paired");
                 send(ServerMessage.ERROR, "Nemas soupere");
             }
@@ -524,17 +511,16 @@ public class ClientHandler implements Runnable {
         return result;
     }
 
-    private boolean validateGameAndLength(String[] tokens){
+    private boolean validateGameAndLength(String[] tokens) {
         boolean result = validatePlayerAndLength(3, tokens);
-        if (result){
+        if (result) {
             var match = player.getMatch();
-            if (match != null){
-                if (!match.isSetup()){
+            if (match != null) {
+                if (!match.isSetup()) {
                     log.warn("Match is not setup yet");
                     send(ServerMessage.ERROR, "Zapas jeste neni nastaven");
                 }
-            }
-            else{
+            } else {
                 log.warn("No player paired in game");
                 send(ServerMessage.ERROR, "Nemas soupere");
             }

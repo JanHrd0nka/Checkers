@@ -9,13 +9,13 @@ import java.util.List;
 /**
  * Test class used for verifying complex game mechanics
  * in the Checkers game implementation.
- *
+ * <p>
  * This class was used to test:
  * - possible moves generation
  * - multi-jump move sequences
  * - move execution logic
  * - game state evaluation
- *
+ * <p>
  * It is not part of the production server and serves only
  * for local debugging and validation of game rules.
  *
@@ -25,30 +25,31 @@ import java.util.List;
 public class GameTest {
     public void test1() {
         String content = """
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 3 0 0 0
-        0 0 0 1 0 0 0 0
-        0 0 3 0 3 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        """.replace("\n", "").replace(" ", "");
+                0 0 0 0 0 0 0 0
+                0 0 0 0 0 0 0 0
+                0 0 0 0 0 0 0 0
+                0 0 0 0 3 0 0 0
+                0 0 0 1 0 0 0 0
+                0 0 3 0 3 0 0 0
+                0 0 0 0 0 0 0 0
+                0 0 0 0 0 0 0 0
+                """.replace("\n", "").replace(" ", "");
 
         Pos pos = new Pos(3, 3);
         testPossibleMoves(content, pos);
     }
+
     public void test2() {
         String content = """
-        0 0 0 0 0 0 0 0
-        0 0 0 0 3 0 3 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 3 0 0 0
-        0 0 0 1 0 0 0 0
-        0 0 3 0 3 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        """.replace("\n", "").replace(" ", "");
+                0 0 0 0 0 0 0 0
+                0 0 0 0 3 0 3 0
+                0 0 0 0 0 0 0 0
+                0 0 0 0 3 0 0 0
+                0 0 0 1 0 0 0 0
+                0 0 3 0 3 0 0 0
+                0 0 0 0 0 0 0 0
+                0 0 0 0 0 0 0 0
+                """.replace("\n", "").replace(" ", "");
 
         Pos pos = new Pos(3, 3);
         testPossibleMoves(content, pos);
@@ -56,15 +57,15 @@ public class GameTest {
 
     public void test3() {
         String content = """
-        0 0 0 0 0 0 0 0
-        0 0 0 0 3 0 3 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 3 0 0 0
-        0 0 0 2 0 0 0 0
-        0 0 3 0 3 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        """.replace("\n", "").replace(" ", "");
+                0 0 0 0 0 0 0 0
+                0 0 0 0 3 0 3 0
+                0 0 0 0 0 0 0 0
+                0 0 0 0 3 0 0 0
+                0 0 0 2 0 0 0 0
+                0 0 3 0 3 0 0 0
+                0 0 0 0 0 0 0 0
+                0 0 0 0 0 0 0 0
+                """.replace("\n", "").replace(" ", "");
 
         Pos pos = new Pos(3, 3);
         testPossibleMoves(content, pos);
@@ -72,15 +73,15 @@ public class GameTest {
 
     public void test4() {
         String content = """
-        0 0 0 0 0 0 0 0
-        0 0 4 0 3 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 4 0 3 0 0 0
-        0 0 0 2 0 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        """.replace("\n", "").replace(" ", "");
+                0 0 0 0 0 0 0 0
+                0 0 4 0 3 0 0 0
+                0 0 0 0 0 0 0 0
+                0 0 4 0 3 0 0 0
+                0 0 0 2 0 0 0 0
+                0 0 0 0 0 0 0 0
+                0 0 0 0 0 0 0 0
+                0 0 0 0 0 0 0 0
+                """.replace("\n", "").replace(" ", "");
 
 
         List<Pos> move = new ArrayList<>();
@@ -114,7 +115,8 @@ public class GameTest {
             System.out.println(moveString);
         }
     }
-    private void testMove(String content, List<Pos> path){
+
+    private void testMove(String content, List<Pos> path) {
         Game game = new Game(content);
         printBoard(game);
         System.out.println("-----------");

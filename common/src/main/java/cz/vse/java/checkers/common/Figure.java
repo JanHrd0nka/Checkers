@@ -1,9 +1,10 @@
 package cz.vse.java.checkers.common;
+
 /**
  * Represents a piece on the checkers board.
- *
+ * <p>
  * Used to encode the state of each board cell.
- *
+ * <p>
  * Values:
  * - NONE: empty field
  * - WHITE_MAN: regular white piece
@@ -14,8 +15,7 @@ package cz.vse.java.checkers.common;
  * @author Jan Hrdonka
  * @version 1.0
  */
-public enum Figure
-{
+public enum Figure {
     NONE,
     WHITE_MAN,
     WHITE_KING,

@@ -8,10 +8,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-/** * Třída zpracovávající příchozí zprávy serveru.
+/**
+ * Třída zpracovávající příchozí zprávy serveru.
+ *
  * @author Adam Filinger
  * @version 1.0
- * */
+ *
+ */
 public class MessageHandler {
     private final Connection connection;
     private final MessageEventBus eventBus;
@@ -34,6 +37,7 @@ public class MessageHandler {
 
     /**
      * Zpracování příchozí zprávy
+     *
      * @param message
      */
     public void onMessage(String message) {
@@ -58,7 +62,9 @@ public class MessageHandler {
         }
     }
 
-    /**     * Bezpečné parsování obsahu ze zprávy     */
+    /**
+     * Bezpečné parsování obsahu ze zprávy
+     */
     private String[] parseContent(String contentStr) {
         try {
             if (contentStr == null || contentStr.isEmpty()) {
@@ -75,7 +81,9 @@ public class MessageHandler {
         }
     }
 
-    /**     * Publikuje event na základě typu serveru zprávy     */
+    /**
+     * Publikuje event na základě typu serveru zprávy
+     */
     private void publishEvent(ServerMessage msgType, String[] content, String ID) {
         switch (msgType) {
             case PLAYERS_WAITING -> eventBus.publishPlayersUpdated(content);
@@ -93,7 +101,6 @@ public class MessageHandler {
             case SETUP_DONE -> handleSetupDone(content);
 
 
-
             case UNMATCH -> {
                 if (content.length > 0) {
                     eventBus.publishRequestingMatchesUpdated(content[0], true);
@@ -103,14 +110,14 @@ public class MessageHandler {
             case RESULT -> handleGameResult(content, ID);
             case REMATCH -> handleRematchEvent(content);
             case DRAW -> {
-                if(content[0].equals("offered")) {
+                if (content[0].equals("offered")) {
                     eventBus.publishDrawOffer();
-                } else if(content[0].equals("no")){
+                } else if (content[0].equals("no")) {
                     eventBus.publishDrawDeclined();
                 }
             }
             case TIME -> {
-                if(content.length == 1){
+                if (content.length == 1) {
                     eventBus.publishTime(content[0]);
                 }
             }
@@ -120,6 +127,7 @@ public class MessageHandler {
 
     /**
      * Zpracování zprávy typu SETUP_DONE - kontrola parametrů zprávy
+     *
      * @param content
      */
     private void handleSetupDone(String[] content) {
@@ -134,9 +142,9 @@ public class MessageHandler {
     }
 
     private void handleStateEvent(String[] content) {
-            if (content.length > 0) {
-                eventBus.publishOpponentMoved(content[0]);
-            }
+        if (content.length > 0) {
+            eventBus.publishOpponentMoved(content[0]);
+        }
     }
 
     private void handleGameResult(String[] content, String ID) {
@@ -151,6 +159,7 @@ public class MessageHandler {
      * Zpracování zprávy typu REMATCH.
      * Kontrola parametrů zprávy a publikace rematch nabídky
      * dle stavu REMATCH (accepted/no)
+     *
      * @param content
      */
     private void handleRematchEvent(String[] content) {

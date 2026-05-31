@@ -16,6 +16,6 @@
 
 
     <root level="debug">
-        <appender-ref ref="CONS" />
+        <appender-ref ref="CONS"/>
     </root>
 </configuration>

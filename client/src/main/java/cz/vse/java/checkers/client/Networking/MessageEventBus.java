@@ -3,13 +3,17 @@ package cz.vse.java.checkers.client.Networking;
 import cz.vse.java.checkers.client.Networking.MessageListeners.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-/** * Centrální event bus pro publikování zpráv od serveru..
+/**
+ * Centrální event bus pro publikování zpráv od serveru..
+ *
  * @author Adam Filinger
  * @version 1.0
- * */
+ *
+ */
 public class MessageEventBus {
     private static volatile MessageEventBus instance;
     private static final Logger logger = LoggerFactory.getLogger(MessageEventBus.class);
@@ -19,7 +23,8 @@ public class MessageEventBus {
     private final Set<GameListener> gameListeners = new CopyOnWriteArraySet<>();
     private final Set<InitialConnectionListener> initialConnectionListeners = new CopyOnWriteArraySet<>();
 
-    private MessageEventBus() {}
+    private MessageEventBus() {
+    }
 
     public static MessageEventBus getInstance() {
         if (instance == null) {

@@ -18,11 +18,14 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-/** * Controller pro obsluhu obrazovky čekárny
+/**
+ * Controller pro obsluhu obrazovky čekárny
+ *
  * @author Adam Filinger
  * @version 1.0
  *
- * */
+ *
+ */
 public class WaitingRoomController extends Controller implements WaitingRoomListener {
     private static final Logger log = LoggerFactory.getLogger(WaitingRoomController.class);
 
@@ -59,6 +62,7 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
     /**
      * Aktualizace čekajících hráčů při příchozí zprávě serveru
      * Kontrola vyždáných zápasů a vlastního jména
+     *
      * @param playersList
      */
     @Override
@@ -124,6 +128,7 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
     /**
      * Přijetí zápasu - odstraní ze seznamu čekajících zápasů.
      * Update UI
+     *
      * @param playerName
      */
     private void acceptMatch(String playerName) {
@@ -131,16 +136,16 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
         CompletableFuture<Message> responseFuture = rm.registerRequest(UID);
         if (handler.send(ClientMessage.MATCH, UID, playerName)) {
             responseFuture.thenAccept(response -> Platform.runLater(() -> {
-                if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
-                    requestingMatches.remove(playerName);
-                    requestedMatches.remove(playerName);
-                    playersRequestingList.getItems().remove(playerName);
+                        if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
+                            requestingMatches.remove(playerName);
+                            requestedMatches.remove(playerName);
+                            playersRequestingList.getItems().remove(playerName);
 
-                    log.info("Match accepted from: {}", playerName);
-                } else {
-                    log.error("Invalid credentials");
-                }
-            })).orTimeout(5, TimeUnit.SECONDS)
+                            log.info("Match accepted from: {}", playerName);
+                        } else {
+                            log.error("Invalid credentials");
+                        }
+                    })).orTimeout(5, TimeUnit.SECONDS)
                     .exceptionally(ex -> {
                         Platform.runLater(() -> log.error("Network timeout on match acceptance"));
                         return null;
@@ -163,13 +168,12 @@ public class WaitingRoomController extends Controller implements WaitingRoomList
         }
     }
 
-    public void cleanLists(){
+    public void cleanLists() {
         requestedMatches.clear();
         requestingMatches.clear();
         playersRequestingList.getItems().clear();
         playersRequestingList.getItems().clear();
     }
-
 
 
 }

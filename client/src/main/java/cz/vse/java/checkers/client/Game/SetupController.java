@@ -20,10 +20,13 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-/** * Controller pro obsluhu obrazovky nastavení parametrů hry.
+/**
+ * Controller pro obsluhu obrazovky nastavení parametrů hry.
+ *
  * @author Adam Filinger
  * @version 1.0
- * */
+ *
+ */
 public class SetupController extends Controller implements SetupListener {
     private static final Logger log = LoggerFactory.getLogger(SetupController.class);
 
@@ -74,13 +77,13 @@ public class SetupController extends Controller implements SetupListener {
                 CompletableFuture<Message> responseFuture = rm.registerRequest(UID);
                 confirmBtn.setDisable(true);
                 responseFuture.thenAccept(response -> Platform.runLater(() -> {
-                    if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
-                        log.info("Setup confirmed by server");
-                    } else {
-                        log.error("Setup failed: {}", response.getContent());
-                        resetUI();
-                    }
-                }))
+                            if (Objects.equals(response.getToken(), ServerMessage.OK.name())) {
+                                log.info("Setup confirmed by server");
+                            } else {
+                                log.error("Setup failed: {}", response.getContent());
+                                resetUI();
+                            }
+                        }))
                         .orTimeout(5, TimeUnit.SECONDS)
                         .exceptionally(ex -> {
                             Platform.runLater(() -> {
@@ -98,6 +101,7 @@ public class SetupController extends Controller implements SetupListener {
 
     /**
      * Nastavení parametrů hry a přechod do herní obrazovky
+     *
      * @param time
      * @param isWhite
      * @param mustTake

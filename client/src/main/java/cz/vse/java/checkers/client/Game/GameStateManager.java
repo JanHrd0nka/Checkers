@@ -8,11 +8,14 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-/** GameStateManager - odděluje herní logiku a stav od UI kontrolery.
+/**
+ * GameStateManager - odděluje herní logiku a stav od UI kontrolery.
  * Jedinou odpovědností je spravovat stav Game2 objektu.
+ *
  * @author Adam Filinger
  * @version 1.0
- * */
+ *
+ */
 public class GameStateManager {
     private static final Logger logger = LoggerFactory.getLogger(GameStateManager.class);
 
@@ -22,7 +25,9 @@ public class GameStateManager {
     public GameStateManager() {
     }
 
-    /**     * Vytvořit novou hru (ideálně s konfiguracemi ze serveru)     */
+    /**
+     * Vytvořit novou hru (ideálně s konfiguracemi ze serveru)
+     */
     public void createNewGame(boolean isWhite, boolean mustTake) {
         // Zde by měly přijít parametry ze serveru (čas, pravidla, počáteční pozice)
         setIsWhite(isWhite);
@@ -30,7 +35,9 @@ public class GameStateManager {
         logger.info("New game created");
     }
 
-    /**     * Provést tah     */
+    /**
+     * Provést tah
+     */
     public void makeMove(Pos from, Pos to) {
         List<Pos> path = new ArrayList<>();
         path.add(from);
@@ -39,7 +46,9 @@ public class GameStateManager {
         logger.debug("Move executed: {} -> {}", from, to);
     }
 
-    /**     * Aktualizovat stav desky z obsahu serveru     */
+    /**
+     * Aktualizovat stav desky z obsahu serveru
+     */
     public void updateBoard(String boardState) {
         try {
             game.updateBoard(boardState);

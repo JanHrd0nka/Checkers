@@ -14,12 +14,15 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-/** * GameController - spravuje herní logiku a interakci se serverem.
+/**
+ * GameController - spravuje herní logiku a interakci se serverem.
  * Implementuje GameListener pro příjem event notifikací.
  * Oddělena logika pro game state (GameStateManager) a scény (SceneNavigator).
+ *
  * @author Adam Filinger
  * @version 1.0
- * */
+ *
+ */
 public class GameController extends Controller implements GameListener {
 
     private static final Logger logger = LoggerFactory.getLogger(GameController.class);
@@ -35,7 +38,9 @@ public class GameController extends Controller implements GameListener {
     private int selectedRow = -1;
     private int selectedCol = -1;
 
-    /**     * Konstruktor - GameController je nyní bez přímé závislosti na MessageHandler     */
+    /**
+     * Konstruktor - GameController je nyní bez přímé závislosti na MessageHandler
+     */
     public GameController(BoardController board) {
         this.board = board;
         this.handler = Connection.getInstance().getHandler();
@@ -84,7 +89,9 @@ public class GameController extends Controller implements GameListener {
 
     // ===== NETWORK OPERATIONS =====
 
-    /**     * Odeslat hermický tah na server     */
+    /**
+     * Odeslat hermický tah na server
+     */
     public void movePiece(Pos from, Pos to) {
         if (from == null || to == null) {
             logger.warn("Invalid move: from or to position is null");
@@ -111,7 +118,9 @@ public class GameController extends Controller implements GameListener {
         });
     }
 
-    /**     * Obdržena zpráva o pohybu soupeře     */
+    /**
+     * Obdržena zpráva o pohybu soupeře
+     */
     @Override
     public void onOpponentMoved(String boardState) {
         Platform.runLater(() -> {
@@ -121,7 +130,9 @@ public class GameController extends Controller implements GameListener {
         });
     }
 
-    /**     * Obdržena zpráva o výsledku hry     */
+    /**
+     * Obdržena zpráva o výsledku hry
+     */
     @Override
     public void onGameResult(String ID, String winner, String score) {
         Platform.runLater(() -> {
@@ -131,7 +142,9 @@ public class GameController extends Controller implements GameListener {
         });
     }
 
-    /**     * Obdržena nabídka na rematch     */
+    /**
+     * Obdržena nabídka na rematch
+     */
     @Override
     public void onRematchOffer(boolean accepted) {
         Platform.runLater(() -> {
@@ -158,7 +171,7 @@ public class GameController extends Controller implements GameListener {
     }
 
     @Override
-    public void onDrawOffer(){
+    public void onDrawOffer() {
         Platform.runLater(() -> {
             logger.info("Received draw offer from opponent, displaying draw alert");
             board.displayDraw();
@@ -182,9 +195,11 @@ public class GameController extends Controller implements GameListener {
     }
 
 
-    /**     * Vrátit se do waiting roomu     */
+    /**
+     * Vrátit se do waiting roomu
+     */
     public void returnToWaitingRoom() {
-       // setupNewGame(); // Reset hry
+        // setupNewGame(); // Reset hry
 
         String name = Connection.getInstance().getName();
         String UID = generateID();
@@ -197,7 +212,7 @@ public class GameController extends Controller implements GameListener {
         sendNetworkMessage(UID, response -> {
             if (isSuccessResponse(response)) {
                 logger.info("Successfully joined waiting room");
-                sceneNavigator. navigateToWaitingRoom();
+                sceneNavigator.navigateToWaitingRoom();
             } else {
                 logger.error("Failed to join waiting room");
             }
@@ -230,17 +245,23 @@ public class GameController extends Controller implements GameListener {
 
     // ===== PRIVATE HELPER METHODS =====
 
-    /**     * Formátovat data pohybu     */
+    /**
+     * Formátovat data pohybu
+     */
     private String formatMoveData(Pos from, Pos to) {
         return String.valueOf(from.x()) + from.y() + to.x() + to.y();
     }
 
-    /**     * Kontrola, zda je odpověď úspěšná     */
+    /**
+     * Kontrola, zda je odpověď úspěšná
+     */
     private boolean isSuccessResponse(Message response) {
         return Objects.equals(response.getToken(), ServerMessage.OK.name());
     }
 
-    /**     * Poslat síťovou zprávu s timeoutem a error handling     * Centrální místo pro všechny síťové operace     */
+    /**
+     * Poslat síťovou zprávu s timeoutem a error handling     * Centrální místo pro všechny síťové operace
+     */
     private void sendNetworkMessage(String UID, java.util.function.Consumer<Message> onSuccess) {
         CompletableFuture<Message> responseFuture = rm.registerRequest(UID);
 
@@ -255,7 +276,9 @@ public class GameController extends Controller implements GameListener {
                 });
     }
 
-    /**     * Aktualizovat zobrazení desky     */
+    /**
+     * Aktualizovat zobrazení desky
+     */
     private void updateBoardDisplay() {
         Platform.runLater(board::drawPieces);
     }
@@ -263,7 +286,7 @@ public class GameController extends Controller implements GameListener {
     public void sendForfeitMessage(ClientMessage clientMessage, String uid, String s) {
         if (!handler.send(clientMessage, uid, s)) {
             logger.error("Failed to send foresight message");
-        } else{
+        } else {
             logger.info("Sent forfeit message");
             sendNetworkMessage(uid, response -> {
                 if (isSuccessResponse(response)) {
@@ -278,7 +301,7 @@ public class GameController extends Controller implements GameListener {
     public void sendDrawRequest(ClientMessage clientMessage, String uid, String s) {
         if (!handler.send(clientMessage, uid, s)) {
             logger.error("Failed to send draw request message");
-        } else{
+        } else {
             logger.info("Sent draw request message");
             sendNetworkMessage(uid, response -> {
                 if (isSuccessResponse(response)) {
@@ -291,11 +314,11 @@ public class GameController extends Controller implements GameListener {
     }
 
     public void sendDrawOffer(boolean b) {
-        String UID  = generateID();
+        String UID = generateID();
         String message = b ? "accept" : "decline";
-        if(!handler.send(ClientMessage.DRAW, UID, message)){
+        if (!handler.send(ClientMessage.DRAW, UID, message)) {
             logger.error("Failed to send draw response");
-        }else{
+        } else {
             sendNetworkMessage(UID, response -> {
                 if (isSuccessResponse(response)) {
                     logger.debug("Successful server response on draw offer: {}", message);
@@ -304,6 +327,6 @@ public class GameController extends Controller implements GameListener {
                 }
             });
         }
-        }
+    }
 
 }

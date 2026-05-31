@@ -5,12 +5,13 @@ import cz.vse.java.checkers.common.Pos;
 import cz.vse.java.checkers.common.ServerMessage;
 
 import java.util.List;
+
 /**
  * Extension of the base Game class that adds time control for both players.
- *
+ * <p>
  * Each player has a fixed time limit, which decreases only while it is their turn.
  * The game automatically ends when a player's time runs out.
- *
+ * <p>
  * The class is responsible for:
  * - tracking remaining time for both players
  * - updating time on each move or state check
@@ -32,37 +33,35 @@ public class TimedGame extends Game {
     public TimedGame(boolean mustTake,
                      Player white,
                      Player black,
-                     int timeLimitSeconds)
-    {
+                     int timeLimitSeconds) {
         super(mustTake);
         this.white = white;
         this.black = black;
-        whiteRemainingTimeMsec = (long)timeLimitSeconds * 1000;
-        blackRemainingTimeMsec = (long)timeLimitSeconds * 1000;
+        whiteRemainingTimeMsec = (long) timeLimitSeconds * 1000;
+        blackRemainingTimeMsec = (long) timeLimitSeconds * 1000;
         lastUpdateMsec = System.currentTimeMillis();
         isFinished = false;
     }
 
     @Override
-    public synchronized boolean makeMove(List<Pos> path){
+    public synchronized boolean makeMove(List<Pos> path) {
         updateTimes();
         return super.makeMove(path);
     }
+
     @Override
     public synchronized boolean checkGameState() {
         updateTimes();
-        if (isWhiteToMove() && whiteRemainingTimeMsec < 0){
+        if (isWhiteToMove() && whiteRemainingTimeMsec < 0) {
             return false;
-        }
-        else if (blackRemainingTimeMsec < 0){
+        } else if (blackRemainingTimeMsec < 0) {
             return false;
         }
         return super.checkGameState();
     }
 
-    public synchronized void sendTimes(){
-        if (!isFinished)
-        {
+    public synchronized void sendTimes() {
+        if (!isFinished) {
             updateTimes();
             int whiteTime = (int) (whiteRemainingTimeMsec / 1000);
             int blackTime = (int) (blackRemainingTimeMsec / 1000);
@@ -71,7 +70,7 @@ public class TimedGame extends Game {
         }
     }
 
-    private synchronized void updateTimes(){
+    private synchronized void updateTimes() {
         long now = System.currentTimeMillis();
         long delta = now - lastUpdateMsec;
         if (isWhiteToMove()) {

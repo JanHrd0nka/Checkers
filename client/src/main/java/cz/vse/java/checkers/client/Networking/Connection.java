@@ -10,7 +10,9 @@ import java.net.Socket;
 import java.util.Set;
 import java.util.concurrent.*;
 
-/** Třída obsluhující připojení na server, příjem a posílání zpráv - centrální  bod
+/**
+ * Třída obsluhující připojení na server, příjem a posílání zpráv - centrální  bod
+ *
  * @author Adam Filinger
  * @version 1.0
  */
@@ -30,14 +32,14 @@ public class Connection {
 
     private String name;
 
-    private Connection(){
+    private Connection() {
         System.out.println("Connection created");
     }
 
-    public static Connection getInstance(){
-        if (instance == null){
-            synchronized (Connection.class){
-                if (instance == null){
+    public static Connection getInstance() {
+        if (instance == null) {
+            synchronized (Connection.class) {
+                if (instance == null) {
                     instance = new Connection();
                 }
             }
@@ -45,22 +47,21 @@ public class Connection {
         return instance;
     }
 
-    public void setName(String setName){
+    public void setName(String setName) {
         name = setName;
     }
-    public String getName(){
+
+    public String getName() {
         return name;
     }
 
 
-
-
-    public void addMessageHandler(MessageHandler handler){
+    public void addMessageHandler(MessageHandler handler) {
         messageHandlers.add(handler);
         messageHandler = handler;
     }
 
-    public MessageHandler getHandler(){
+    public MessageHandler getHandler() {
         return messageHandler;
     }
 
@@ -69,6 +70,7 @@ public class Connection {
 
     /**
      * Zaslání zprávy na server
+     *
      * @param name
      * @param content
      * @return true pokud se zpráva úspěšně přidala do fronty, false pokud je fronta plná
@@ -85,6 +87,7 @@ public class Connection {
 
     /**
      * Připojení na server - nastartování vláken pro čtení a zápis
+     *
      * @param host
      * @param port
      */
@@ -111,11 +114,11 @@ public class Connection {
     /**
      * Odpojení od serveru - zastavení vláken pro čtení a zápis
      */
-    public void disconnect(){
+    public void disconnect() {
         log.info("Disconnecting...");
         try {
             // stop writer
-            if (!sendQueue.offer(stopMessage)){
+            if (!sendQueue.offer(stopMessage)) {
                 throw new RuntimeException("Send queue is full");
             }
 
@@ -160,7 +163,7 @@ public class Connection {
     /**
      * Start vlákna pro čtení zpráv
      */
-    private void startReader(){
+    private void startReader() {
         try {
             String line;
             while ((line = in.readLine()) != null) {

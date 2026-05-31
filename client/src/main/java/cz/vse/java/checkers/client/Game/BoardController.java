@@ -25,10 +25,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-/**BoardController - odpovídá za UI vykreslování desky. * Deleguje herní logiku GameControlleru.
+/**
+ * BoardController - odpovídá za UI vykreslování desky. * Deleguje herní logiku GameControlleru.
+ *
  * @author Adam Filinger
  * @version 1.0
- * */
+ *
+ */
 public class BoardController extends Controller {
 
     private static final Logger logger = LoggerFactory.getLogger(BoardController.class);
@@ -55,8 +58,9 @@ public class BoardController extends Controller {
     private Group boardWrapper;
 
 
-
-    /**     * Inicializace scény     */
+    /**
+     * Inicializace scény
+     */
     @FXML
     public void initialize() {
         logger.info("Initializing board");
@@ -66,7 +70,9 @@ public class BoardController extends Controller {
     }
 
 
-    /**     * Vytvořit novou hru     */
+    /**
+     * Vytvořit novou hru
+     */
     public void createNewGame(boolean isWhite, boolean mustTake) {
         checkersBoard = new GridPane();
         gameController.setupNewGame(isWhite, mustTake);
@@ -81,7 +87,9 @@ public class BoardController extends Controller {
         }
     }
 
-    /**     * Reset UI desky - vymazat vybrané pozice a překreslit  */
+    /**
+     * Reset UI desky - vymazat vybrané pozice a překreslit
+     */
     public void resetBoardDisplay() {
         logger.info("Resetting board display");
         gameController.setSelectedRow(-1);
@@ -91,11 +99,13 @@ public class BoardController extends Controller {
     }
 
 
-    /**     * Vykreslit kousky na desku     */
+    /**
+     * Vykreslit kousky na desku
+     */
     public void drawPieces() {
         drawEmptyBoard();
-        if(!gameController.isWhite()){
-            for (int col = 0; col < BOARD_SIZE ; col++) {
+        if (!gameController.isWhite()) {
+            for (int col = 0; col < BOARD_SIZE; col++) {
                 for (int row = 0; row < BOARD_SIZE; row++) {
                     Pos current = new Pos(row, col);
                     Figure figure = gameController.getGame().getPiece(current);
@@ -105,9 +115,9 @@ public class BoardController extends Controller {
                     }
                 }
             }
-        }else{
-            for (int col = BOARD_SIZE-1; col >= 0 ; col--) {
-                for (int row = BOARD_SIZE-1; row >= 0; row--) {
+        } else {
+            for (int col = BOARD_SIZE - 1; col >= 0; col--) {
+                for (int row = BOARD_SIZE - 1; row >= 0; row--) {
                     Pos current = new Pos(row, col);
                     Figure figure = gameController.getGame().getPiece(current);
 
@@ -119,7 +129,9 @@ public class BoardController extends Controller {
         }
     }
 
-    /**     * Vykreslit jednu figurku     */
+    /**
+     * Vykreslit jednu figurku
+     */
     private void drawPiece(Pos pos, Figure figure) {
         Circle piece = new Circle(PIECE_RADIUS);
         piece.setFill(getFigureColor(figure, pos.x(), pos.y()));
@@ -131,7 +143,9 @@ public class BoardController extends Controller {
         piece.setOnMouseClicked(event -> handlePieceClick(pos));
     }
 
-    /**     * Získat barvu pro figurku     */
+    /**
+     * Získat barvu pro figurku
+     */
     private Color getFigureColor(Figure figure, int row, int col) {
         boolean isSelected = (row == gameController.getSelectedRow() &&
                 col == gameController.getSelectedCol());
@@ -145,10 +159,12 @@ public class BoardController extends Controller {
         };
     }
 
-    /**     * Vykreslit prázdnou desku (šachovnici)     */
+    /**
+     * Vykreslit prázdnou desku (šachovnici)
+     */
     private void drawEmptyBoard() {
         checkersBoard.getChildren().clear();
-        for (int col = 0; col < BOARD_SIZE ; col++) {
+        for (int col = 0; col < BOARD_SIZE; col++) {
             for (int row = 0; row < BOARD_SIZE; row++) {
                 Rectangle square = new Rectangle(SQUARE_SIZE, SQUARE_SIZE);
                 square.setFill((row + col) % 2 == 0
@@ -163,7 +179,9 @@ public class BoardController extends Controller {
         }
     }
 
-    /**     * Obsluha kliknutí na figurku     */
+    /**
+     * Obsluha kliknutí na figurku
+     */
     private void handlePieceClick(Pos clickedPos) {
         if (!gameController.isPlayerTurn()) {
             logger.debug("Not player turn");
@@ -178,7 +196,9 @@ public class BoardController extends Controller {
         drawPossibleMoves(clickedPos);
     }
 
-    /**     * Vykreslit možné tahy     */
+    /**
+     * Vykreslit možné tahy
+     */
     public void drawPossibleMoves(Pos pos) {
         List<List<Pos>> possibleMoves = gameController.getGame().getPossibleMoves(pos);
 
@@ -194,7 +214,9 @@ public class BoardController extends Controller {
         }
     }
 
-    /**     * Obsluha kliknutí na pole     */
+    /**
+     * Obsluha kliknutí na pole
+     */
     private void handleSquareClick(Pos pos) {
         if (gameController.getSelectedRow() != -1 &&
                 gameController.getSelectedCol() != -1 &&
@@ -209,7 +231,9 @@ public class BoardController extends Controller {
         }
     }
 
-    /**     * Zobrazit dialog s výsledkem hry     */
+    /**
+     * Zobrazit dialog s výsledkem hry
+     */
     public void showResultDialog(String ID, boolean isWin, String score) {
         drawBtn.setDisable(false);
         forfeightBtn.setDisable(false);
@@ -219,7 +243,7 @@ public class BoardController extends Controller {
 
         if (ID.equals("surrender")) {
             content = "Váš soupeř se vzdal\nSkóre: " + score;
-        }else{
+        } else {
             content = isWin
                     ? "Vyhráli jste zápas \nSkóre: " + score
                     : "Prohráli jste zápas.\nSkóre: " + score;
@@ -253,7 +277,7 @@ public class BoardController extends Controller {
         gameController.sendForfeitMessage(ClientMessage.SURRENDER, UID, "");
     }
 
-    private void offerDraw(){
+    private void offerDraw() {
         String UID = generateID();
         gameController.sendDrawRequest(ClientMessage.DRAW, UID, "");
         drawBtn.setDisable(true);
@@ -269,7 +293,7 @@ public class BoardController extends Controller {
         return this.stage;
     }
 
-    public void setStage(Stage stage){
+    public void setStage(Stage stage) {
         this.stage = stage;
     }
 
@@ -282,7 +306,7 @@ public class BoardController extends Controller {
         ButtonType decline = new ButtonType("Odmíntout");
         ButtonType accept = new ButtonType("Přijmout");
 
-        drawAlert = new Alert(Alert.AlertType.NONE, "",decline, accept);
+        drawAlert = new Alert(Alert.AlertType.NONE, "", decline, accept);
         drawAlert.setTitle("Remíza");
         drawAlert.setHeaderText("Soupeř nabídl remízu");
 
@@ -293,7 +317,7 @@ public class BoardController extends Controller {
             drawBtn.setDisable(false);
             forfeightBtn.setDisable(false);
             logger.info("Sending draw decline");
-        } else if(result.isPresent() && result.get() == accept){
+        } else if (result.isPresent() && result.get() == accept) {
             gameController.sendDrawOffer(true);
             drawBtn.setDisable(false);
             forfeightBtn.setDisable(false);
@@ -314,7 +338,7 @@ public class BoardController extends Controller {
 
     public void updateTime(String s) {
         String current = timeLabel.getText();
-        if(!Objects.equals(current, s)){
+        if (!Objects.equals(current, s)) {
             Platform.runLater(() -> timeLabel.setText(s));
         }
     }

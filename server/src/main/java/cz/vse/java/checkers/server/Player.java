@@ -6,10 +6,10 @@ import java.util.Set;
 
 /**
  * Represents a connected player on the server.
- *
+ * <p>
  * Stores player state including name, active match, matchmaking requests,
  * rematch requests, and score history against opponents.
- *
+ * <p>
  * Each Player instance is bound to a ClientHandler and represents
  * a single connected client.
  *
@@ -26,7 +26,7 @@ public class Player {
 
     private final Map<String, Integer> opponentScores;
 
-    public Player(ClientHandler clientHandler){
+    public Player(ClientHandler clientHandler) {
         this.clientHandler = clientHandler;
         offeredMatches = new HashSet<>();
         offeredRematches = new HashSet<>();
@@ -62,49 +62,49 @@ public class Player {
         opponentScores.put(opponent.getName(), value);
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
-    public void setName(String name){
+    public void setName(String name) {
         this.name = name;
     }
 
     /**
      * Registers a match offer from another player.
      */
-    public synchronized void offerMatch(Player player){
+    public synchronized void offerMatch(Player player) {
         offeredMatches.add(player);
     }
 
-    public synchronized void removeMatch(Player player){
+    public synchronized void removeMatch(Player player) {
         offeredMatches.remove(player);
     }
 
-    public synchronized ClientHandler getClientHandler(){
+    public synchronized ClientHandler getClientHandler() {
         return clientHandler;
     }
 
     /**
      * Checks whether this player has received a match offer from the given player.
      */
-    public synchronized boolean wantsMatch(Player player){
+    public synchronized boolean wantsMatch(Player player) {
         return offeredMatches.contains(player);
     }
 
-    public synchronized void setMatch(Match match){
+    public synchronized void setMatch(Match match) {
         this.match = match;
     }
 
-    public synchronized void clearOfferedMatches(){
+    public synchronized void clearOfferedMatches() {
         offeredMatches.clear();
     }
 
-    public synchronized Set<Player> getOfferedMatches(){
+    public synchronized Set<Player> getOfferedMatches() {
         return offeredMatches;
     }
 
-    public synchronized Match getMatch(){
+    public synchronized Match getMatch() {
         return match;
     }
 
@@ -119,11 +119,11 @@ public class Player {
     /**
      * Checks whether this player has offered a rematch to the given opponent.
      */
-    public synchronized boolean wantsRematch(Player player){
+    public synchronized boolean wantsRematch(Player player) {
         return offeredRematches.contains(player);
     }
 
-    public synchronized void clearOfferedRematches(){
+    public synchronized void clearOfferedRematches() {
         offeredRematches.clear();
     }
 }

@@ -4,7 +4,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CompletableFuture;
 
-/** Třída zajišťující správné párování odeslaných a příchozích zpráv
+/**
+ * Třída zajišťující správné párování odeslaných a příchozích zpráv
+ *
  * @author Adam Filinger
  * @version 1.0
  */
@@ -14,12 +16,13 @@ public class ResponseManager {
 
     public static volatile ResponseManager instance;
 
-    private ResponseManager() {}
+    private ResponseManager() {
+    }
 
     public static ResponseManager getInstance() {
-        if (instance == null){
-            synchronized (ResponseManager.class){
-                if (instance == null){
+        if (instance == null) {
+            synchronized (ResponseManager.class) {
+                if (instance == null) {
                     instance = new ResponseManager();
                 }
             }
@@ -29,6 +32,7 @@ public class ResponseManager {
 
     /**
      * Uložení zprávy před zasláním na server - nutno volat z controlleru kde posílám zprávu
+     *
      * @param ID
      * @return
      */
@@ -40,6 +44,7 @@ public class ResponseManager {
 
     /**
      * Odbavení příchozí zprávy dle ID a notifikace čekajícího controlleru
+     *
      * @param correlationId
      * @param response
      */

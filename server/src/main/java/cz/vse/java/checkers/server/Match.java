@@ -3,13 +3,14 @@ package cz.vse.java.checkers.server;
 import cz.vse.java.checkers.common.Pos;
 
 import java.util.List;
+
 /**
  * Represents a match between two paired players in the Checkers server.
- *
+ * <p>
  * The Match class manages the lifecycle of a game between two players,
  * from initial pairing, through game setup, turn management, move validation,
  * and game termination.
- *
+ * <p>
  * It also holds the active game instance and tracks additional match state
  * such as draw offers and the current player's turn.
  *
@@ -22,68 +23,71 @@ public class Match {
     private TimedGame game;
     private Player currentPlayer;
     private boolean drawOffered;
-    public Match (Player p1, Player p2){
+
+    public Match(Player p1, Player p2) {
         this.p1 = p1;
         this.p2 = p2;
         p1.setMatch(this);
         p2.setMatch(this);
     }
-    public synchronized void setUp(int time, Player white, boolean mustTake, TimeSender timeSender){
+
+    public synchronized void setUp(int time, Player white, boolean mustTake, TimeSender timeSender) {
         currentPlayer = white;
         var black = getOpponent(white);
-        if (game != null){
+        if (game != null) {
             timeSender.remove(game);
         }
         game = new TimedGame(mustTake, white, black, time);
         timeSender.add(game);
     }
 
-    public synchronized boolean isSetup(){
+    public synchronized boolean isSetup() {
         return game != null;
     }
 
-    public synchronized Player getOpponent(Player player){
-        if (player == p1){
+    public synchronized Player getOpponent(Player player) {
+        if (player == p1) {
             return p2;
-        }
-        else{
+        } else {
             return p1;
         }
     }
-    public String getGameContent(){
+
+    public String getGameContent() {
         return game.toContent();
     }
-    public String getHistory(int index){
+
+    public String getHistory(int index) {
         return game.getHistory(index);
     }
-    public String makeMove(Player player, List<Pos> path){
+
+    public String makeMove(Player player, List<Pos> path) {
         String error = "";
-        if (player == currentPlayer){
-            if (game.makeMove(path)){
+        if (player == currentPlayer) {
+            if (game.makeMove(path)) {
                 switchPlayersTurn();
-            }
-            else{
+            } else {
                 error = " Neplarny_tah";
             }
-        }
-        else{
+        } else {
             error = " Nejsi_na_tahu.";
         }
         return error;
     }
-    private void switchPlayersTurn(){
-        if (currentPlayer == p1){
+
+    private void switchPlayersTurn() {
+        if (currentPlayer == p1) {
             currentPlayer = p2;
-        }
-        else {
+        } else {
             currentPlayer = p1;
         }
     }
-    public boolean checkGameState (){
+
+    public boolean checkGameState() {
         return game.checkGameState();
     }
 
-    public Player getWinner(){
+    public Player getWinner() {
         return getOpponent(currentPlayer);
     }
 
@@ -95,11 +99,11 @@ public class Match {
         this.drawOffered = drawOffered;
     }
 
-    public void endGame(){
+    public void endGame() {
         game = null;
     }
 
-    public TimedGame getGame(){
+    public TimedGame getGame() {
         return game;
     }
 }

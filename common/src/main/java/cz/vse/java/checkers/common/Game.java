@@ -2,9 +2,10 @@ package cz.vse.java.checkers.common;
 
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  * Core game logic for a checkers match.
- *
+ * <p>
  * This class represents the full state of a checkers game, including:
  * - board representation and piece management
  * - move validation and execution
@@ -13,10 +14,10 @@ import java.util.List;
  * - promotion rules
  * - game history tracking
  * - optional forced-capture rule (mustTake)
- *
+ * <p>
  * The class is also responsible for generating possible moves
  * and determining whether the game is still playable.
- *
+ * <p>
  * It can be used both in real matches (TimedGame) and for testing
  * via string-based board initialization.
  *
@@ -29,27 +30,29 @@ public class Game {
     private boolean whiteToMove;
     private static final int BOARD_SIZE = 8;
     private final boolean mustTake;
-    public Game(boolean mustTake){
+
+    public Game(boolean mustTake) {
         setPieces();
         whiteToMove = true;
         this.mustTake = mustTake;
         gameHistory = new ArrayList<>();
         gameHistory.add(toContent());
     }
+
     // Constructor for testing purposes.
-    public Game(String content){
+    public Game(String content) {
         gameHistory = new ArrayList<>();
         whiteToMove = true;
         mustTake = false;
         board = new ArrayList<>(BOARD_SIZE);
-        for (int i = 0; i < BOARD_SIZE; ++i){
+        for (int i = 0; i < BOARD_SIZE; ++i) {
             board.add(new ArrayList<>(BOARD_SIZE));
-            for (int j = 0; j < BOARD_SIZE; ++j){
+            for (int j = 0; j < BOARD_SIZE; ++j) {
                 board.get(i).add(Figure.NONE);
             }
         }
-        if (content.length() == 64){
-            for (int i = 0; i < 64; ++i){
+        if (content.length() == 64) {
+            for (int i = 0; i < 64; ++i) {
                 int x = i % 8;
                 int y = 7 - (i / 8);
                 char charFigure = content.charAt(i);
@@ -65,6 +68,7 @@ public class Game {
             }
         }
     }
+
     public String toContent() {
 
         StringBuilder sb = new StringBuilder(65);
@@ -90,8 +94,8 @@ public class Game {
         return sb.toString();
     }
 
-    public void updateBoard(String state){
-        if(state.length() == 65) {
+    public void updateBoard(String state) {
+        if (state.length() == 65) {
             for (int i = 0; i < 64; ++i) {
                 int x = i % 8;
                 int y = 7 - (i / 8);
@@ -110,13 +114,13 @@ public class Game {
         }
     }
 
-    public synchronized boolean makeMove(List<Pos> path){
+    public synchronized boolean makeMove(List<Pos> path) {
         boolean result = false;
         if (path.size() >= 2 && (getPossibleMoves(path.getFirst()).contains(path))) {
             Pos from = path.getFirst();
             var figure = setPiece(from, Figure.NONE);
             if (from.isCaptureMove(path.get(1))) {
-                for (int i = 1; i < path.size(); ++i){
+                for (int i = 1; i < path.size(); ++i) {
                     Pos direction = path.get(i).subtract(path.get(i - 1));
                     Pos normalizedDir = direction.divide(2);
                     setPiece(path.get(i - 1).add(normalizedDir), Figure.NONE);
@@ -127,13 +131,13 @@ public class Game {
             whiteToMove = !whiteToMove;
             gameHistory.add(toContent());
             result = true;
-            }
+        }
         return result;
     }
 
     public Figure getPiece(Pos pos) {
         Figure result = Figure.NONE;
-        if (pos.x() >= 0 && pos.x() < BOARD_SIZE && pos.y() >= 0 && pos.y() < BOARD_SIZE){
+        if (pos.x() >= 0 && pos.x() < BOARD_SIZE && pos.y() >= 0 && pos.y() < BOARD_SIZE) {
             result = board.get(pos.x()).get(pos.y());
         }
         return result;
@@ -141,87 +145,87 @@ public class Game {
 
     public List<List<Pos>> getPossibleMoves(Pos pos) {
         List<List<Pos>> result = new ArrayList<>();
-        if (validateColor(pos)){
+        if (validateColor(pos)) {
             List<Pos> directions = getDirections(pos);
-            for (Pos direction : directions){
+            for (Pos direction : directions) {
                 exploreDirection(new ArrayList<>(List.of(pos)), direction, directions, result, new ArrayList<>());
             }
             trimPossibleMoves(result);
         }
         return result;
     }
+
     /**
      * Generates all possible moves for a piece without applying any filtering rules.
-     *
+     * <p>
      * This method is used internally to avoid infinite recursion issues that can occur
      * in {@link #getPossibleMoves(Pos)} when capture-move constraints are applied.
-     *
+     * <p>
      * Unlike the main move generator, this version does NOT:
      * - remove invalid short moves
      * - enforce mandatory capture rules
-     *
+     * <p>
      * It is primarily used as a helper for deeper recursive move exploration in the previous function.
      */
     public List<List<Pos>> getPossibleMovesNoTrim(Pos pos) {
         List<List<Pos>> result = new ArrayList<>();
-        if (validateColor(pos)){
+        if (validateColor(pos)) {
             List<Pos> directions = getDirections(pos);
-            for (Pos direction : directions){
+            for (Pos direction : directions) {
                 exploreDirection(new ArrayList<>(List.of(pos)), direction, directions, result, new ArrayList<>());
             }
         }
         return result;
     }
+
     /**
      * Filters generated moves by removing invalid or incomplete paths.
-     *
+     * <p>
      * Removes:
      * - moves with insufficient length (size <= 1)
-     *
+     * <p>
      * If a capture move is required anywhere on the board (mustTake rule),
      * this method also removes all non-capturing moves and keeps only
      * moves that start with a capture step.
      */
-    private void trimPossibleMoves(List<List<Pos>> moves){
+    private void trimPossibleMoves(List<List<Pos>> moves) {
         moves.removeIf(move -> move.size() <= 1);
-        if (requireCaptureMove()){
+        if (requireCaptureMove()) {
             moves.removeIf(move -> !move.getFirst().isCaptureMove(move.get(1)));
         }
     }
+
     /**
      * Recursively explores all possible move continuations from a given direction.
-     *
+     * <p>
      * This method is used by the move generation system to build full move paths,
      * including multi-capture sequences (double or multiple jumps).
-     *
+     * <p>
      * It works by:
      * - advancing one step in the given direction
      * - detecting normal moves or capture opportunities
      * - recursively exploring further jumps after a capture
-     *
+     * <p>
      * The method ensures that already captured pieces are not captured again
      * within the same move sequence.
      *
-     * @param path current move path being constructed
-     * @param direction current movement direction being explored
+     * @param path               current move path being constructed
+     * @param direction          current movement direction being explored
      * @param possibleDirections all allowed movement directions for the piece
-     * @param out output list of all valid move paths
-     * @param capturedPieces list of already captured opponent positions in this path
+     * @param out                output list of all valid move paths
+     * @param capturedPieces     list of already captured opponent positions in this path
      */
-    private void exploreDirection(List<Pos> path, Pos direction, List<Pos> possibleDirections, List<List<Pos>> out, List<Pos> capturedPieces){
+    private void exploreDirection(List<Pos> path, Pos direction, List<Pos> possibleDirections, List<List<Pos>> out, List<Pos> capturedPieces) {
         Pos newPos = path.getLast().add(direction);
-        if(isValidMove(newPos)){
-            if ((getPiece(newPos) == Figure.NONE || capturedPieces.contains(newPos))){
-                if (path.size() == 1)
-                {
+        if (isValidMove(newPos)) {
+            if ((getPiece(newPos) == Figure.NONE || capturedPieces.contains(newPos))) {
+                if (path.size() == 1) {
                     path.add(newPos);
                     out.add(path);
                 }
-            }
-            else if (isOppositeColor(newPos) && !capturedPieces.contains(newPos)){
+            } else if (isOppositeColor(newPos) && !capturedPieces.contains(newPos)) {
                 Pos newPos2 = newPos.add(direction);
-                if (isValidMove(newPos2))
-                {
+                if (isValidMove(newPos2)) {
                     if (getPiece(newPos2) == Figure.NONE || capturedPieces.contains(newPos2)) {
                         capturedPieces.add(newPos);
                         path.add(newPos2);
@@ -242,26 +246,24 @@ public class Game {
         }
     }
 
-    private List<Pos> getDirections(Pos pos){
+    private List<Pos> getDirections(Pos pos) {
         List<Pos> result = new ArrayList<>();
-        if (getPiece(pos) == Figure.BLACK_KING || getPiece(pos) == Figure.WHITE_KING){
+        if (getPiece(pos) == Figure.BLACK_KING || getPiece(pos) == Figure.WHITE_KING) {
             result.add(new Pos(-1, -1));
             result.add(new Pos(1, -1));
             result.add(new Pos(-1, 1));
             result.add(new Pos(1, 1));
-        }
-        else if (getPiece(pos) == Figure.WHITE_MAN){
+        } else if (getPiece(pos) == Figure.WHITE_MAN) {
             result.add(new Pos(-1, 1));
             result.add(new Pos(-1, -1));
-        }
-        else if (getPiece(pos) == Figure.BLACK_MAN){
+        } else if (getPiece(pos) == Figure.BLACK_MAN) {
             result.add(new Pos(1, 1));
             result.add(new Pos(1, -1));
         }
         return result;
     }
 
-    private boolean isOppositeColor(Pos pos){
+    private boolean isOppositeColor(Pos pos) {
         return !validateColor(pos);
     }
 
@@ -288,28 +290,27 @@ public class Game {
         }
     }
 
-    private boolean validateColor(Pos pos){
-        if (whiteToMove){
+    private boolean validateColor(Pos pos) {
+        if (whiteToMove) {
             return getPiece(pos) == Figure.WHITE_MAN || getPiece(pos) == Figure.WHITE_KING;
-        }
-        else{
+        } else {
             return getPiece(pos) == Figure.BLACK_MAN || getPiece(pos) == Figure.BLACK_KING;
         }
     }
 
-    private void checkPromote(Pos pos){
-        if (pos.x() == 0 && getPiece(pos) == Figure.WHITE_MAN){
+    private void checkPromote(Pos pos) {
+        if (pos.x() == 0 && getPiece(pos) == Figure.WHITE_MAN) {
             setPiece(pos, Figure.WHITE_KING);
-        }
-        else if ((pos.x() == BOARD_SIZE - 1) && getPiece(pos) == Figure.BLACK_MAN){
+        } else if ((pos.x() == BOARD_SIZE - 1) && getPiece(pos) == Figure.BLACK_MAN) {
             setPiece(pos, Figure.BLACK_KING);
         }
     }
-    public synchronized boolean checkGameState(){
+
+    public synchronized boolean checkGameState() {
         boolean result = false;
-        for (int i = 0; i < BOARD_SIZE; ++i){
-            for (int j = 0; j < BOARD_SIZE; ++j){
-                if (!getPossibleMoves(new Pos(i, j)).isEmpty()){
+        for (int i = 0; i < BOARD_SIZE; ++i) {
+            for (int j = 0; j < BOARD_SIZE; ++j) {
+                if (!getPossibleMoves(new Pos(i, j)).isEmpty()) {
                     result = true;
                     break;
                 }
@@ -317,23 +318,24 @@ public class Game {
         }
         return result;
     }
-    public String getHistory(int index){
+
+    public String getHistory(int index) {
         String result = "";
-        if (index < gameHistory.size())
-        {
+        if (index < gameHistory.size()) {
             result = gameHistory.get(index);
         }
         return result;
     }
-    private boolean requireCaptureMove(){
+
+    private boolean requireCaptureMove() {
         boolean result = false;
-        if (mustTake){
-            for (int i = 0; i < BOARD_SIZE; ++i){
+        if (mustTake) {
+            for (int i = 0; i < BOARD_SIZE; ++i) {
                 for (int j = 0; j < BOARD_SIZE; ++j) {
                     Pos pos = new Pos(i, j);
                     var moves = getPossibleMovesNoTrim(pos);
-                    for (var move : moves){
-                        if (move.size() > 2 || move.get(1).isCaptureMove(pos)){
+                    for (var move : moves) {
+                        if (move.size() > 2 || move.get(1).isCaptureMove(pos)) {
                             result = true;
                             break;
                         }
@@ -344,13 +346,13 @@ public class Game {
         return result;
     }
 
-    private boolean isValidMove(Pos pos){
+    private boolean isValidMove(Pos pos) {
         boolean row_result = pos.x() >= 0 && pos.x() < BOARD_SIZE;
         boolean col_result = pos.y() >= 0 && pos.y() < BOARD_SIZE;
         return row_result && col_result;
     }
 
-    public boolean isWhiteToMove(){
+    public boolean isWhiteToMove() {
         return whiteToMove;
     }
 }

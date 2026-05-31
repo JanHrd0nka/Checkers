@@ -14,7 +14,7 @@ import java.util.Set;
  * Main server component responsible for accepting client
  * connections, managing connected clients, and coordinating
  * communication between them.
- *
+ * <p>
  * The server maintains a waiting room for matchmaking and
  * provides broadcast functionality for server-wide messages.
  *
@@ -41,15 +41,15 @@ public class Server {
         serverThread.start();
     }
 
-    public synchronized void broadcast(ServerMessage name, String message){
+    public synchronized void broadcast(ServerMessage name, String message) {
         log.info("----Broadcast Started----");
-        for (ClientHandler client : clients){
+        for (ClientHandler client : clients) {
             client.send(name, "server-id " + message);
         }
         log.info("----Broadcast finished---");
     }
 
-    public synchronized WaitingRoom getWaitingRoom(){
+    public synchronized WaitingRoom getWaitingRoom() {
         return waitingRoom;
     }
 
@@ -70,7 +70,7 @@ public class Server {
         }
     }
 
-    public TimeSender getTimeSender(){
+    public TimeSender getTimeSender() {
         return timeSender;
     }
 
