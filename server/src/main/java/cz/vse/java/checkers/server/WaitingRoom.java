@@ -3,6 +3,22 @@ package cz.vse.java.checkers.server;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Manages all connected players and their presence in the waiting room.
+ *
+ * The WaitingRoom is responsible for:
+ * - storing active players by name
+ * - handling player registration and renaming
+ * - tracking which players are available for matchmaking
+ * - providing list of available players
+ * - cleaning up player state on disconnect
+ *
+ * This class acts as a central registry for all players
+ * outside of active matches.
+ *
+ * @author Jan Hrdonka
+ * @version 1.0
+ */
 public class WaitingRoom
 {
     private final Map<String, Player> allPlayers = new HashMap<>();

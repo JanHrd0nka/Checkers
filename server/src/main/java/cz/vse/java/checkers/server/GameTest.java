@@ -6,6 +6,22 @@ import cz.vse.java.checkers.common.Pos;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Test class used for verifying complex game mechanics
+ * in the Checkers game implementation.
+ *
+ * This class was used to test:
+ * - possible moves generation
+ * - multi-jump move sequences
+ * - move execution logic
+ * - game state evaluation
+ *
+ * It is not part of the production server and serves only
+ * for local debugging and validation of game rules.
+ *
+ * @author Jan Hrdonka
+ * @version 1.0
+ */
 public class GameTest {
     public void test1() {
         String content = """

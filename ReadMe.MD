@@ -41,6 +41,12 @@ After a successful build, the following files will be created:
 
 ### Start the Client
 
+* The client configuration file is located at:
+
+  client/src/main/resources/META-INF/config.xml
+
+  During build, it is packaged into the JAR and loaded at runtime via the Java classpath using getResourceAsStream().
+
 Open a new PowerShell window and run:
 
 ```powershell
@@ -59,3 +65,4 @@ The server should be started before launching any clients.
 * Game history is not preserved or displayed on the client side.
 * The rematch functionality returns players to the waiting room instead of starting a new game directly. A new match is then offered automatically.
 * Client disconnection is interpreted as a resignation and results in an immediate loss.
+* The server supports multi-jump moves (capturing multiple opponent pieces in a single turn). However, the current client implementation is unable to correctly send such move requests.

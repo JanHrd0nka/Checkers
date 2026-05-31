@@ -1,7 +1,5 @@
 package cz.vse.java.checkers.client.Networking;
 
-import cz.vse.java.checkers.common.Message;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CompletableFuture;

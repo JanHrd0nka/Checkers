@@ -5,7 +5,7 @@ import cz.vse.java.checkers.client.Networking.MessageListeners.SetupListener;
 import cz.vse.java.checkers.client.Networking.Connection;
 import cz.vse.java.checkers.client.Networking.MessageHandler;
 import cz.vse.java.checkers.common.ClientMessage;
-import cz.vse.java.checkers.common.Message;
+import cz.vse.java.checkers.client.Networking.Message;
 import cz.vse.java.checkers.common.ServerMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;

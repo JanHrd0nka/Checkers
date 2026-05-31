@@ -1,5 +1,6 @@
 package cz.vse.java.checkers.client.Game;
 
+import cz.vse.java.checkers.client.Networking.Message;
 import cz.vse.java.checkers.client.Networking.MessageListeners.GameListener;
 import cz.vse.java.checkers.client.Networking.MessageEventBus;
 import cz.vse.java.checkers.client.Networking.Connection;

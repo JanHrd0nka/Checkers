@@ -5,6 +5,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Scanner;
 
+/**
+ * Server application bootstrap class.
+ * Handles startup initialization, obtains the server port
+ * from the user, and starts the server instance.
+ *
+ * @author Jan Hrdonka
+ * @version 1.0
+ */
 public class App {
     private final Logger log = LoggerFactory.getLogger(App.class);
 

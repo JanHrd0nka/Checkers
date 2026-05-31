@@ -10,6 +10,17 @@ import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Main server component responsible for accepting client
+ * connections, managing connected clients, and coordinating
+ * communication between them.
+ *
+ * The server maintains a waiting room for matchmaking and
+ * provides broadcast functionality for server-wide messages.
+ *
+ * @author Jan Hrdonka
+ * @version 1.0
+ */
 public class Server {
     private final Logger log;
     private final int port;

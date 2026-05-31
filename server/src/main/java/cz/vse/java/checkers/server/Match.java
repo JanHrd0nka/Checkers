@@ -3,7 +3,19 @@ package cz.vse.java.checkers.server;
 import cz.vse.java.checkers.common.Pos;
 
 import java.util.List;
-
+/**
+ * Represents a match between two paired players in the Checkers server.
+ *
+ * The Match class manages the lifecycle of a game between two players,
+ * from initial pairing, through game setup, turn management, move validation,
+ * and game termination.
+ *
+ * It also holds the active game instance and tracks additional match state
+ * such as draw offers and the current player's turn.
+ *
+ * @author Jan Hrdonka
+ * @version 1.0
+ */
 public class Match {
     private final Player p1;
     private final Player p2;

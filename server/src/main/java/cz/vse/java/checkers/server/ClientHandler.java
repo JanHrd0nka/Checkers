@@ -12,6 +12,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Handles communication with a single connected client.
+ *
+ * Processes incoming client messages, validates requests,
+ * manages matchmaking and game actions, and sends responses
+ * back to the client.
+ *
+ * Each client connection is served in a separate thread.
+ *
+ * @author Jan Hrdonka, Adam Filinger
+ * @version 1.0
+ */
 public class ClientHandler implements Runnable {
 
     private final Logger log = LoggerFactory.getLogger(ClientHandler.class);
@@ -110,6 +122,17 @@ public class ClientHandler implements Runnable {
             }
         }
     }
+
+    /**
+     * Handles a match request between two players.
+     *
+     * When a player requests a match with another player, a match offer
+     * is sent to the selected opponent. If the opponent has already sent
+     * a match request to the same player, the request is treated as mutual
+     * confirmation and both players are paired into a new game.
+     *
+     * @param tokens parsed client message tokens
+     */
     private void handleMatch(String[] tokens) {
         log.info("MATCH request");
         if (validatePlayerAndLength(3, tokens)){
@@ -167,7 +190,13 @@ public class ClientHandler implements Runnable {
             }
         }
     }
-
+    /**
+     * Attempts to configure the current match.
+     * The first player who submits a valid setup determines the game
+     * settings and starts the match.
+     *
+     * @param tokens parsed client message tokens
+     */
     private void handleSetup(String[] tokens) {
         log.info("SETUP request");
         if (validateSetupAndLength(tokens)){
@@ -204,7 +233,14 @@ public class ClientHandler implements Runnable {
             }
         }
     }
-
+    /**
+     * Attempts to perform a move in the current match.
+     * If the move is valid, the updated game state is sent to both players.
+     * After each move, the game state is checked and the result is sent
+     * if the match has ended.
+     *
+     * @param tokens parsed client message tokens
+     */
     private void handleMove(String[] tokens) {
         log.info("MOVE request");
         if (validateGameAndLength(tokens)){
@@ -262,7 +298,15 @@ public class ClientHandler implements Runnable {
             }
         }
     }
-
+    /**
+     * Handles draw offers between two players.
+     *
+     * A player can first send a draw offer, which is forwarded to the opponent.
+     * If the opponent responds with a draw acceptance, the game ends in a draw
+     * and the result is sent to both clients.
+     *
+     * @param tokens parsed client message tokens
+     */
     private void handleDraw(String[] tokens) {
         log.info("DRAW request");
         Match match = player.getMatch();
@@ -282,7 +326,17 @@ public class ClientHandler implements Runnable {
         }
 
     }
-
+    /**
+     * Processes the draw logic.
+     *
+     * If a draw offer has already been made, the second confirmation
+     * ends the game as a draw and sends the result to both players.
+     * Otherwise, a draw offer is stored and forwarded to the opponent.
+     *
+     * @param tokens parsed client message tokens
+     * @param match current match instance
+     * @param opponent opponent player
+     */
     private void drawResult(String[] tokens, Match match, Player opponent) {
         if (match.isDrawOffered()){
             send(ServerMessage.OK, tokens[1]);
@@ -309,7 +363,6 @@ public class ClientHandler implements Runnable {
 
     private void handleJoinWaitingRoom(String[] tokens) {
         log.info("JOIN WAITING ROOM");
-        //server.addToWaitingRoom(this);
         if (validateLenght(3, tokens))
         {
             var wr = server.getWaitingRoom();
@@ -366,7 +419,17 @@ public class ClientHandler implements Runnable {
             }
         }
     }
-
+    /**
+     * Stops the current game and sends final results to both players.
+     *
+     * The method determines the winner and loser based on either normal
+     * game result or surrender. It updates the score, sends the result
+     * message to both clients, removes the game from the time sender,
+     * and properly terminates the match.
+     *
+     * @param player player who triggered the game end (or surrendered)
+     * @param isSurrender true if the game ended by surrender (or disconnect)
+     */
     public synchronized void stopGame(Player player, boolean isSurrender){
         Match match = player.getMatch();
         Player winner;

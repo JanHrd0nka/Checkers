@@ -5,7 +5,21 @@ import cz.vse.java.checkers.common.Pos;
 import cz.vse.java.checkers.common.ServerMessage;
 
 import java.util.List;
-
+/**
+ * Extension of the base Game class that adds time control for both players.
+ *
+ * Each player has a fixed time limit, which decreases only while it is their turn.
+ * The game automatically ends when a player's time runs out.
+ *
+ * The class is responsible for:
+ * - tracking remaining time for both players
+ * - updating time on each move or state check
+ * - notifying clients about remaining time
+ * - triggering game termination when time expires.
+ *
+ * @author Jan Hrdonka
+ * @version 1.0
+ */
 public class TimedGame extends Game {
     private final Player white;
     private final Player black;

@@ -2,7 +2,27 @@ package cz.vse.java.checkers.common;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * Core game logic for a checkers match.
+ *
+ * This class represents the full state of a checkers game, including:
+ * - board representation and piece management
+ * - move validation and execution
+ * - capture and multi-jump logic
+ * - turn management
+ * - promotion rules
+ * - game history tracking
+ * - optional forced-capture rule (mustTake)
+ *
+ * The class is also responsible for generating possible moves
+ * and determining whether the game is still playable.
+ *
+ * It can be used both in real matches (TimedGame) and for testing
+ * via string-based board initialization.
+ *
+ * @author Jan Hrdonka
+ * @version 1.0
+ */
 public class Game {
     private final List<String> gameHistory;
     private List<List<Figure>> board;
@@ -130,6 +150,18 @@ public class Game {
         }
         return result;
     }
+    /**
+     * Generates all possible moves for a piece without applying any filtering rules.
+     *
+     * This method is used internally to avoid infinite recursion issues that can occur
+     * in {@link #getPossibleMoves(Pos)} when capture-move constraints are applied.
+     *
+     * Unlike the main move generator, this version does NOT:
+     * - remove invalid short moves
+     * - enforce mandatory capture rules
+     *
+     * It is primarily used as a helper for deeper recursive move exploration in the previous function.
+     */
     public List<List<Pos>> getPossibleMovesNoTrim(Pos pos) {
         List<List<Pos>> result = new ArrayList<>();
         if (validateColor(pos)){
@@ -140,14 +172,42 @@ public class Game {
         }
         return result;
     }
-
+    /**
+     * Filters generated moves by removing invalid or incomplete paths.
+     *
+     * Removes:
+     * - moves with insufficient length (size <= 1)
+     *
+     * If a capture move is required anywhere on the board (mustTake rule),
+     * this method also removes all non-capturing moves and keeps only
+     * moves that start with a capture step.
+     */
     private void trimPossibleMoves(List<List<Pos>> moves){
         moves.removeIf(move -> move.size() <= 1);
         if (requireCaptureMove()){
             moves.removeIf(move -> !move.getFirst().isCaptureMove(move.get(1)));
         }
     }
-
+    /**
+     * Recursively explores all possible move continuations from a given direction.
+     *
+     * This method is used by the move generation system to build full move paths,
+     * including multi-capture sequences (double or multiple jumps).
+     *
+     * It works by:
+     * - advancing one step in the given direction
+     * - detecting normal moves or capture opportunities
+     * - recursively exploring further jumps after a capture
+     *
+     * The method ensures that already captured pieces are not captured again
+     * within the same move sequence.
+     *
+     * @param path current move path being constructed
+     * @param direction current movement direction being explored
+     * @param possibleDirections all allowed movement directions for the piece
+     * @param out output list of all valid move paths
+     * @param capturedPieces list of already captured opponent positions in this path
+     */
     private void exploreDirection(List<Pos> path, Pos direction, List<Pos> possibleDirections, List<List<Pos>> out, List<Pos> capturedPieces){
         Pos newPos = path.getLast().add(direction);
         if(isValidMove(newPos)){
