@@ -237,16 +237,16 @@ public class BoardController extends Controller {
     public void showResultDialog(String ID, boolean isWin, String score) {
         drawBtn.setDisable(false);
         forfeightBtn.setDisable(false);
-        String title = isWin ? "Výhra" : "Prohra";
-        String header = isWin ? "Gratulace!" : "Bohužel...";
+        String title = isWin ? "Win" : "Lost";
+        String header = isWin ? "Congratulations!" : "Its too bad...";
         String content;
 
         if (ID.equals("surrender")) {
-            content = "Váš soupeř se vzdal\nSkóre: " + score;
+            content = "Your opponent has surrendered\nScore: " + score;
         } else {
             content = isWin
-                    ? "Vyhráli jste zápas \nSkóre: " + score
-                    : "Prohráli jste zápas.\nSkóre: " + score;
+                    ? "You won the match \nScore: " + score
+                    : "You lost the match.\nScore: " + score;
         }
         ButtonType backButton = new ButtonType("Back to waiting room");
         ButtonType rematchButton = new ButtonType("Offer rematch");
