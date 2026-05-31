@@ -8,7 +8,7 @@ import java.util.UUID;
 /**
  * Rodičovská třída pro všechny controllery.
  * @author Adam Filinger
- * @version 1.2
+ * @version 1.0
  */
 public class Controller {
 

@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * Implementuje GameListener pro příjem event notifikací.
  * Oddělena logika pro game state (GameStateManager) a scény (SceneNavigator).
  * @author Adam Filinger
- * @version 2.1
+ * @version 1.0
  * */
 public class GameController extends Controller implements GameListener {
 

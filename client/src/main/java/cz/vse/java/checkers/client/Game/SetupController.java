@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 /** * Controller pro obsluhu obrazovky nastavení parametrů hry.
  * @author Adam Filinger
- * @version 1.5
+ * @version 1.0
  * */
 public class SetupController extends Controller implements SetupListener {
     private static final Logger log = LoggerFactory.getLogger(SetupController.class);

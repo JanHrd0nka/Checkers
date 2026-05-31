@@ -11,7 +11,7 @@ import java.util.List;
 /** GameStateManager - odděluje herní logiku a stav od UI kontrolery.
  * Jedinou odpovědností je spravovat stav Game2 objektu.
  * @author Adam Filinger
- * @version 1.2
+ * @version 1.0
  * */
 public class GameStateManager {
     private static final Logger logger = LoggerFactory.getLogger(GameStateManager.class);
